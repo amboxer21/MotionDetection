@@ -31,100 +31,93 @@ VERSION
     Version 2
 '''
 
-import cv2
-import sys
-import time
+import cv2,sys,time,smtplib,threading
+import modules.datetime.datetime as datetime
 
-# The two main parameters that affect movement detection sensitivity
-# are BLUR_SIZE and NOISE_CUTOFF. Both have little direct effect on
-# CPU usage. In theory a smaller BLUR_SIZE should use less CPU, but
-# for the range of values that are effective the difference is
-# negligible. The default values are effective with on most light
-# conditions with the cameras I have tested. At these levels the
-# detectory can easily trigger on eye blinks, yet not trigger if the
-# subject remains still without blinking. These levels will likely be
-# useless outdoors.
-BLUR_SIZE = 3
-NOISE_CUTOFF = 12
-# Ah, but the third main parameter that affects movement detection
-# sensitivity is the time between frames. I like about 10 frames per
-# second. Even 4 FPS is fine.
-#FRAMES_PER_SECOND = 10
+from __init__ import *
+from time import sleep
+from threading import Timer,Thread
 
-cam = cv2.VideoCapture(0)
-# 320*240 = 76800 pixels
-#cam.set(3, 320)
-#cam.set(4, 240)
-# 640*480 = 307200 pixels
-cam.set(3,640)
-cam.set(4,480)
+from multiprocessing import Process
+from email.MIMEImage import MIMEImage
+from email.MIMEMultipart import MIMEMultipart
 
-window_name = "delta view"
-#cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-cv2.namedWindow(window_name, cv2.WINDOW_AUTOSIZE)
-window_name_now = "now view"
-cv2.namedWindow(window_name_now, cv2.WINDOW_AUTOSIZE)
+def now():
+    return time.asctime(time.localtime(time.time()))
 
-# Stabilize the detector by letting the camera warm up and
-# seeding the first frames.
-frame_now = cam.read()[1]
-frame_now = cam.read()[1]
-frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-frame_now = cv2.blur(frame_now, (BLUR_SIZE, BLUR_SIZE))
-frame_prior = frame_now
-
-delta_count_last = 1
-while True:
-    frame_delta = cv2.absdiff(frame_prior, frame_now)
-    frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, 3)[1]
-    delta_count = cv2.countNonZero(frame_delta)
-    #if delta_count > 5:
-        #sys.stdout.write("Moving\n")
-        #sys.stdout.write("delta_count %s\n" + str(delta_count))
-
-    # Visual detection statistics output.
-    # Normalize improves brightness and contrast.
-    # Mirror view makes self display more intuitive.
-    cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
-    frame_delta = cv2.flip(frame_delta, 1)
-    cv2.putText(frame_delta, "DELTA: %d" % (delta_count),
-            (5, 15), cv2.FONT_HERSHEY_PLAIN, 0.8, (255, 255, 255))
-    cv2.imshow(window_name, frame_delta)
-
-    #frame_delta = cv2.threshold(frame_delta, 92, 255, 0)[1]
-    dst = cv2.flip(frame_now, 1)
-    dst = cv2.addWeighted(dst,1.0, frame_delta,0.9,0)
-    cv2.imshow(window_name_now, dst)
-
-    # Stdout output.
-    # Only output when there is new movement or when movement stops.
-    # Time codes are in epoch time format.
-    #if (delta_count_last == 0 and delta_count != 0):
-    if(delta_count > 500):
-        sys.stdout.write("MOVEMENT %f\n" % time.time())
+def sendMail(sender,to,password,port,subject):
+    try:
+        message = MIMEMultipart()
+        message['Subject'] = subject
+        mail = smtplib.SMTP('smtp.gmail.com',port)
+        mail.starttls()
+        mail.login(sender,password)
+        mail.sendmail(sender, to, message.as_string())
+        sys.stdout.write("MotionDetection.py Security ALERT: - Sent email successfully!\n")
         sys.stdout.flush()
-    #elif delta_count_last != 0 and delta_count == 0:
-        #sys.stdout.write("STILL    %f\n" % time.time())
-        #sys.stdout.flush()
-    #delta_count_last = delta_count
+    except smtplib.SMTPAuthenticationError:
+        sys.stdout.write("MotionDetection.py - Could not athenticate with password and username!\n")
+        sys.stdout.flush()
+    except:
+        sys.stdout.write("MotionDetection.py - Unexpected error in sendMail().\n")
+        sys.stdout.flush()
 
-    # Advance the frames.
-    frame_prior = frame_now
+def notify():
+    global is_sent
+    print("is_sent = " + str(is_sent))
+    if is_sent is not True:
+        sendMail('from@gmail.com','tn@vtext.com','app password',587,'Motion Detected')
+        is_sent = True
+
+def main():
+
+    BLUR_SIZE = 3
+    NOISE_CUTOFF = 12
+
+    cam = cv2.VideoCapture(0)
+    cam.set(3,640)
+    cam.set(4,480)
+
+    # Stabilize the detector by letting the camera warm up and
+    # seeding the first frames.
+    frame_now = cam.read()[1]
     frame_now = cam.read()[1]
     frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
     frame_now = cv2.blur(frame_now, (BLUR_SIZE, BLUR_SIZE))
-    # Wait up to 10ms for a key press. Quit if the key is either ESC or 'q'.
-    key = cv2.waitKey(10)
-    if key == 0x1b or key == ord('q'):
-        cv2.destroyWindow(window_name)
-        break
+    frame_prior = frame_now
 
-#    # Morphology noise filters. They work, but really don't help much.
-#    # A simple noise cutoff and blur is good enough.
-#kernel = numpy.ones((5,5), numpy.uint8)
-#    cv2.morphologyEx(frame_delta, cv2.MORPH_OPEN, kernel)
-#    cv2.morphologyEx(frame_delta, cv2.MORPH_CLOSE, kernel)
-#    # A bilateral filter also seems pointless.
-#    #frame_now = cv2.bilateralFilter(frame_now,9,75,75)
+    while True:
+  
+        global count
+        global is_sent
 
-# vim: set ft=python fileencoding=utf-8 sr et ts=4 sw=4 : See help 'modeline'
+        frame_delta = cv2.absdiff(frame_prior, frame_now)
+        frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, 3)[1]
+        delta_count = cv2.countNonZero(frame_delta)
+
+        # Visual detection statistics output.
+        # Normalize improves brightness and contrast.
+        # Mirror view makes self display more intuitive.
+        cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
+        frame_delta = cv2.flip(frame_delta, 1)
+
+        if(delta_count > 1000 and is_moving is True):
+            count = 0
+            is_moving = False
+            print("MOVEMENT: " + now() + ", Delta: " + str(delta_count))
+            notify()
+        elif delta_count < 100:
+            count += 1
+            is_moving = True
+            print("count: " + str(count))
+            if count == 60:
+                print("Count == 60")
+                is_sent = False
+
+        # Advance the frames.
+        frame_prior = frame_now
+        frame_now = cam.read()[1]
+        frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
+        frame_now = cv2.blur(frame_now, (BLUR_SIZE, BLUR_SIZE))
+
+main()
