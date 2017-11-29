@@ -59,7 +59,7 @@ def main():
         frame_delta = cv2.absdiff(frame_prior, frame_now)
         frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, 3)[1]
         delta_count = cv2.countNonZero(frame_delta)
-.
+
         cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
         frame_delta = cv2.flip(frame_delta, 1)
 
