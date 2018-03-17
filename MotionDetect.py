@@ -2,22 +2,46 @@
 #coding: interpy
     
 import modules.datetime.datetime as datetime
-import cv2,sys,time,smtplib,threading,glob,re,os
+import cv2,sys,time,smtplib,threading,glob,re,os,subprocess
     
 from __init__ import *
 from time import sleep
+from optparse import OptionParser
    
 from email.MIMEImage import MIMEImage
 from email.MIMEMultipart import MIMEMultipart
    
 class MotionDetection():
+
+    def __init__(self):
+
+        parser = OptionParser()
+        parser.add_option("-e",
+            "--email", dest='email', help='"This argument is required!"')
+        parser.add_option("-p",
+            "--password", dest='password', help='"This argument is required!"')
+        parser.add_option("-P",
+            "--port", dest='port', help='"Deafults to port 587"', type="int", default=587)
+        (options, args) = parser.parse_args()
+
+        self.port = options.port
+        self.email = options.email
+        self.password = options.password
+
+        if self.email is None or self.password is None:
+            print("\nERROR: Both E-mail and password are required!\n")
+            parser.print_help()
+
+    def user_name(self):
+        comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
+        return re.search("(\w+)", str(comm.stdout.read())).group()
     
     def now(self):
         return time.asctime(time.localtime(time.time()))
     
     def img_num(self):
         _list = []
-        os.chdir("/home/aguevara/.motiondetection/")
+        os.chdir("/home/" + self.user_name() + "/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             _list.append(num.group(2))
@@ -28,7 +52,7 @@ class MotionDetection():
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            message.attach(MIMEImage(file("/home/aguevara/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
@@ -42,9 +66,8 @@ class MotionDetection():
     
     def notify(self):
         global is_sent
-        print("is_sent = " + str(is_sent))
         if is_sent is not True:
-            self.sendMail('from@gmail.com','to@gmail.com','email_password',587,'Motion Detected','MotionDecetor.py detected movement!')
+            self.sendMail(self.email,self.email,self.password,self.port,'Motion Detected','MotionDecetor.py detected movement!')
             is_sent = True
     
     def takePicture(self):
@@ -54,7 +77,7 @@ class MotionDetection():
         ret, frame = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.1)
-        picture_name = "/home/aguevara/.motiondetection/capture" + str(int(self.img_num()) + 1) + ".png"
+        picture_name = "/home/" + self.user_name() + "/.motiondetection/capture" + str(int(self.img_num()) + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
     
@@ -92,7 +115,7 @@ class MotionDetection():
             if(delta_count > 1000 and is_moving is True):
                 count = 0
                 is_moving = False
-                print("MOVEMENT: " + now() + ", Delta: " + str(delta_count))
+                print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
                 del(cam)
                 cam_deleted = True
                 self.takePicture()
@@ -123,4 +146,8 @@ class MotionDetection():
     
 if __name__ == '__main__':
     motiond = MotionDetection()
-    motiond.main()
+
+    print "" + str(len(sys.argv))
+
+    if len(sys.argv) >= 5:
+        motiond.main()
