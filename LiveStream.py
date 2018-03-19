@@ -51,8 +51,8 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 def main():
   global capture
   capture = cv2.VideoCapture(1)
-  capture.set(3,440)
-  capture.set(4,380)
+  capture.set(3,320)
+  capture.set(4,320)
   global img
   try:
     server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)

@@ -1,0 +1,3 @@
+# view AndroidManifest.xml #generated:8
+-keep class com.cam.view.CamView { <init>(...); }
+

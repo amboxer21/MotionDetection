@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/camView"
+    android:background="#F0F0F0"
+    android:orientation="horizontal"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:windowSoftInputMode="adjustNothing">
+
+    <WebView
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/webView"
+      android:layout_marginTop="5dp"
+      android:layout_marginLeft="5dp"
+      android:layout_marginRight="5dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"/>
+
+    <EditText
+      android:ems="10"
+      android:id="@+id/editIPAddress"
+      android:textColorHint="#3F51B5"
+      android:layout_marginTop="5dp"
+      android:layout_marginLeft="10dp"
+      android:layout_marginRight="10dp"
+      android:layout_width="fill_parent"
+      android:layout_below="@+id/webView"
+      android:layout_height="wrap_content"
+      android:inputType="textNoSuggestions"
+      android:hint="Your public IP Address"/>
+
+    <EditText
+      android:ems="10"
+      android:id="@+id/editPort"
+      android:inputType="number"
+      android:hint="Port number"
+      android:textColorHint="#3F51B5"
+      android:layout_marginLeft="10dp"
+      android:layout_marginRight="10dp"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_below="@+id/editIPAddress"/>
+
+    <Button
+      android:text="Configure"
+      android:id="@+id/button"
+      android:layout_marginLeft="50dp"
+      android:layout_marginRight="50dp"
+      android:layout_marginBottom="20dp"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:layout_centerHorizontal="true"
+      android:windowSoftInputMode="adjustNothing"
+      android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>
+
