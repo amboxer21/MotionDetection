@@ -36,6 +36,9 @@ public class CamView extends Activity implements OnTouchListener {
   private static String ipAddressDb;
   private static String portNumberDb;
 
+  private static String sIPAddress  = "";
+  private static String sPortNumber = "";
+
   private static long backPressedTime = 0;
 
   @Override
@@ -66,23 +69,37 @@ public class CamView extends Activity implements OnTouchListener {
     ipAddress  = (EditText) findViewById(R.id.editIPAddress);
 
     db = new DatabaseHandler(CamView.this);
-    getDatabaseInfo("","");
+    getSetDatabaseInfo(0);
 
     webView    = (WebView) findViewById(R.id.webView);
+
+    webView.setVerticalScrollBarEnabled(false);
+    webView.setHorizontalScrollBarEnabled(false);
     webView.setWebViewClient(new CamViewBrowser());
-    webView.loadUrl("http://174.57.49.30:5000/cam.mjpg");
+  
+    String ip   = String.valueOf(ipAddressDb);
+    String port = String.valueOf(portNumberDb);
+    final String addr = "http://" + ip + ":" + port + "/cam.mjpg";
+
+    webView.loadUrl(addr);
 
     button.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
         sanityCheck();
+        String ip   = String.valueOf(sIPAddress);
+        String port = String.valueOf(sPortNumber);
+        String addr = "http://" + ip + ":" + port + "/cam.mjpg";
+        webView.setVerticalScrollBarEnabled(false);
+        webView.setHorizontalScrollBarEnabled(false);
+        webView.setWebViewClient(new CamViewBrowser());
+        webView.loadUrl(addr);
       }
     });
 
     portNumber.setOnTouchListener(new OnTouchListener() {
       @Override
       public boolean onTouch(View v, MotionEvent event) {
-        //button.setVisibility(View.INVISIBLE);
         return false;
       }
     });
@@ -90,7 +107,6 @@ public class CamView extends Activity implements OnTouchListener {
     ipAddress.setOnTouchListener(new OnTouchListener() {
       @Override
       public boolean onTouch(View v, MotionEvent event) {
-        //button.setVisibility(View.INVISIBLE);
         return false;
       }
     });
@@ -98,9 +114,6 @@ public class CamView extends Activity implements OnTouchListener {
   }
 
   public void sanityCheck() {
-
-    String sIPAddress  = "";
-    String sPortNumber = "";
 
     try {
       sIPAddress  = ipAddress.getText().toString();
@@ -120,7 +133,7 @@ public class CamView extends Activity implements OnTouchListener {
         return;
       }
       else {
-        getDatabaseInfo(sIPAddress,sPortNumber);
+        getSetDatabaseInfo(1);
       }
     }
     catch(Exception e) {
@@ -129,7 +142,7 @@ public class CamView extends Activity implements OnTouchListener {
     }
   }
 
-  public void getDatabaseInfo(String ip, String port)  {
+  public void getSetDatabaseInfo(int action) {
 
     List<Address> address = db.getAllAddresses();
 
@@ -142,22 +155,23 @@ public class CamView extends Activity implements OnTouchListener {
       portNumberDb = url.getPortNumber();
     }
 
-    if(ip.isEmpty() || port.isEmpty() && ipAddressDb != null) {
-      ipAddress.setText(ipAddressDb);
-      portNumber.setText(portNumberDb); 
-      return; 
-    }
-    else if(ipAddressDb != null) {
-      db.updateAddress(new Address(1,ip, port));
-      for(Address url : address) {
-        ipAddressDb  = url.getIPAddress();
-        portNumberDb = url.getPortNumber();
-      }
-      ipAddress.setText(ipAddressDb);
-      portNumber.setText(portNumberDb);
-    }
-    else if(ipAddressDb == null) {
-      db.addAddress(new Address(1, ip, port));
+    switch(action) {
+      case 0:
+        if(ipAddressDb != null) {
+          ipAddress.setText(ipAddressDb);
+          portNumber.setText(portNumberDb);
+        }
+        break;
+      case 1:
+        if(ipAddressDb != null) {
+          Log.d("CamView","getSetDatabaseInfo() case 1 - if ipAddressDb != null");
+          db.updateAddress(new Address(1,sIPAddress,sPortNumber));
+        }
+        else {
+          Log.d("CamView","getSetDatabaseInfo() case 1 - else");
+          db.addAddress(new Address(1,sIPAddress,sPortNumber));
+        }
+        break;
     }
 
   }

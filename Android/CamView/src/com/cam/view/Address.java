@@ -10,6 +10,7 @@ public class Address {
   public Address() { }
      
   public Address(int id, String ip_address, String port_number) {
+      this._id = id;
       this._ip_address  = ip_address;
       this._port_number = port_number;
   }

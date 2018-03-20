@@ -1,5 +1,7 @@
 package com.cam.view;
 
+import android.util.Log;
+
 import java.util.List;
 import java.util.ArrayList;
  
@@ -86,17 +88,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         addressList.add(address);
       } while (cursor.moveToNext());
     }
- 
+
     return addressList;
   }
  
   public int updateAddress(Address address) {
+    Log.d("CamView","updateAddress(Address address) debug");
     SQLiteDatabase db    = this.getWritableDatabase();
     ContentValues values = new ContentValues();
     values.put(KEY_IP_ADDRESS, address.getIPAddress());
     values.put(KEY_PORT_NUMBER, address.getPortNumber());
  
-    return db.update(TABLE_ADDRESS, values, KEY_ID + " = ?",
+    return db.update(TABLE_ADDRESS, values, "id = ?",
       new String[] { String.valueOf(address.getID()) });
   }
  
@@ -109,10 +112,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
   public int getAddressCount() {
     String countQuery = "SELECT  * FROM " + TABLE_ADDRESS;
+    Log.d("CamView","countQuery => " + countQuery);
     SQLiteDatabase db = this.getReadableDatabase();
     Cursor cursor = db.rawQuery(countQuery, null);
     cursor.close();
  
+    Log.d("CamView","getAddressCount() => " + cursor.getCount());
     return cursor.getCount();
   }
  
