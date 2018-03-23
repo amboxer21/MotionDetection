@@ -4,12 +4,16 @@ import socket,sys
 
 class Server():
 
+    def __init__(self,ip='0.0.0.0',port=5050):
+        self.ip = ip
+        self.port = port
+
     def main(self):
 
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-        s.bind((socket.gethostname(), 5051))
+        s.bind((self.ip, int(self.port)))
 
         s.listen(5)
         print("Listening for connections.")
@@ -17,9 +21,12 @@ class Server():
             c, addr = s.accept()
             print("Received connection from " + str(addr))
             mes = c.recv(1024)
-            if(mes == 'mon'):
+            if(mes == 'smon'):
                 print("Starting camera!")
                 c.send("Starting camera!")
+            elif(mes == 'kmon'):
+                print("Killing camera!")
+                c.send("Killing camera!")
             else:
                 print(mes + " is not a known command.")
                 c.send(mes + " is not a konwn command!")

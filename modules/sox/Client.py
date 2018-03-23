@@ -4,6 +4,10 @@ import socket,sys
 
 class Client():
 
+    def __init__(self,ip='127.0.0.1',port=5050):
+        self.ip = ip
+        self.port = port
+
     def main(self):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,8 +19,8 @@ class Client():
 
         try:
             #s.connect('174.57.49.30','5050')
-            s.connect(('200.255.100.118',5051))
-            s.send("mon")
+            s.connect((self.ip,int(self.port)))
+            s.send("smon")
             print("Server: " + s.recv(1024))
             s.close()
         except Exception as e:
