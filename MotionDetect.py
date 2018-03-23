@@ -60,7 +60,7 @@ class MotionDetection():
             print("MotionDetection.py Security ALERT: - Sent email successfully!\n")
         except smtplib.SMTPAuthenticationError:
             print("MotionDetection.py - Could not athenticate with password and username!")
-        except  Exception as e:
+        except Exception as e:
             print( "Error: %s " % str(e) )
             print("MotionDetection.py - Unexpected error in sendMail():")
     
