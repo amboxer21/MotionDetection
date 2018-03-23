@@ -3,8 +3,8 @@
 import Image,time,cv2,sys
 import StringIO,threading
 
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from SocketServer import ThreadingMixIn
+from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 capture=None
 
@@ -45,7 +45,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             print("server started")
             server.serve_forever()
-            except KeyboardInterrupt:
+        except KeyboardInterrupt:
             del(capture)
             server.socket.close()
 
