@@ -27,6 +27,15 @@ class Server():
             elif(mes == 'kmon'):
                 print("Killing camera!")
                 c.send("Killing camera!")
+            elif(mes == 'smot'):
+                print("Starting motion sensor!")
+                c.send("Starting motion sensor!")
+            elif(mes == 'kmot'):
+                print("Killing motion sensor!")
+                c.send("Killing motion sensor!")
+            elif(mes == 'probe'):
+                print("Server is alive.")
+                c.send("Server is alive.")
             else:
                 print(mes + " is not a known command.")
                 c.send(mes + " is not a konwn command!")
