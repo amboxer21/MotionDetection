@@ -109,7 +109,7 @@ class MotionDetection():
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num() + 1) + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
