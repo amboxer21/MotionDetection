@@ -104,7 +104,8 @@ class MotionDetection():
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             _list.append(num.group(2))
-        return max(_list)
+        #print("max(_list) -> " + int(max(_list)) + 1)
+        return int(max(_list)) + 1
     
     def sendMail(self,sender,to,password,port,subject,body):
         try:
@@ -190,7 +191,7 @@ class MotionDetection():
                 print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
                 del(cam)
                 cam_deleted = True
-                #self.takePicture()
+                self.takePicture()
                 #self.notify()
             elif delta_count < 100:
                 count += 1
