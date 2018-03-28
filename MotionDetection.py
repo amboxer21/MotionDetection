@@ -103,9 +103,8 @@ class MotionDetection():
         os.chdir("/home/" + self.user_name() + "/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
-            _list.append(num.group(2))
-        #print("max(_list) -> " + int(max(_list)) + 1)
-        return int(max(_list)) + 1
+            _list.append(int(num.group(2)))
+        return max(_list)
     
     def sendMail(self,sender,to,password,port,subject,body):
         try:
