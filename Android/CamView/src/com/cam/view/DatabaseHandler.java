@@ -18,7 +18,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
  
   private static final String KEY_ID          = "id";
   private static final String KEY_IP_ADDRESS  = "ip_address";
-  private static final String KEY_PORT_NUMBER = "port_number";
+  private static final String KEY_CAM_PORT_NUMBER = "cam_port_number";
+  private static final String KEY_SERVER_PORT_NUMBER = "Server_port_number";
 
   private static final String TABLE_ADDRESS   = "address";
   private static final String DATABASE_NAME   = "url";
@@ -32,7 +33,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     String CREATE_ADDRESS_TABLE = "CREATE TABLE " + TABLE_ADDRESS + "("
       + KEY_ID + " INTEGER PRIMARY KEY," 
       + KEY_IP_ADDRESS + " TEXT,"
-      + KEY_PORT_NUMBER + " TEXT" + ")";
+      + KEY_CAM_PORT_NUMBER + " TEXT,"
+      + KEY_SERVER_PORT_NUMBER + " TEXT" + ")";
     db.execSQL(CREATE_ADDRESS_TABLE);
   }
  
@@ -47,7 +49,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
  
     ContentValues values = new ContentValues();
     values.put(KEY_IP_ADDRESS, address.getIPAddress()); 
-    values.put(KEY_PORT_NUMBER, address.getPortNumber()); 
+    values.put(KEY_CAM_PORT_NUMBER, address.getCamPortNumber()); 
+    values.put(KEY_SERVER_PORT_NUMBER, address.getServerPortNumber()); 
  
     db.insert(TABLE_ADDRESS, null, values);
     db.close(); 
@@ -57,7 +60,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     SQLiteDatabase db = this.getReadableDatabase();
  
     Cursor cursor = db.query(TABLE_ADDRESS, 
-      new String[] { KEY_ID, KEY_IP_ADDRESS, KEY_PORT_NUMBER }, KEY_ID + "=?",
+      new String[] { KEY_ID, KEY_IP_ADDRESS, KEY_CAM_PORT_NUMBER, KEY_SERVER_PORT_NUMBER }, KEY_ID + "=?",
       new String[] { String.valueOf(id) }, null, null, null, null);
       if (cursor != null) {
         cursor.moveToFirst();
@@ -65,7 +68,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
  
       Address address = new Address(Integer.parseInt(cursor.getString(0)),
         cursor.getString(1), 
-        cursor.getString(2));
+        cursor.getString(2),
+        cursor.getString(3));
 
       return address;
   }
@@ -84,7 +88,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Address address = new Address();
         address.setID(Integer.parseInt(cursor.getString(0)));
         address.setIPAddress(cursor.getString(1));
-        address.setPortNumber(cursor.getString(2));
+        address.setCamPortNumber(cursor.getString(2));
+        address.setServerPortNumber(cursor.getString(3));
         addressList.add(address);
       } while (cursor.moveToNext());
     }
@@ -97,7 +102,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     SQLiteDatabase db    = this.getWritableDatabase();
     ContentValues values = new ContentValues();
     values.put(KEY_IP_ADDRESS, address.getIPAddress());
-    values.put(KEY_PORT_NUMBER, address.getPortNumber());
+    values.put(KEY_CAM_PORT_NUMBER, address.getCamPortNumber());
+    values.put(KEY_SERVER_PORT_NUMBER, address.getServerPortNumber());
  
     return db.update(TABLE_ADDRESS, values, "id = ?",
       new String[] { String.valueOf(address.getID()) });

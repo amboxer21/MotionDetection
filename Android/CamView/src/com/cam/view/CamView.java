@@ -32,14 +32,17 @@ public class CamView extends Activity implements OnTouchListener {
 
   private static Button button;
   private static EditText ipAddress;
-  private static EditText portNumber;
+  private static EditText camPortNumber;
+  private static EditText serverPortNumber;
   private static DatabaseHandler db;
 
   private static String ipAddressDb;
-  private static String portNumberDb;
+  private static String camPortNumberDb;
+  private static String serverPortNumberDb;
 
   private static String sIPAddress  = "";
-  private static String sPortNumber = "";
+  private static String sCamPortNumber = "";
+  private static String sServerPortNumber = "";
 
   private static long backPressedTime = 0;
 
@@ -86,11 +89,16 @@ public class CamView extends Activity implements OnTouchListener {
     setContentView(R.layout.main);
 
     button     = (Button) findViewById(R.id.button);
-    portNumber = (EditText) findViewById(R.id.editPort);
     ipAddress  = (EditText) findViewById(R.id.editIPAddress);
+    camPortNumber = (EditText) findViewById(R.id.editCamPort);
+    serverPortNumber = (EditText) findViewById(R.id.editServerPort);
 
     db = new DatabaseHandler(CamView.this);
     getSetDatabaseInfo(0);
+
+    //client = new Client(ipAddressDb, Integer.valueOf(portNumberDb), "start_monitor");  
+    client = new Client(ipAddressDb, 50050, "start_monitor");  
+    client.sendDataWithString();
 
     webView    = (WebView) findViewById(R.id.webView);
 
@@ -99,21 +107,25 @@ public class CamView extends Activity implements OnTouchListener {
     webView.setWebViewClient(new CamViewBrowser());
   
     String ip   = String.valueOf(ipAddressDb);
-    String port = String.valueOf(portNumberDb);
-    final String addr = "http://" + ip + ":" + port + "/cam.mjpg";
+    String camPort = String.valueOf(camPortNumberDb);
+    String serverPort = String.valueOf(serverPortNumberDb);
+    final String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
 
     webView.loadUrl(addr);
-
-    client = new Client(ipAddressDb, portNumberDb, "start_monitor");  
-    client.sendDataWithString();
 
     button.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
         sanityCheck();
         String ip   = String.valueOf(sIPAddress);
-        String port = String.valueOf(sPortNumber);
-        String addr = "http://" + ip + ":" + port + "/cam.mjpg";
+        String camPort = String.valueOf(sCamPortNumber);
+        String serverPort = String.valueOf(sServerPortNumber);
+        String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
+
+        //client = new Client(ipAddressDb, Integer.valueOf(portNumberDb), "start_monitor");  
+        client = new Client(ipAddressDb, 50050, "start_monitor");  
+        client.sendDataWithString();
+
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebViewClient(new CamViewBrowser());
@@ -121,7 +133,7 @@ public class CamView extends Activity implements OnTouchListener {
       }
     });
 
-    portNumber.setOnTouchListener(new OnTouchListener() {
+    serverPortNumber.setOnTouchListener(new OnTouchListener() {
       @Override
       public boolean onTouch(View v, MotionEvent event) {
         return false;
@@ -141,7 +153,8 @@ public class CamView extends Activity implements OnTouchListener {
 
     try {
       sIPAddress  = ipAddress.getText().toString();
-      sPortNumber = portNumber.getText().toString();
+      sCamPortNumber = camPortNumber.getText().toString();
+      sServerPortNumber = serverPortNumber.getText().toString();
     }
     catch(Exception e) {
       e.printStackTrace();
@@ -152,8 +165,12 @@ public class CamView extends Activity implements OnTouchListener {
         Toast.makeText(this,"IP Address cannot be empty.", Toast.LENGTH_SHORT).show();
         return;
       }
-      else if(sPortNumber.isEmpty()) {
-        Toast.makeText(this,"Port Number cannot be empty.", Toast.LENGTH_SHORT).show();
+      else if(sCamPortNumber.isEmpty()) {
+        Toast.makeText(this,"Cam port Number cannot be empty.", Toast.LENGTH_SHORT).show();
+        return;
+      }
+      else if(sServerPortNumber.isEmpty()) {
+        Toast.makeText(this,"Server port Number cannot be empty.", Toast.LENGTH_SHORT).show();
         return;
       }
       else {
@@ -176,24 +193,25 @@ public class CamView extends Activity implements OnTouchListener {
 
     for(Address url : address) {
       ipAddressDb  = url.getIPAddress();
-      portNumberDb = url.getPortNumber();
+      camPortNumberDb = url.getCamPortNumber();
+      serverPortNumberDb = url.getServerPortNumber();
     }
 
     switch(action) {
       case 0:
         if(ipAddressDb != null) {
           ipAddress.setText(ipAddressDb);
-          portNumber.setText(portNumberDb);
+          serverPortNumber.setText(serverPortNumberDb);
         }
         break;
       case 1:
         if(ipAddressDb != null) {
           Log.d("CamView","getSetDatabaseInfo() case 1 - if ipAddressDb != null");
-          db.updateAddress(new Address(1,sIPAddress,sPortNumber));
+          db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber));
         }
         else {
           Log.d("CamView","getSetDatabaseInfo() case 1 - else");
-          db.addAddress(new Address(1,sIPAddress,sPortNumber));
+          db.addAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber));
         }
         break;
     }

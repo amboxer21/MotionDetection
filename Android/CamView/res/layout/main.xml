@@ -31,14 +31,27 @@
 
     <EditText
       android:ems="10"
-      android:id="@+id/editPort"
+      android:id="@+id/editCamPort"
       android:inputType="number"
-      android:hint="Port number"
+      android:hint="Cam port"
       android:textColorHint="#3F51B5"
       android:layout_marginLeft="10dp"
-      android:layout_marginRight="10dp"
-      android:layout_width="fill_parent"
+      android:layout_marginRight="2dp"
+      android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:layout_below="@+id/editIPAddress"/>
+
+    <EditText
+      android:ems="10"
+      android:id="@+id/editServerPort"
+      android:inputType="number"
+      android:hint="Server port"
+      android:textColorHint="#3F51B5"
+      android:layout_marginLeft="2dp"
+      android:layout_marginRight="10dp"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_toRightOf="@+id/editCamPort"
       android:layout_below="@+id/editIPAddress"/>
 
     <Button

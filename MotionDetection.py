@@ -175,7 +175,7 @@ class MotionDetection():
                 print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
                 del(cam)
                 cam_deleted = True
-                self.takePicture()
+                #self.takePicture()
                 #self.notify()
             elif delta_count < 100:
                 count += 1
