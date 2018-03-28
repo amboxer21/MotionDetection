@@ -13,23 +13,23 @@ import modules.datetime.datetime as datetime
 import cv2,sys,time,smtplib,threading,glob,re
 import StringIO,Image,socket,threading,os,subprocess
 
-_capture=None
-
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        global _capture
+
+        global streamCamera
+
         if self.path.endswith('.mjpg'):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
         while True:
             try:
-                rc, img = _capture.read()
+                rc, img = streamCamera.read()
                 if not rc:
                     continue
-                if kill is True:
-                    print("Killing cam.")
-                    del(_capture)
+                if killCamera is True:
+                    print("[CamHandler] Killing cam.")
+                    del(streamCamera)
                     break
                 imgRGB = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(imgRGB)
@@ -42,6 +42,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
             except KeyboardInterrupt:
+                del(streamCamera)
                 break
         return
 
@@ -55,18 +56,18 @@ class Stream():
     def main(self):
 
         global img
-        global kill
-        global _capture
+        global killCamera
+        global streamCamera
 
-        _capture = cv2.VideoCapture(self.cam_location)
-        _capture.set(3,320)
-        _capture.set(4,320)
+        streamCamera = cv2.VideoCapture(self.cam_location)
+        streamCamera.set(3,320)
+        streamCamera.set(4,320)
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             print("Streaming HTTPServer started")
             server.serve_forever()
         except KeyboardInterrupt:
-            del(_capture)
+            del(streamCamera)
             server.socket.close()
 
 class MotionDetection():
@@ -132,7 +133,7 @@ class MotionDetection():
     def kill_cam(self):
         global kill
         print("def kill_cam(self):")
-        kill = True
+        killCamera = True
 
     def capture(self):
         print("capture")
@@ -158,7 +159,7 @@ class MotionDetection():
     
         while(True):
 
-            if kill is True:
+            if killCamera is True:
                 print("Killing cam.")
                 del(cam)
                 break
@@ -245,7 +246,7 @@ class Server():
 
     def main(self):
 
-        global kill
+        global killCamera
 
         stream = Stream(self.cam_location)
         motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
@@ -267,24 +268,24 @@ class Server():
                 if(message == 'start_monitor'):
                     print("Starting camera!")
                     con.send("Starting camera!")
-                    kill = True
+                    killCamera = True
                     time.sleep(1)
                     self.start_thread(stream.main)
-                    kill = False
+                    killCamera = False
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
                     con.send("Killing camera!")
                     self.start_thread(motionDetection.capture)
-                    kill = True
+                    killCamera = True
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     con.send("Starting motion sensor!")
-                    kill = False
+                    killCamera = False
                     self.start_thread(motionDetection.capture)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     con.send("Killing motion sensor!")
-                    self.kill_cam()
+                    killCamera = True
                 elif(message == 'probe'):
                     print("Server is alive.")
                     con.send("Server is alive.")
