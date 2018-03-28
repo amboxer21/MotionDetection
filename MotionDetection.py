@@ -44,10 +44,13 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 class Stream():
+    def __init__(self,cam_location):
+        self.cam_location = cam_location
+
     def main(self):
         global img
         global capture
-        capture = cv2.VideoCapture(0)
+        capture = cv2.VideoCapture(self.cam_location)
         capture.set(3,320)
         capture.set(4,320)
         try:
@@ -60,33 +63,17 @@ class Stream():
 
 class MotionDetection():
 
-    def __init__(self):
+    def __init__(self,ip,server_port,email,password,email_port,cam_location):
 
-        parser = OptionParser()
-        parser.add_option("-i",
-            "--ip", dest='ip', help='"This is the IP address of the server."',default='0.0.0.0')
-        parser.add_option("-S",
-            "--server-port", dest='server_port', help='"Server port defaults to port 5051"', type="int", default=5051)
-        parser.add_option("-e",
-            "--email", dest='email', help='"This argument is required!"')
-        parser.add_option("-p",
-            "--password", dest='password', help='"This argument is required!"')
-        parser.add_option("-c",
-            "--camera", dest='camera', help='"Camera index number."', type="int", default=0)
-        parser.add_option("-E",
-            "--email-port", dest='email_port', help='"E-mail port defaults to port 587"', type="int", default=587)
-        (options, args) = parser.parse_args()
-
-        self.ip = options.ip
-        self.server_port = options.server_port
-        self.email_port = options.email_port
-        self.email = options.email
-        self.camera = options.camera
-        self.password = options.password
+        self.ip = ip
+        self.email = email
+        self.password = password
+        self.email_port = email_port
+        self.server_port = server_port
+        self.cam_location = cam_location
 
         if self.email is None or self.password is None:
             print("\nERROR: Both E-mail and password are required!\n")
-            parser.print_help()
             sys.exit(0)
 
     def user_name(self):
@@ -128,7 +115,7 @@ class MotionDetection():
             is_sent = True
     
     def takePicture(self):
-        camera = cv2.VideoCapture(self.camera)
+        camera = cv2.VideoCapture(self.cam_location)
         if not camera.isOpened():
             return
         ret, frame = camera.read()
@@ -154,7 +141,7 @@ class MotionDetection():
         BLUR_SIZE = 3
         NOISE_CUTOFF = 12
     
-        cam = cv2.VideoCapture(self.camera)
+        cam = cv2.VideoCapture(self.cam_location)
         cam.set(3,640)
         cam.set(4,480)
 
@@ -202,7 +189,7 @@ class MotionDetection():
                 BLUR_SIZE = 3
                 NOISE_CUTOFF = 12
     
-                cam = cv2.VideoCapture(self.camera)
+                cam = cv2.VideoCapture(self.cam_location)
                 cam.set(3,640)
                 cam.set(4,480)
     
@@ -213,6 +200,36 @@ class MotionDetection():
             frame_now = cam.read()[1]
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.blur(frame_now, (BLUR_SIZE, BLUR_SIZE))
+
+class Server():
+
+    def __init__(self):
+        parser = OptionParser()
+        parser.add_option("-i",
+            "--ip", dest='ip', help='"This is the IP address of the server."',default='0.0.0.0')
+        parser.add_option("-S",
+            "--server-port", dest='server_port', help='"Server port defaults to port 50050"', type="int", default=50050)
+        parser.add_option("-e",
+            "--email", dest='email', help='"This argument is required!"')
+        parser.add_option("-p",
+            "--password", dest='password', help='"This argument is required!"')
+        parser.add_option("-c",
+            "--camera-location", dest='cam_location', help='"Camera index number."', type="int", default=0)
+        parser.add_option("-E",
+            "--email-port", dest='email_port', help='"E-mail port defaults to port 587"', type="int", default=587)
+        (options, args) = parser.parse_args()
+
+        self.ip = options.ip
+        self.email = options.email
+        self.password = options.password
+        self.email_port = options.email_port
+        self.server_port = options.server_port
+        self.cam_location = options.cam_location
+
+        if self.email is None or self.password is None:
+            print("\nERROR: Both E-mail and password are required!\n")
+            parser.print_help()
+            sys.exit(0)
 
     def start_thread(self,proc):
         try:
@@ -226,13 +243,15 @@ class MotionDetection():
 
         global kill
 
-        stream = Stream()
+        stream = Stream(self.cam_location)
+        motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
 
         sock = socket.socket()
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(('', 50050))
+        sock.bind(('', self.server_port))
         sock.listen(5)
-        self.start_thread(self.capture)
+        self.start_thread(motionDetection.capture)
+        time.sleep(1)
 
         print("Listening for connections.")
         while(True):
@@ -244,7 +263,7 @@ class MotionDetection():
                 if(message == 'start_monitor'):
                     print("Starting camera!")
                     con.send("Starting camera!")
-                    self.kill_cam()
+                    motionDetection.kill_cam()
                     time.sleep(1)
                     self.start_thread(stream.main)
                     kill = False
@@ -255,7 +274,7 @@ class MotionDetection():
                     print("Starting motion sensor!")
                     con.send("Starting motion sensor!")
                     kill = False
-                    self.start_thread(self.capture)
+                    self.start_thread(motionDetection.capture)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     con.send("Killing motion sensor!")
@@ -271,5 +290,5 @@ class MotionDetection():
         con.close()
 
 if __name__ == '__main__':
-    motionDetection = MotionDetection()
-    motionDetection.main()
+    server = Server()
+    server.main()

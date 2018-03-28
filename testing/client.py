@@ -30,7 +30,7 @@ class Client():
         print("Socket created.")
 
         try:
-            s.connect(('192.168.1.13',50050))
+            s.connect(('192.168.1.5',50050))
             #s.connect(('174.57.49.30',5052))
             #s.connect((str(self.ip),int(self.port)))
         except Exception as e:
