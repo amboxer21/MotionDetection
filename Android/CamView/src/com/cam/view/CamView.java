@@ -28,6 +28,8 @@ public class CamView extends Activity implements OnTouchListener {
 
   private WebView webView;
 
+  private static Client client;
+
   private static Button button;
   private static EditText ipAddress;
   private static EditText portNumber;
@@ -82,6 +84,9 @@ public class CamView extends Activity implements OnTouchListener {
     final String addr = "http://" + ip + ":" + port + "/cam.mjpg";
 
     webView.loadUrl(addr);
+
+    /*client = new Client("192.168.1.177", 9486, "onn");  
+    client.sendDataWithString();*/
 
     button.setOnClickListener(new OnClickListener() {
       @Override
