@@ -13,19 +13,24 @@ import modules.datetime.datetime as datetime
 import cv2,sys,time,smtplib,threading,glob,re
 import StringIO,Image,socket,threading,os,subprocess
 
-capture=None
+_capture=None
 
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        global _capture
         if self.path.endswith('.mjpg'):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
         while True:
             try:
-                rc, img = capture.read()
+                rc, img = _capture.read()
                 if not rc:
                     continue
+                if kill is True:
+                    print("Killing cam.")
+                    del(_capture)
+                    break
                 imgRGB = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(imgRGB)
                 tmpFile = StringIO.StringIO()
@@ -48,17 +53,20 @@ class Stream():
         self.cam_location = cam_location
 
     def main(self):
+
         global img
-        global capture
-        capture = cv2.VideoCapture(self.cam_location)
-        capture.set(3,320)
-        capture.set(4,320)
+        global kill
+        global _capture
+
+        _capture = cv2.VideoCapture(self.cam_location)
+        _capture.set(3,320)
+        _capture.set(4,320)
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             print("Streaming HTTPServer started")
             server.serve_forever()
         except KeyboardInterrupt:
-            del(capture)
+            del(_capture)
             server.socket.close()
 
 class MotionDetection():
@@ -71,10 +79,6 @@ class MotionDetection():
         self.email_port = email_port
         self.server_port = server_port
         self.cam_location = cam_location
-
-        if self.email is None or self.password is None:
-            print("\nERROR: Both E-mail and password are required!\n")
-            sys.exit(0)
 
     def user_name(self):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
@@ -263,13 +267,15 @@ class Server():
                 if(message == 'start_monitor'):
                     print("Starting camera!")
                     con.send("Starting camera!")
-                    motionDetection.kill_cam()
+                    kill = True
                     time.sleep(1)
                     self.start_thread(stream.main)
                     kill = False
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
                     con.send("Killing camera!")
+                    self.start_thread(motionDetection.capture)
+                    kill = True
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     con.send("Starting motion sensor!")

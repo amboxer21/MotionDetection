@@ -1,11 +1,13 @@
 package com.cam.view;
 
 import android.util.Log;
-import android.os.Bundle;
 import android.app.Activity;
 
 import java.util.List;
 import java.util.Arrays;
+
+import android.os.Bundle;
+import android.os.Handler;
 
 import android.content.Intent;
 import android.content.Context;
@@ -29,6 +31,7 @@ public class CamView extends Activity implements OnTouchListener {
   private WebView webView;
 
   private static Client client;
+  private static ClientAsyncTask clientAsyncTask;
 
   private static Button button;
   private static EditText ipAddress;
@@ -76,6 +79,8 @@ public class CamView extends Activity implements OnTouchListener {
 
   public void onStop() {
     super.onStop();
+    clientAsyncTask = new ClientAsyncTask();
+    clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
   }
 
   @Override
@@ -96,10 +101,7 @@ public class CamView extends Activity implements OnTouchListener {
     db = new DatabaseHandler(CamView.this);
     getSetDatabaseInfo(0);
 
-    //client = new Client(ipAddressDb, Integer.valueOf(portNumberDb), "start_monitor");  
-    client = new Client(ipAddressDb, 50050, "start_monitor");  
-    client.sendDataWithString();
-
+    final Handler handler = new Handler();
     webView    = (WebView) findViewById(R.id.webView);
 
     webView.setVerticalScrollBarEnabled(false);
@@ -109,27 +111,30 @@ public class CamView extends Activity implements OnTouchListener {
     String ip   = String.valueOf(ipAddressDb);
     String camPort = String.valueOf(camPortNumberDb);
     String serverPort = String.valueOf(serverPortNumberDb);
-    final String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
-
-    webView.loadUrl(addr);
 
     button.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
+
         sanityCheck();
+
         String ip   = String.valueOf(sIPAddress);
         String camPort = String.valueOf(sCamPortNumber);
         String serverPort = String.valueOf(sServerPortNumber);
-        String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
+        final String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
 
         //client = new Client(ipAddressDb, Integer.valueOf(portNumberDb), "start_monitor");  
-        client = new Client(ipAddressDb, 50050, "start_monitor");  
-        client.sendDataWithString();
+        clientAsyncTask = new ClientAsyncTask();
+        clientAsyncTask.execute(ipAddressDb, "50050", "start_monitor");
 
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
         webView.setWebViewClient(new CamViewBrowser());
-        webView.loadUrl(addr);
+        handler.postDelayed(new Runnable() {
+          public void run() {
+            webView.loadUrl(addr);
+          }
+        }, 2000);
       }
     });
 
@@ -183,7 +188,7 @@ public class CamView extends Activity implements OnTouchListener {
     }
   }
 
-  public void getSetDatabaseInfo(int action) {
+  public void databaseGetter() {
 
     List<Address> address = db.getAllAddresses();
 
@@ -196,11 +201,17 @@ public class CamView extends Activity implements OnTouchListener {
       camPortNumberDb = url.getCamPortNumber();
       serverPortNumberDb = url.getServerPortNumber();
     }
+  }
+
+  public void getSetDatabaseInfo(int action) {
+
+    databaseGetter();
 
     switch(action) {
       case 0:
         if(ipAddressDb != null) {
           ipAddress.setText(ipAddressDb);
+          camPortNumber.setText(camPortNumberDb);
           serverPortNumber.setText(serverPortNumberDb);
         }
         break;
@@ -208,6 +219,7 @@ public class CamView extends Activity implements OnTouchListener {
         if(ipAddressDb != null) {
           Log.d("CamView","getSetDatabaseInfo() case 1 - if ipAddressDb != null");
           db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber));
+          databaseGetter();
         }
         else {
           Log.d("CamView","getSetDatabaseInfo() case 1 - else");

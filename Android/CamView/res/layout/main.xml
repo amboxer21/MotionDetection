@@ -55,7 +55,7 @@
       android:layout_below="@+id/editIPAddress"/>
 
     <Button
-      android:text="Configure"
+      android:text="View Cam"
       android:id="@+id/button"
       android:layout_marginLeft="50dp"
       android:layout_marginRight="50dp"
