@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __init__ import *
+from time import sleep
 from optparse import OptionParser
 
 from email.MIMEImage import MIMEImage
@@ -52,7 +53,8 @@ class Stream():
         capture.set(4,320)
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
-            print("Streaming HTTPServer started")
+            #server = ThreadedHTTPServer(ThreadingMixIn, HTTPServer)
+            print("server started")
             server.serve_forever()
         except KeyboardInterrupt:
             del(capture)
@@ -101,7 +103,7 @@ class MotionDetection():
         os.chdir("/home/" + self.user_name() + "/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
-            _list.append(int(num.group(2)))
+            _list.append(num.group(2))
         return max(_list)
     
     def sendMail(self,sender,to,password,port,subject,body):
@@ -134,7 +136,7 @@ class MotionDetection():
         ret, frame = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.1)
-        picture_name = "/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
+        picture_name = "/home/" + self.user_name() + "/.motiondetection/capture" + str(int(self.img_num()) + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
 
@@ -189,7 +191,7 @@ class MotionDetection():
                 del(cam)
                 cam_deleted = True
                 self.takePicture()
-                #self.notify()
+                self.notify()
             elif delta_count < 100:
                 count += 1
                 is_moving = True
@@ -219,57 +221,57 @@ class MotionDetection():
             t = threading.Thread(target=proc)
             t.daemon = True
             t.start()
-        except Exception as eStartThread:
-            print("Threading exception e => " + str(eStartThread))
+        except Exception as e:
+            print("Threading exception e => " + str(e))
 
     def main(self):
 
         global kill
 
-        stream = Stream()
+        m = Stream()
 
-        sock = socket.socket()
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(('', 50050))
-        sock.listen(5)
+        s = socket.socket()
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        s.bind(('', 50050))
+        s.listen(5)
         self.start_thread(self.capture)
 
         print("Listening for connections.")
         while(True):
             try:
-                con, addr = sock.accept()
+                c, addr = s.accept()
                 print("Received connection from " + str(addr))
-                message = con.recv(1024)
+                mes = c.recv(1024)
 
-                if(message == 'start_monitor'):
+                if(mes == 'start_monitor'):
                     print("Starting camera!")
-                    con.send("Starting camera!")
+                    c.send("Starting camera!")
                     self.kill_cam()
                     time.sleep(1)
-                    self.start_thread(stream.main)
+                    self.start_thread(m.main)
                     kill = False
-                elif(message == 'kill_monitor'):
+                elif(mes == 'kill_monitor'):
                     print("Killing camera!")
-                    con.send("Killing camera!")
-                elif(message == 'start_motion'):
+                    c.send("Killing camera!")
+                elif(mes == 'start_motion'):
                     print("Starting motion sensor!")
-                    con.send("Starting motion sensor!")
+                    c.send("Starting motion sensor!")
                     kill = False
                     self.start_thread(self.capture)
-                elif(message == 'kill_motion'):
+                elif(mes == 'kill_motion'):
                     print("Killing motion sensor!")
-                    con.send("Killing motion sensor!")
+                    c.send("Killing motion sensor!")
                     self.kill_cam()
-                elif(message == 'probe'):
+                elif(mes == 'probe'):
                     print("Server is alive.")
-                    con.send("Server is alive.")
+                    c.send("Server is alive.")
                 else:
-                    print(message + " is not a known command.")
-                    con.send(mes + " is not a konwn command!")
-            except Exception as eAccept:
-                print("Socket accept error: " + str(eAccept))
-        con.close()
+                    print(mes + " is not a known command.")
+                    c.send(mes + " is not a konwn command!")
+            except Exception as e:
+                print("Socket accept error: " + str(e))
+        c.close()
 
 if __name__ == '__main__':
-    motionDetection = MotionDetection()
-    motionDetection.main()
+    m = MotionDetection()
+    m.main()
