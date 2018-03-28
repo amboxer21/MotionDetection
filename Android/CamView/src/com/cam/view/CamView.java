@@ -62,6 +62,25 @@ public class CamView extends Activity implements OnTouchListener {
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+  }
+
+  public void onStop() {
+    super.onStop();
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+  } 
+
+  @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
@@ -85,8 +104,8 @@ public class CamView extends Activity implements OnTouchListener {
 
     webView.loadUrl(addr);
 
-    /*client = new Client("192.168.1.177", 9486, "onn");  
-    client.sendDataWithString();*/
+    client = new Client(ipAddressDb, portNumberDb, "start_monitor");  
+    client.sendDataWithString();
 
     button.setOnClickListener(new OnClickListener() {
       @Override
