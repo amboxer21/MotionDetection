@@ -24,20 +24,20 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
         while True:
             try:
-                rc, img = streamCamera.read()
-                if not rc:
+                read, image = streamCamera.read()
+                if not read:
                     continue
                 if killCamera is True:
                     print("[CamHandler] Killing cam.")
                     del(streamCamera)
                     break
-                imgRGB = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-                jpg = Image.fromarray(imgRGB)
-                tmpFile = StringIO.StringIO()
-                jpg.save(tmpFile,'JPEG')
+                rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+                jpg = Image.fromarray(rgb)
+                jpg_file = StringIO.StringIO()
+                jpg.save(jpg_file,'JPEG')
                 self.wfile.write("--jpgboundary")
                 self.send_header('Content-type','image/jpeg')
-                self.send_header('Content-length',str(tmpFile.len))
+                self.send_header('Content-length',str(jpg_file.len))
                 self.end_headers()
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
@@ -55,7 +55,6 @@ class Stream():
 
     def main(self):
 
-        global img
         global killCamera
         global streamCamera
 
@@ -71,7 +70,6 @@ class Stream():
             server.socket.close()
         except Exception as eThreadedHTTPServer:
             pass
-            #print("ThreadedHTTPServer exception eThreadedHTTPServer => " + str(eThreadedHTTPServer))
 
 class MotionDetection():
 

@@ -100,7 +100,7 @@ public class CamView extends Activity implements OnTouchListener {
     final Handler handler = new Handler();
     final WebView webView = (WebView) findViewById(R.id.webView);
 
-    String ip   = String.valueOf(ipAddressDb);
+    String ip = String.valueOf(ipAddressDb);
     String camPort = String.valueOf(camPortNumberDb);
     String serverPort = String.valueOf(serverPortNumberDb);
 
