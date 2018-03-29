@@ -69,6 +69,9 @@ class Stream():
         except KeyboardInterrupt:
             del(streamCamera)
             server.socket.close()
+        except Exception as eThreadedHTTPServer:
+            pass
+            #print("ThreadedHTTPServer exception eThreadedHTTPServer => " + str(eThreadedHTTPServer))
 
 class MotionDetection():
 
@@ -242,21 +245,25 @@ class Server():
             t.daemon = True
             t.start()
         except Exception as eStartThread:
-            print("Threading exception e => " + str(eStartThread))
+            print("Threading exception eStartThread => " + str(eStartThread))
 
     def main(self):
 
+        global sock
         global killCamera
 
         stream = Stream(self.cam_location)
         motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
 
-        sock = socket.socket()
-        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind(('', self.server_port))
-        sock.listen(5)
-        self.start_thread(motionDetection.capture)
-        time.sleep(1)
+        try:
+            sock = socket.socket()
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            sock.bind(('', self.server_port))
+            sock.listen(5)
+            self.start_thread(motionDetection.capture)
+            time.sleep(1)
+        except Exception as eSock:
+            print("Sock exception eSock => " + str(eSock))
 
         print("Listening for connections.")
         while(True):
@@ -270,22 +277,21 @@ class Server():
                     con.send("Starting camera!")
                     killCamera = True
                     time.sleep(1)
-                    self.start_thread(stream.main)
                     killCamera = False
+                    self.start_thread(stream.main)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
                     con.send("Killing camera!")
-                    self.start_thread(motionDetection.capture)
                     killCamera = True
+                    time.sleep(1)
+                    killCamera = False
+                    self.start_thread(motionDetection.capture)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     con.send("Starting motion sensor!")
-                    killCamera = False
-                    self.start_thread(motionDetection.capture)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     con.send("Killing motion sensor!")
-                    killCamera = True
                 elif(message == 'probe'):
                     print("Server is alive.")
                     con.send("Server is alive.")

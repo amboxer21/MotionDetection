@@ -28,12 +28,9 @@ import android.view.View.OnClickListener;
 
 public class CamView extends Activity implements OnTouchListener {
 
-  private WebView webView;
-
   private static Client client;
   private static ClientAsyncTask clientAsyncTask;
 
-  private static Button button;
   private static EditText ipAddress;
   private static EditText camPortNumber;
   private static EditText serverPortNumber;
@@ -47,12 +44,10 @@ public class CamView extends Activity implements OnTouchListener {
   private static String sCamPortNumber = "";
   private static String sServerPortNumber = "";
 
-  private static long backPressedTime = 0;
-
   @Override
   public void onBackPressed() {
 
-    button.setVisibility(View.VISIBLE);
+    long backPressedTime = 0;
 
     long mTime = System.currentTimeMillis();
     if(mTime - backPressedTime > 2000) {
@@ -86,6 +81,8 @@ public class CamView extends Activity implements OnTouchListener {
   @Override
   public void onDestroy() {
     super.onDestroy();
+    clientAsyncTask = new ClientAsyncTask();
+    clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
   } 
 
   @Override
@@ -93,8 +90,8 @@ public class CamView extends Activity implements OnTouchListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    button     = (Button) findViewById(R.id.button);
-    ipAddress  = (EditText) findViewById(R.id.editIPAddress);
+    Button button = (Button) findViewById(R.id.button);
+    ipAddress = (EditText) findViewById(R.id.editIPAddress);
     camPortNumber = (EditText) findViewById(R.id.editCamPort);
     serverPortNumber = (EditText) findViewById(R.id.editServerPort);
 
@@ -102,7 +99,7 @@ public class CamView extends Activity implements OnTouchListener {
     getSetDatabaseInfo(0);
 
     final Handler handler = new Handler();
-    webView    = (WebView) findViewById(R.id.webView);
+    WebView webView = (WebView) findViewById(R.id.webView);
 
     webView.setVerticalScrollBarEnabled(false);
     webView.setHorizontalScrollBarEnabled(false);
