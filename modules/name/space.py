@@ -4,29 +4,34 @@ import sys
 
 class NameSpace():
 
-    def count(variable=0,option=None):
+    def count(self,option=None,variable=0):
+        print("count ONE")
         print("option => " + option)
 
-    def isSent(variable=False,option=None):
+    def isSent(self,option=None,variable=False):
         print("option => " + option)
+        print("isSent")
 
-    def isMoving(variable=True,option=None):
+    def isMoving(self,option=None,variable=True):
         print("option => " + option)
+        print("isMoving")
 
-    def killCamera(variable=False,option=None:
+    def killCamera(self,option=None,variable=False):
         print("option => " + option)
+        print("killCamera")
 
-    def streamCamera(variable=None,option=None):
+    def streamCamera(self,option=None,variable=None):
         print("option => " + option)
+        print("streamCamera")
 
-    options = {
-        0 : count,
-        1 : isSent,
-        2 : isMoving,
-        3 : killCamera,
-        4 : streamCamera,
-    }
+    def options(self,opt,var):
+        option = {
+            'count' : self.count,
+            'isSent' : self.isSent,'isMoving' : self.isMoving,
+            'killCamera' : self.killCamera,'streamCamera' : self.streamCamera,
+        }
+        option[opt](var)
 
 if __name__ == '__main__':
     nameSpace = NameSpace()
-    nameSpace.options[int(sys.argv[1])](sys.argv[2])
+    nameSpace.options(sys.argv[1],sys.argv[2])
