@@ -44,11 +44,10 @@ public class CamView extends Activity implements OnTouchListener {
   private static String sCamPortNumber = "";
   private static String sServerPortNumber = "";
 
+  private static long backPressedTime = 0;
+
   @Override
   public void onBackPressed() {
-
-    long backPressedTime = 0;
-
     long mTime = System.currentTimeMillis();
     if(mTime - backPressedTime > 2000) {
       backPressedTime = mTime;
@@ -116,7 +115,6 @@ public class CamView extends Activity implements OnTouchListener {
         String serverPort = String.valueOf(sServerPortNumber);
         final String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
 
-        //client = new Client(ipAddressDb, Integer.valueOf(portNumberDb), "start_monitor");  
         clientAsyncTask = new ClientAsyncTask();
         clientAsyncTask.execute(ipAddressDb, "50050", "start_monitor");
 
