@@ -99,12 +99,8 @@ public class CamView extends Activity implements OnTouchListener {
     getSetDatabaseInfo(0);
 
     final Handler handler = new Handler();
-    WebView webView = (WebView) findViewById(R.id.webView);
+    final WebView webView = (WebView) findViewById(R.id.webView);
 
-    webView.setVerticalScrollBarEnabled(false);
-    webView.setHorizontalScrollBarEnabled(false);
-    webView.setWebViewClient(new CamViewBrowser());
-  
     String ip   = String.valueOf(ipAddressDb);
     String camPort = String.valueOf(camPortNumberDb);
     String serverPort = String.valueOf(serverPortNumberDb);
@@ -115,7 +111,7 @@ public class CamView extends Activity implements OnTouchListener {
 
         sanityCheck();
 
-        String ip   = String.valueOf(sIPAddress);
+        String ip = String.valueOf(sIPAddress);
         String camPort = String.valueOf(sCamPortNumber);
         String serverPort = String.valueOf(sServerPortNumber);
         final String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
