@@ -19,3 +19,21 @@ aguevara@anthony ~ $ opencv_version
 #### **OpenCV DOWNLOAD LINK:**
 
 Download [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
+
+#### ** BUILT WITH:**
+
+>ffmpeg-3.0.11
+
+>cmake version 3.5.1
+
+>opencv-2.4.13.6
+
+>opencv-3.1.0
+
+>opencv_contrib-3.1.0
+
+#### **DEPS:**
+
+```python
+sudo apt-get install build-essential cmake pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
+```
