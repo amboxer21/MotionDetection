@@ -5,7 +5,7 @@ A system that monitors motion from a webcam and allows remote viewing of the web
 #### **CMAKE BUILD OPTIONS FOR OpenCV:** 
 
 ```python
-cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_QT=ON -DOPENCV_EXTRA_MODULES_PATH=modules -DBUILD_EXAMPLES=OFF
+sudo cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D INSTALL_PYTHON_EXAMPLES=ON -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib-3.1.0/modules -DBUILD_EXAMPLES=ON ..
 ```
 
 #### **OpenCV VERSION**
