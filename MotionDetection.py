@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from PIL import Image
 from __init__ import *
 from optparse import OptionParser
 
@@ -11,7 +12,8 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 import modules.datetime.datetime as datetime
 import cv2,sys,time,smtplib,threading,glob,re
-import StringIO,Image,socket,threading,os,subprocess
+#import StringIO,Image,socket,threading,os,subprocess
+import StringIO,socket,threading,os,subprocess
 
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -23,10 +25,11 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
         while True:
+            time.sleep(0.5)
             try:
                 read, image = streamCamera.read()
-                if not read:
-                    continue
+                #if not read:
+                    #continue
                 if killCamera is True:
                     print("[CamHandler] Killing cam.")
                     del(streamCamera)
@@ -258,6 +261,7 @@ class Server():
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             sock.bind(('', self.server_port))
             sock.listen(5)
+            time.sleep(1)
             self.start_thread(motionDetection.capture)
             time.sleep(1)
         except Exception as eSock:
@@ -265,6 +269,7 @@ class Server():
 
         print("Listening for connections.")
         while(True):
+	    time.sleep(0.05)
             try:
                 con, addr = sock.accept()
                 print("Received connection from " + str(addr))
@@ -272,30 +277,30 @@ class Server():
 
                 if(message == 'start_monitor'):
                     print("Starting camera!")
-                    con.send("Starting camera!")
+                    #con.send("Starting camera!")
                     killCamera = True
                     time.sleep(1)
                     killCamera = False
                     self.start_thread(stream.main)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
-                    con.send("Killing camera!")
+                    #con.send("Killing camera!")
                     killCamera = True
                     time.sleep(1)
                     killCamera = False
                     self.start_thread(motionDetection.capture)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
-                    con.send("Starting motion sensor!")
+                    #con.send("Starting motion sensor!")
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
-                    con.send("Killing motion sensor!")
+                    #con.send("Killing motion sensor!")
                 elif(message == 'probe'):
                     print("Server is alive.")
-                    con.send("Server is alive.")
+                    #con.send("Server is alive.")
                 else:
                     print(message + " is not a known command.")
-                    con.send(mes + " is not a konwn command!")
+                    #con.send(message + " is not a konwn command!")
             except Exception as eAccept:
                 print("Socket accept error: " + str(eAccept))
         con.close()

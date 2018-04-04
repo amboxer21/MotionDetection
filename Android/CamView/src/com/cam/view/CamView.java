@@ -125,7 +125,7 @@ public class CamView extends Activity implements OnTouchListener {
           public void run() {
             webView.loadUrl(addr);
           }
-        }, 2000);
+        }, 3000);
       }
     });
 
