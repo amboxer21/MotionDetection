@@ -5,15 +5,7 @@ A system that monitors motion from a webcam and allows remote viewing of the web
 #### **CMAKE BUILD OPTIONS FOR OpenCV:** 
 
 ```python
-sudo cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D INSTALL_PYTHON_EXAMPLES=ON -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib-3.1.0/modules -DBUILD_EXAMPLES=ON ..
-```
-
-```python
-sudo cmake -D CAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_PYTHON_EXAMPLES=ON -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib-3.1.0/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7l ..
-```
-
-```python
-sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 ..
+sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 .. && sudo make -j3
 ```
 
 #### **OpenCV VERSION**
@@ -28,9 +20,13 @@ aguevara@anthony ~ $ opencv_version
 
 Download [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
 
+### **FFMpeg confiure options**
+
+>sudo ./configure --enable-libv4l2 --enable-opengl
+
 #### ** BUILT WITH:**
 
->ffmpeg-3.0.11
+>ffmpeg-3.3.6
 
 >cmake version 3.5.1
 
