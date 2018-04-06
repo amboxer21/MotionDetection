@@ -147,8 +147,11 @@ class MotionDetection():
         is_moving   = True
         cam_deleted = False
     
-        BLUR_SIZE = 3
-        NOISE_CUTOFF = 12
+        #BLUR_SIZE = 3
+        #NOISE_CUTOFF = 12
+
+        BLUR_SIZE = 30
+        NOISE_CUTOFF = 127
    
         cam = cv2.VideoCapture(self.cam_location)
         cam.set(3,640)
@@ -199,8 +202,8 @@ class MotionDetection():
                     is_sent = False
     
             if cam_deleted:
-                BLUR_SIZE = 3
-                NOISE_CUTOFF = 12
+                BLUR_SIZE = 30
+                NOISE_CUTOFF = 127
     
                 cam = cv2.VideoCapture(self.cam_location)
                 cam.set(3,640)
@@ -273,7 +276,7 @@ class Server():
 
         print("Listening for connections.")
         while(True):
-	    time.sleep(0.05)
+            time.sleep(0.05)
             try:
                 con, addr = sock.accept()
                 print("Received connection from " + str(addr))
