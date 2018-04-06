@@ -184,11 +184,11 @@ class MotionDetection():
                 del(cam)
                 cam_deleted = True
                 self.takePicture()
-                #self.notify()
+                self.notify()
             elif delta_count < 100:
                 count += 1
                 is_moving = True
-                print("count: " + str(count))
+                #print("count: " + str(count))
                 if count == 60:
                     print("Count == 60")
                     is_sent = False
