@@ -25,7 +25,6 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
         while True:
-            time.sleep(0.5)
             try:
                 read, image = streamCamera.read()
                 #if not read:
