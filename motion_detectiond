@@ -8,4 +8,4 @@
 # Short-Description: Start MotionDetection system on boot
 ### END INIT INFO
 
-/usr/bin/python /home/pi/Documents/Python/MotionDetection/MotionDetection.py -e 'sshmonitorapp@gmail.com' -p 'GHOST21ghost' &
+/usr/bin/python /home/pi/Documents/Python/MotionDetection/MotionDetection.py -e 'example@gmail.com' -p 'password' &
