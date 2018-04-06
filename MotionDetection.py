@@ -139,16 +139,17 @@ class MotionDetection():
         killCamera = True
 
     def capture(self):
-        print("capture")
+        print("Motion Detection system initialed.")
     
         global cam
         global cam_deleted
-    
+   
+        is_moving   = True
         cam_deleted = False
     
         BLUR_SIZE = 3
         NOISE_CUTOFF = 12
-    
+   
         cam = cv2.VideoCapture(self.cam_location)
         cam.set(3,640)
         cam.set(4,480)
@@ -171,26 +172,30 @@ class MotionDetection():
             global is_sent
     
             frame_delta = cv2.absdiff(frame_prior, frame_now)
-            frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, 3)[1]
+            #frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C)[1]
+            #frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, 3)[1]
+            frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, cv2.THRESH_BINARY)[1]
             delta_count = cv2.countNonZero(frame_delta)
     
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
-    
-            if(delta_count > 1000 and is_moving is True):
+             
+            if(delta_count > 1500 and is_moving is True):
                 count = 0
                 is_moving = False
                 print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
                 del(cam)
                 cam_deleted = True
-                self.takePicture()
-                self.notify()
+                #self.takePicture()
+                #self.notify()
             elif delta_count < 100:
                 count += 1
+                time.sleep(0.1)
                 is_moving = True
                 #print("count: " + str(count))
-                if count == 60:
-                    print("Count == 60")
+                if count == 5000:
+                    print("Resetting counter.")
+                    count = 0
                     is_sent = False
     
             if cam_deleted:
