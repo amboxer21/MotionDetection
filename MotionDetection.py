@@ -147,21 +147,13 @@ class MotionDetection():
         is_moving   = True
         cam_deleted = False
     
-        #BLUR_SIZE = 3
-        #NOISE_CUTOFF = 12
-
-        BLUR_SIZE = 30
-        NOISE_CUTOFF = 127
-   
         cam = cv2.VideoCapture(self.cam_location)
-        cam.set(3,640)
-        cam.set(4,480)
 
         frame_now = cam.read()[1]
         frame_now = cam.read()[1]
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-        frame_now = cv2.blur(frame_now, (BLUR_SIZE, BLUR_SIZE))
+        frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
         frame_prior = frame_now
     
         while(True):
@@ -173,17 +165,15 @@ class MotionDetection():
       
             global count
             global is_sent
-    
+
             frame_delta = cv2.absdiff(frame_prior, frame_now)
-            #frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C)[1]
-            #frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, 3)[1]
-            frame_delta = cv2.threshold(frame_delta, NOISE_CUTOFF, 255, cv2.THRESH_BINARY)[1]
+            frame_delta = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)[1]
             delta_count = cv2.countNonZero(frame_delta)
     
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
-            if(delta_count > 1500 and is_moving is True):
+            if(delta_count > 1500 and delta_count < 10000 and is_moving is True):
                 count = 0
                 is_moving = False
                 print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
@@ -202,12 +192,7 @@ class MotionDetection():
                     is_sent = False
     
             if cam_deleted:
-                BLUR_SIZE = 30
-                NOISE_CUTOFF = 127
-    
                 cam = cv2.VideoCapture(self.cam_location)
-                cam.set(3,640)
-                cam.set(4,480)
     
                 cam_deleted = False
     
@@ -215,7 +200,7 @@ class MotionDetection():
             frame_prior = frame_now
             frame_now = cam.read()[1]
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-            frame_now = cv2.blur(frame_now, (BLUR_SIZE, BLUR_SIZE))
+            frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
 class Server():
 
