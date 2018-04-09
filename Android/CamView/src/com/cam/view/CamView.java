@@ -1,5 +1,6 @@
 package com.cam.view;
 
+import  android.net.Uri;
 import android.util.Log;
 import android.app.Activity;
 
@@ -19,6 +20,8 @@ import android.widget.RelativeLayout.LayoutParams;
 
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 
 import android.view.View;
 import android.view.KeyEvent;
@@ -30,6 +33,8 @@ public class CamView extends Activity implements OnTouchListener {
 
   private static Client client;
   private static ClientAsyncTask clientAsyncTask;
+
+  private static Button button;
 
   private static EditText ipAddress;
   private static EditText camPortNumber;
@@ -69,12 +74,16 @@ public class CamView extends Activity implements OnTouchListener {
   @Override
   public void onPause() {
     super.onPause();
+    clientAsyncTask = new ClientAsyncTask();
+    clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
+    button.setText("Go Live");
   }
 
   public void onStop() {
     super.onStop();
     clientAsyncTask = new ClientAsyncTask();
     clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
+    button.setText("Go Live");
   }
 
   @Override
@@ -82,6 +91,7 @@ public class CamView extends Activity implements OnTouchListener {
     super.onDestroy();
     clientAsyncTask = new ClientAsyncTask();
     clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
+    button.setText("Go Live");
   } 
 
   @Override
@@ -89,7 +99,7 @@ public class CamView extends Activity implements OnTouchListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    Button button = (Button) findViewById(R.id.button);
+    button = (Button) findViewById(R.id.button);
     ipAddress = (EditText) findViewById(R.id.editIPAddress);
     camPortNumber = (EditText) findViewById(R.id.editCamPort);
     serverPortNumber = (EditText) findViewById(R.id.editServerPort);
@@ -120,10 +130,12 @@ public class CamView extends Activity implements OnTouchListener {
 
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
+        //webView.setWebViewClient(new WebClient());
         webView.setWebViewClient(new CamViewBrowser());
         handler.postDelayed(new Runnable() {
           public void run() {
             webView.loadUrl(addr);
+            button.setText("LIVE");
           }
         }, 3000);
       }
@@ -234,5 +246,36 @@ public class CamView extends Activity implements OnTouchListener {
       return true;
     }
   }
+
+  private class WebClient extends WebViewClient {
+
+    @Override
+    public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+      super.onReceivedError(view, request, error);
+      final Uri uri = request.getUrl();
+      handleError(view, error.getErrorCode(), error.getDescription().toString(), uri);
+    }
+
+    @SuppressWarnings("deprecation")
+    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+      super.onReceivedError(view, errorCode, description, failingUrl);
+      final Uri uri = Uri.parse(failingUrl);
+      handleError(view, errorCode, description, uri);
+    }
+
+    private void handleError(WebView view, int errorCode, String description, final Uri uri) {
+      final String host = uri.getHost();
+      final String scheme = uri.getScheme();
+        if(description.equals("net::ERR_NAME_NOT_RESOLVED")) {
+          view.loadUrl("about:blank");
+          view.loadUrl("file:///android_asset/html/errorpage.html");
+        }
+        else {
+          view.loadUrl("about:blank");
+          view.loadUrl("file:///android_asset/html/errorpage.html");
+        }
+    }
+  }
+
 
 }
