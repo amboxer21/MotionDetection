@@ -12,7 +12,6 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 import modules.datetime.datetime as datetime
 import cv2,sys,time,smtplib,threading,glob,re
-#import StringIO,Image,socket,threading,os,subprocess
 import StringIO,socket,threading,os,subprocess
 
 class CamHandler(BaseHTTPRequestHandler):
@@ -93,7 +92,7 @@ class MotionDetection():
     
     def img_num(self):
         _list = []
-        os.chdir("/home/" + self.user_name() + "/.motiondetection/")
+        os.chdir("/home/pi/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             _list.append(int(num.group(2)))
@@ -104,7 +103,8 @@ class MotionDetection():
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            #message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
@@ -129,7 +129,7 @@ class MotionDetection():
         ret, frame = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.1)
-        picture_name = "/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
+        picture_name = "/home/pi/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
 
@@ -158,7 +158,7 @@ class MotionDetection():
     
         while(True):
 
-            if killCamera is True:
+            if killCamera is True or stopMotion:
                 print("Killing cam.")
                 del(cam)
                 break
@@ -173,7 +173,7 @@ class MotionDetection():
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
-            if(delta_count > 1500 and delta_count < 10000 and is_moving is True):
+            if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
                 count = 0
                 is_moving = False
                 print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
@@ -186,7 +186,7 @@ class MotionDetection():
                 time.sleep(0.1)
                 is_moving = True
                 #print("count: " + str(count))
-                if count == 5000:
+                if count == 120:
                     print("Resetting counter.")
                     count = 0
                     is_sent = False
@@ -243,6 +243,7 @@ class Server():
     def main(self):
 
         global sock
+	global stopMotion
         global killCamera
 
         stream = Stream(self.cam_location)
@@ -283,9 +284,17 @@ class Server():
                     self.start_thread(motionDetection.capture)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
+                    killCamera = True
+                    time.sleep(1)
+                    stopMotion = False
+                    killCamera = False
+                    self.start_thread(motionDetection.capture)
                     #con.send("Starting motion sensor!")
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
+                    stopMotion = True
+                    killCamera = True
+                    time.sleep(1)
                     #con.send("Killing motion sensor!")
                 elif(message == 'probe'):
                     print("Server is alive.")
