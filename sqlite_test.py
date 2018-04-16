@@ -28,7 +28,19 @@ class SQLDB():
                         cursor.execute("Insert into motion (name, state) values('kill_motion','False')")
                     self.db.commit()
 
+    def killCamera(self):
+        for d in self.selectAll():
+            if re.search('kill_camera', str(d["name"])):
+                return d['state']
+
+    def killMotion(self):
+        for d in self.selectAll():
+            if re.search('kill_camera', str(d["name"])):
+                return d['state']
+
 if __name__ == '__main__':
     sqldb = SQLDB('test.db')
+    sqldb.selectAll()
+    print "killCamera() => " + str(sqldb.killCamera())
     for d in sqldb.selectAll():
-        print "%s %s %s " % (d["id"], d["name"], d["state"])
+        print "%s %s %s" % (d["id"], d["name"], d["state"])
