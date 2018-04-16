@@ -3,13 +3,15 @@
 import sqlite3,re
     
 class SQLDB():
+
+    def __init__(self,db_name):
+        self.db = sqlite3.connect(db_name)
     
     def selectAll(self):
-        db = sqlite3.connect('test.db')
         while True:
-            with db:
-                db.row_factory = sqlite3.Row
-                cursor = db.cursor()
+            with self.db:
+                self.db.row_factory = sqlite3.Row
+                cursor = self.db.cursor()
                 try:
                     cursor.execute('select * from motion')
                     data = cursor.fetchall()
@@ -24,9 +26,9 @@ class SQLDB():
                         print("Exception e => " + str(e))
                         cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
                         cursor.execute("Insert into motion (name, state) values('kill_motion','False')")
-                    db.commit()
+                    self.db.commit()
 
 if __name__ == '__main__':
-    sqldb = SQLDB()
+    sqldb = SQLDB('test.db')
     for d in sqldb.selectAll():
         print "%s %s %s " % (d["id"], d["name"], d["state"])
