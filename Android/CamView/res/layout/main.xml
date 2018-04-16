@@ -6,15 +6,49 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:windowSoftInputMode="adjustNothing">
-
-    <WebView
-      xmlns:android="http://schemas.android.com/apk/res/android"
-      android:id="@+id/webView"
+ 
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/scrollView"
+      android:layout_height="235dp"
       android:layout_marginTop="5dp"
       android:layout_marginLeft="5dp"
       android:layout_marginRight="5dp"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"/>
+      android:layout_width="fill_parent"
+      android:background="@drawable/scroll_view_bg"
+      android:layout_alignParentTop="true">
+
+      <Button
+        android:elevation="10dp"
+        android:text="Go Live"
+        android:id="@+id/buttonLive"
+        android:textColor="#009900"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="right"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/circle"/>
+
+      <Button
+        android:elevation="10dp"
+        android:text="Stop"
+        android:id="@+id/buttonCam"
+        android:textColor="#009900"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="right"
+        android:layout_marginTop="70dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/circle"
+        android:layout_below="@+id/buttonLive"/>
+
+      <WebView
+        android:elevation="0dp"
+        android:id="@+id/webView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    </FrameLayout>
 
     <EditText
       android:ems="10"
@@ -24,7 +58,7 @@
       android:layout_marginLeft="10dp"
       android:layout_marginRight="10dp"
       android:layout_width="fill_parent"
-      android:layout_below="@+id/webView"
+      android:layout_below="@+id/scrollView"
       android:layout_height="wrap_content"
       android:inputType="textNoSuggestions"
       android:hint="Your public IP Address"/>
@@ -54,6 +88,18 @@
       android:layout_toRightOf="@+id/editCamPort"
       android:layout_below="@+id/editIPAddress"/>
 
+    <!--<Button
+      android:text="Go Live"
+      android:textColor="#009900"
+      android:id="@+id/button"
+      android:layout_marginBottom="20dp"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_centerHorizontal="true"
+      android:background="@drawable/circle"
+      android:windowSoftInputMode="adjustNothing"
+      android:layout_alignParentBottom="true"/>
+ 
     <Button
       android:text="View Cam"
       android:id="@+id/button"
@@ -63,8 +109,9 @@
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
       android:layout_centerHorizontal="true"
+      android:background="@drawable/circle"
       android:windowSoftInputMode="adjustNothing"
-      android:layout_alignParentBottom="true"/>
+      android:layout_alignParentBottom="true"/>-->
 
 </RelativeLayout>
 

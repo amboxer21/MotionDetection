@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CamView</string>
+    <string name="no_feed" style="position:absolute;padding-left:50px;padding-top:50px;left:0px;top:0px;">No Feed</string>
+    <string name="go_live" style="position:absolute;padding-left:50px;padding-top:50px;left:0px;top:0px;">Go Live</string>
 </resources>
