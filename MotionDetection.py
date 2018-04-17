@@ -12,7 +12,63 @@ from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 import modules.datetime.datetime as datetime
 import cv2,sys,time,smtplib,threading,glob,re
-import StringIO,socket,threading,os,subprocess
+import StringIO,socket,threading,os,subprocess,sqlite3
+
+class SQLDB():
+
+    def __init__(self):
+        self.db = sqlite3.connect('motiondetection.db')
+    
+    def select_all(self):
+        while True:
+            with self.db:
+                self.db.row_factory = sqlite3.Row
+                cursor = self.db.cursor()
+                try:
+                    cursor.execute('select * from motion')
+                    data = cursor.fetchall()
+                    return data
+                except sqlite3.OperationalError as e:
+                    if re.search('no such table:', str(e), re.I | re.M):
+                        cursor.execute('Create table motion(id INTEGER PRIMARY KEY NOT NULL, name TEXT, state TEXT)')
+                        cursor.execute("Insert into motion (name, state) values('is_sent','False')")
+                        cursor.execute("Insert into motion (name, state) values('cam_deleted','False')")
+                        cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
+                        cursor.execute("Insert into motion (name, state) values('stop_motion','False')")
+                    elif re.search('no such column:', str(e), re.I | re.M):
+                        cursor.execute("Insert into motion (name, state) values('is_sent','False')")
+                        cursor.execute("Insert into motion (name, state) values('cam_deleted','False')")
+                        cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
+                        cursor.execute("Insert into motion (name, state) values('stop_motion','False')")
+                    self.db.commit()
+
+    def insert(self,column,value):
+        with self.db:
+            cursor = self.db.cursor()
+            try:
+                cursor.execute("insert into " + column + " values(" + value + ");")
+            except Exception as e:
+                pass
+            self.db.commit()
+
+    def update(self,column,value):
+        with self.db:
+            cursor = self.db.cursor()
+            try:
+                cursor.execute("update motion set state = '" + value + "' where name = '" + column + "';")
+            except Exception as e:
+                pass
+            self.db.commit()
+
+    def kill_camera_state(self):
+        for d in self.select_all():
+            if re.search('kill_camera', str(d["name"])):
+                return d['state']
+
+    def kill_motion_state(self):
+        for d in self.select_all():
+            if re.search('kill_camera', str(d["name"])):
+                return d['state']
 
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -50,8 +106,9 @@ class CamHandler(BaseHTTPRequestHandler):
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
-class Stream():
-    def __init__(self,cam_location):
+class Stream(object):
+    def __init__(self,cam_location,*args):
+        super(Stream, self).__init__(*args)
         self.cam_location = cam_location
 
     def main(self):
@@ -185,7 +242,6 @@ class MotionDetection():
                 count += 1
                 time.sleep(0.1)
                 is_moving = True
-                #print("count: " + str(count))
                 if count == 120:
                     print("Resetting counter.")
                     count = 0
@@ -202,7 +258,7 @@ class MotionDetection():
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
-class Server():
+class Server(Stream,MotionDetection):
 
     def __init__(self):
         parser = OptionParser()
@@ -231,6 +287,7 @@ class Server():
             print("\nERROR: Both E-mail and password are required!\n")
             parser.print_help()
             sys.exit(0)
+        super(Server, self).__init__()
 
     def start_thread(self,proc):
         try:
@@ -243,7 +300,7 @@ class Server():
     def main(self):
 
         global sock
-	global stopMotion
+	      global stopMotion
         global killCamera
 
         stream = Stream(self.cam_location)
@@ -307,5 +364,7 @@ class Server():
         con.close()
 
 if __name__ == '__main__':
+    sqldb = SQLDB('motiondetection.db')
+    sqldb.select_all()
     server = Server()
     server.main()
