@@ -107,9 +107,9 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 class Stream(object):
-    def __init__(self,cam_location,*args):
+    def __init__(self,opts,*args):
         super(Stream, self).__init__(*args)
-        self.cam_location = cam_location
+        self.cam_location = opts[0] # cam_location
 
     def main(self):
 
@@ -129,16 +129,17 @@ class Stream(object):
         except Exception as eThreadedHTTPServer:
             pass
 
-class MotionDetection():
+class MotionDetection(object):
 
-    def __init__(self,ip,server_port,email,password,email_port,cam_location):
-
-        self.ip = ip
-        self.email = email
-        self.password = password
-        self.email_port = email_port
-        self.server_port = server_port
-        self.cam_location = cam_location
+    #def __init__(self,ip,server_port,email,password,email_port,cam_location):
+    def __init__(self,opts,*args):
+        super(MotionDetection, self).__init__(*args)
+        self.ip = opts[0] # ip
+        self.email = opts[2] # email
+        self.password = opts[3] # password
+        self.email_port = opts[4] # email_port
+        self.server_port = opts[1] # server_port
+        self.cam_location = opts[5] # cam_location
 
     def user_name(self):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
@@ -287,7 +288,13 @@ class Server(Stream,MotionDetection):
             print("\nERROR: Both E-mail and password are required!\n")
             parser.print_help()
             sys.exit(0)
-        super(Server, self).__init__()
+
+        streamDict = (self.cam_location)
+
+        motionDict = (self.ip,self.server_port,
+          self.email,self.password,self.email_port,self.cam_location)
+
+        super(Server, self).__init__(streamDict,motionDict)
 
     def start_thread(self,proc):
         try:
@@ -303,8 +310,8 @@ class Server(Stream,MotionDetection):
 	      global stopMotion
         global killCamera
 
-        stream = Stream(self.cam_location)
-        motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
+        #stream = Stream(self.cam_location)
+        #motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
 
         try:
             sock = socket.socket()
