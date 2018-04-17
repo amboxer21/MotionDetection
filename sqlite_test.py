@@ -19,11 +19,15 @@ class SQLDB():
                 except sqlite3.OperationalError as e:
                     if re.search('no such table:', str(e), re.I | re.M):
                         cursor.execute('Create table motion(id INTEGER PRIMARY KEY NOT NULL, name TEXT, state TEXT)')
+                        cursor.execute("Insert into motion (name, state) values('is_sent','False')")
+                        cursor.execute("Insert into motion (name, state) values('cam_deleted','False')")
                         cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
-                        cursor.execute("Insert into motion (name, state) values('kill_motion','False')")
+                        cursor.execute("Insert into motion (name, state) values('stop_motion','False')")
                     elif re.search('no such column:', str(e), re.I | re.M):
+                        cursor.execute("Insert into motion (name, state) values('is_sent','False')")
+                        cursor.execute("Insert into motion (name, state) values('cam_deleted','False')")
                         cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
-                        cursor.execute("Insert into motion (name, state) values('kill_motion','False')")
+                        cursor.execute("Insert into motion (name, state) values('stop_motion','False')")
                     self.db.commit()
 
     def insert(self,column,value):
