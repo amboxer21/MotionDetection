@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from PIL import Image
+import Image
 from __init__ import *
 from optparse import OptionParser
 
@@ -14,9 +14,10 @@ import modules.datetime.datetime as datetime
 import cv2,sys,time,smtplib,threading,glob,re
 import StringIO,socket,threading,os,subprocess,sqlite3
 
-class SQLDB():
+class SQLDB(object):
 
     def __init__(self):
+        super(SQLDB, self).__init__()
         self.db = sqlite3.connect('motiondetection.db')
     
     def select_all(self):
@@ -107,9 +108,9 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 class Stream(object):
-    def __init__(self,cam_location,*args):
+    def __init__(self,opts,*args):
         super(Stream, self).__init__(*args)
-        self.cam_location = cam_location
+        self.cam_location = opts[0] # cam_location
 
     def main(self):
 
@@ -129,16 +130,17 @@ class Stream(object):
         except Exception as eThreadedHTTPServer:
             pass
 
-class MotionDetection():
+class MotionDetection(object):
 
-    def __init__(self,ip,server_port,email,password,email_port,cam_location):
-
-        self.ip = ip
-        self.email = email
-        self.password = password
-        self.email_port = email_port
-        self.server_port = server_port
-        self.cam_location = cam_location
+    #def __init__(self,ip,server_port,email,password,email_port,cam_location):
+    def __init__(self,opts,*args):
+        super(MotionDetection, self).__init__(*args)
+        self.ip = opts[0] # ip
+        self.email = opts[2] # email
+        self.password = opts[3] # password
+        self.email_port = opts[4] # email_port
+        self.server_port = opts[1] # server_port
+        self.cam_location = opts[5] # cam_location
 
     def user_name(self):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
@@ -149,7 +151,7 @@ class MotionDetection():
     
     def img_num(self):
         _list = []
-        os.chdir("/home/pi/.motiondetection/")
+        os.chdir("/home/" + self.user_name() + "/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             _list.append(int(num.group(2)))
@@ -160,8 +162,8 @@ class MotionDetection():
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            #message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
-            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            #message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
@@ -186,7 +188,8 @@ class MotionDetection():
         ret, frame = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.1)
-        picture_name = "/home/pi/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
+        #picture_name = "/home/pi/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
+        picture_name = "/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
 
@@ -196,18 +199,21 @@ class MotionDetection():
         killCamera = True
 
     def capture(self):
+        time.sleep(1)
         print("Motion Detection system initialed.")
     
         global cam
+        global stopMotion
         global cam_deleted
    
         is_moving   = True
         cam_deleted = False
     
         cam = cv2.VideoCapture(self.cam_location)
+        #print("sys.argv[5]: " + sys.argv[5])
+        #cam = cv2.VideoCapture(int(sys.argv[5]))
 
-        frame_now = cam.read()[1]
-        frame_now = cam.read()[1]
+        read,frame_now = cam.read()
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
         frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
@@ -215,7 +221,8 @@ class MotionDetection():
     
         while(True):
 
-            if killCamera is True or stopMotion:
+            #if killCamera is True or stopMotion:
+            if killCamera is True:
                 print("Killing cam.")
                 del(cam)
                 break
@@ -258,7 +265,7 @@ class MotionDetection():
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
-class Server(Stream,MotionDetection):
+class Server(Stream,MotionDetection,SQLDB):
 
     def __init__(self):
         parser = OptionParser()
@@ -287,7 +294,12 @@ class Server(Stream,MotionDetection):
             print("\nERROR: Both E-mail and password are required!\n")
             parser.print_help()
             sys.exit(0)
-        super(Server, self).__init__()
+
+        streamDict = [self.cam_location]
+        motionDict = [self.ip,self.server_port,
+            self.email,self.password,self.email_port,self.cam_location]
+
+        super(Server, self).__init__(streamDict,motionDict)
 
     def start_thread(self,proc):
         try:
@@ -300,11 +312,8 @@ class Server(Stream,MotionDetection):
     def main(self):
 
         global sock
-	      global stopMotion
+        global stopMotion
         global killCamera
-
-        stream = Stream(self.cam_location)
-        motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
 
         try:
             sock = socket.socket()
@@ -312,7 +321,7 @@ class Server(Stream,MotionDetection):
             sock.bind(('', self.server_port))
             sock.listen(5)
             time.sleep(1)
-            self.start_thread(motionDetection.capture)
+            self.start_thread(Server().capture)
             time.sleep(1)
         except Exception as eSock:
             print("Sock exception eSock => " + str(eSock))
@@ -331,21 +340,21 @@ class Server(Stream,MotionDetection):
                     killCamera = True
                     time.sleep(1)
                     killCamera = False
-                    self.start_thread(stream.main)
+                    self.start_thread(Server().main)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
                     #con.send("Killing camera!")
                     killCamera = True
                     time.sleep(1)
                     killCamera = False
-                    self.start_thread(motionDetection.capture)
+                    self.start_thread(Server().capture)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     killCamera = True
                     time.sleep(1)
                     stopMotion = False
                     killCamera = False
-                    self.start_thread(motionDetection.capture)
+                    self.start_thread(Server().capture)
                     #con.send("Starting motion sensor!")
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
@@ -364,7 +373,7 @@ class Server(Stream,MotionDetection):
         con.close()
 
 if __name__ == '__main__':
-    sqldb = SQLDB('motiondetection.db')
-    sqldb.select_all()
+    #sqldb = SQLDB()
+    #sqldb.select_all()
     server = Server()
     server.main()
