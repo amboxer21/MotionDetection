@@ -315,6 +315,9 @@ class Server(Stream,MotionDetection,SQLDB):
         global stopMotion
         global killCamera
 
+        #stream = Stream(self.cam_location)
+        #motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
+
         try:
             sock = socket.socket()
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
