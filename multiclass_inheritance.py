@@ -19,7 +19,7 @@ class Dog(object):
 class GermanShepard(Dog,GoodBoy,Animal):
     def __init__(self):
         print("init GermanShepard")
-        super(GermanShepard,self).__init__(("Dog","trr"),"GoodBoy","Animal")
+        super(GermanShepard,self).__init__(["Dog","trr"],"GoodBoy","Animal")
 
 if __name__ == '__main__':
     GermanShepard()
