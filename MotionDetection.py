@@ -21,7 +21,6 @@ class SQLDB(object):
         self.db = db 
     
     def select_all(self):
-        print("SQLDB() - def select_all()")
         while True:
             with self.db:
                 self.db.row_factory = sqlite3.Row
@@ -72,6 +71,10 @@ class SQLDB(object):
                 pass
         for d in data:
             return d[0]
+
+if __name__ == '__main__':
+    sqldb = SQLDB(sqlite3.connect('motiondetection.db'))
+    sqldb.select_all()
 
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -308,7 +311,7 @@ class Server(Stream,MotionDetection,SQLDB):
             name = re.search("(\wideo)(\d)", _file, re.M | re.I)
             if name is not None:
                 _ids.append(int(name.group(2)))
-        if _ids is None:
+        if not _ids:
             print("\n -> Cannot find a camera. Please use the -c option" + 
                 "\n    and specifiy the cameras location manually.\n")
             sys.exit(0)
