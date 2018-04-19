@@ -225,13 +225,6 @@ class MotionDetection(object):
                     print("Killing cam.")
                     del(cam)
                     break
-            else:
-                m = re.search('True',Server().select_state_from('kill_camera'), re.M | re.I)
-                if m is not None:
-                    print "m.group() => " + str(m.group())
-                else:
-                    print "m.group() is None"
-                  
       
             global count
             global is_sent
