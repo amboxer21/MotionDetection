@@ -19,7 +19,9 @@ class SQLDB(object):
     def __init__(self,db):
         super(SQLDB, self).__init__()
         self.db = db 
-    
+   
+    # Used to initialize the database. It will create the
+    # database, columns and tables if they do not exist and then return. 
     def select_all(self):
         while True:
             with self.db:
@@ -61,6 +63,8 @@ class SQLDB(object):
                 pass
             self.db.commit()
 
+    # Used to grab the state of which ever column you pass as a parameter.
+    # Every column has a state field which either returns true or false.
     def select_state_from(self,column):
         with self.db:
             cursor = self.db.cursor()
@@ -72,6 +76,8 @@ class SQLDB(object):
         for d in data:
             return d[0]
 
+# This class is instantiated to create the DB when the program is started for the
+# first time. It's useless after the first call but but necessary to call for that first time.
 if __name__ == '__main__':
     sqldb = SQLDB(sqlite3.connect('motiondetection.db'))
     sqldb.select_all()
@@ -90,10 +96,12 @@ class CamHandler(BaseHTTPRequestHandler):
 
                 read, image = streamCamera.read()
 
+                # if kill_camera:
                 if re.search('True',Server().select_state_from('kill_camera'), re.M | re.I):
                     print("[CamHandler] Killing cam.")
                     del(streamCamera)
                     break
+
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -123,8 +131,9 @@ class Stream(object):
 
         time.sleep(1)
         streamCamera = cv2.VideoCapture(self.cam_location)
-        streamCamera.set(3,160)
-        streamCamera.set(4,120)
+        streamCamera.set(3,160) # Set width
+        streamCamera.set(4,120) # Set height
+
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             print("Streaming HTTPServer started")
