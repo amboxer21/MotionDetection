@@ -116,7 +116,6 @@ class Stream(object):
 
     def stream_main(self):
 
-        global killCamera
         global streamCamera
 
         time.sleep(1)
@@ -194,11 +193,6 @@ class MotionDetection(object):
         picture_name = "/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
-
-    def kill_cam(self):
-        global kill
-        print("def kill_cam(self):")
-        killCamera = True
 
     def capture(self):
         print("Motion Detection system initialed.\n")
@@ -338,7 +332,6 @@ class Server(Stream,MotionDetection,SQLDB):
     def main(self):
 
         global sock
-        global killCamera
 
         try:
             sock = socket.socket()
