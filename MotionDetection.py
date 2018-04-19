@@ -16,11 +16,12 @@ import StringIO,socket,threading,os,subprocess,sqlite3
 
 class SQLDB(object):
 
-    def __init__(self):
+    def __init__(self,db):
         super(SQLDB, self).__init__()
-        self.db = sqlite3.connect('motiondetection.db')
+        self.db = db 
     
     def select_all(self):
+        print("SQLDB() - def select_all()")
         while True:
             with self.db:
                 self.db.row_factory = sqlite3.Row
@@ -28,6 +29,8 @@ class SQLDB(object):
                 try:
                     cursor.execute('select * from motion')
                     data = cursor.fetchall()
+                    #for d in data:
+                        #print("data['name'] => " + str(d['name']) + " - data['state'] => " + str(d['state']))
                     return data
                 except sqlite3.OperationalError as e:
                     if re.search('no such table:', str(e), re.I | re.M):
@@ -47,7 +50,7 @@ class SQLDB(object):
         with self.db:
             cursor = self.db.cursor()
             try:
-                cursor.execute("insert into " + column + " values(" + value + ");")
+                cursor.execute("insert into motion (name,state) values('" + column + "','" + values + "');")
             except Exception as e:
                 pass
             self.db.commit()
@@ -60,6 +63,19 @@ class SQLDB(object):
             except Exception as e:
                 pass
             self.db.commit()
+
+    def select_state_from(self,column):
+        with self.db:
+            cursor = self.db.cursor()
+            try:
+                print("select state from motion where name = '" + column + "';")
+                data = cursor.execute("select state from motion where name = '" + column + "';")
+            except Exception as e:
+                print("Exception e => " + e)
+                pass
+        for d in data:
+            print "state => " + str(d['state'])
+            return d['state']
 
     def kill_camera_state(self):
         for d in self.select_all():
@@ -85,6 +101,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 read, image = streamCamera.read()
                 #if not read:
                     #continue
+                print "select_state_from 'kill_camera' => " + str(self.select_state_from('kill_camera'))
                 if killCamera is True:
                     print("[CamHandler] Killing cam.")
                     del(streamCamera)
@@ -112,14 +129,17 @@ class Stream(object):
         super(Stream, self).__init__(*args)
         self.cam_location = opts[0] # cam_location
 
-    def main(self):
+    def stream_main(self):
 
         global killCamera
         global streamCamera
 
+        time.sleep(0.5)
         streamCamera = cv2.VideoCapture(self.cam_location)
-        streamCamera.set(3,320)
-        streamCamera.set(4,320)
+        streamCamera.set(3,160)
+        streamCamera.set(4,120)
+        print "streamCamera.get(3) => " + str(streamCamera.get(3))
+        print "streamCamera.get(4) => " + str(streamCamera.get(4))
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             print("Streaming HTTPServer started")
@@ -132,7 +152,6 @@ class Stream(object):
 
 class MotionDetection(object):
 
-    #def __init__(self,ip,server_port,email,password,email_port,cam_location):
     def __init__(self,opts,*args):
         super(MotionDetection, self).__init__(*args)
         self.ip = opts[0] # ip
@@ -210,8 +229,6 @@ class MotionDetection(object):
         cam_deleted = False
     
         cam = cv2.VideoCapture(self.cam_location)
-        #print("sys.argv[5]: " + sys.argv[5])
-        #cam = cv2.VideoCapture(int(sys.argv[5]))
 
         read,frame_now = cam.read()
 
@@ -220,6 +237,8 @@ class MotionDetection(object):
         frame_prior = frame_now
     
         while(True):
+
+            #print "str(self.kill_camera_state()) => " + str(sqldb.select_state_from('kill_camera'))
 
             #if killCamera is True or stopMotion:
             if killCamera is True:
@@ -278,7 +297,7 @@ class Server(Stream,MotionDetection,SQLDB):
         parser.add_option("-p",
             "--password", dest='password', help='"This argument is required!"')
         parser.add_option("-c",
-            "--camera-location", dest='cam_location', help='"Camera index number."', type="int", default=0)
+            "--camera-location", dest='cam_location', help='"Camera index number."', type="int")
         parser.add_option("-E",
             "--email-port", dest='email_port', help='"E-mail port defaults to port 587"', type="int", default=587)
         (options, args) = parser.parse_args()
@@ -288,7 +307,10 @@ class Server(Stream,MotionDetection,SQLDB):
         self.password = options.password
         self.email_port = options.email_port
         self.server_port = options.server_port
-        self.cam_location = options.cam_location
+        if options.cam_locationi is None:
+            self.cam_location = self.video_id()
+        else:
+            self.cam_location = options.cam_location
 
         if self.email is None or self.password is None:
             print("\nERROR: Both E-mail and password are required!\n")
@@ -299,9 +321,18 @@ class Server(Stream,MotionDetection,SQLDB):
         motionDict = [self.ip,self.server_port,
             self.email,self.password,self.email_port,self.cam_location]
 
-        super(Server, self).__init__(streamDict,motionDict)
+        super(Server, self).__init__(streamDict,motionDict,sqlite3.connect('motiondetection.db'))
+
+    def video_id(self):
+        _ids = []
+        for _file in os.listdir('/dev/'):
+            name = re.search("(\wideo)(\d)", _file, re.M | re.I)
+            if name is not None:
+                _ids.append(int(name.group(2)))
+        return min(_ids)
 
     def start_thread(self,proc):
+        time.sleep(1)
         try:
             t = threading.Thread(target=proc)
             t.daemon = True
@@ -314,9 +345,6 @@ class Server(Stream,MotionDetection,SQLDB):
         global sock
         global stopMotion
         global killCamera
-
-        #stream = Stream(self.cam_location)
-        #motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
 
         try:
             sock = socket.socket()
@@ -338,31 +366,41 @@ class Server(Stream,MotionDetection,SQLDB):
                 message = con.recv(1024)
 
                 if(message == 'start_monitor'):
-                    print("Starting camera!")
+                    print("Starting Stream!")
                     #con.send("Starting camera!")
                     killCamera = True
+                    self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
                     killCamera = False
-                    self.start_thread(Server().main)
+                    self.start_thread(self.update('kill_camera','False'))
+                    time.sleep(1)
+                    self.start_thread(Server().stream_main)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
                     #con.send("Killing camera!")
                     killCamera = True
+                    self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
                     killCamera = False
+                    self.start_thread(self.update('kill_camera','False'))
+                    time.sleep(1)
                     self.start_thread(Server().capture)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     killCamera = True
+                    self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
                     stopMotion = False
                     killCamera = False
+                    self.start_thread(self.update('kill_camera','False'))
+                    time.sleep(1)
                     self.start_thread(Server().capture)
                     #con.send("Starting motion sensor!")
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     stopMotion = True
                     killCamera = True
+                    self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
                     #con.send("Killing motion sensor!")
                 elif(message == 'probe'):
@@ -373,10 +411,9 @@ class Server(Stream,MotionDetection,SQLDB):
                     #con.send(message + " is not a konwn command!")
             except Exception as eAccept:
                 print("Socket accept error: " + str(eAccept))
+                print("self.server_port => " + str(self.server_port))
         con.close()
 
 if __name__ == '__main__':
-    #sqldb = SQLDB()
-    #sqldb.select_all()
     server = Server()
     server.main()
