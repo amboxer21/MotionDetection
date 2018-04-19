@@ -16,7 +16,8 @@ def sock_opts(list,time):
         
 
 if __name__ == '__main__':
-    func([{'kill_camera':'True'},{'stop_motion':'False'},{'kill_camera':'False'}],1)
+    #func([{'kill_camera':'True'},{'stop_motion':'False'},{'kill_camera':'False'}],1)
+    func([{'kill_camera':'False'}],1)
 
 """
 print("Starting motion sensor!")

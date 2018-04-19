@@ -361,34 +361,22 @@ class Server(Stream,MotionDetection,SQLDB):
 
                 if(message == 'start_monitor'):
                     print("Starting Stream!")
-                    self.start_thread(self.update('kill_camera','True'))
-                    time.sleep(1)
-                    self.start_thread(self.update('kill_camera','False'))
-                    time.sleep(1)
+                    self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
                     self.start_thread(Server().stream_main)
                     time.sleep(1)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
-                    self.start_thread(self.update('kill_camera','True'))
-                    time.sleep(1)
-                    self.start_thread(self.update('kill_camera','False'))
-                    time.sleep(1)
+                    self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
                     self.start_thread(Server().capture)
                     time.sleep(1)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
-                    self.start_thread(self.update('kill_camera','True'))
-                    time.sleep(1)
-                    self.start_thread(self.update('stop_motion','False'))
-                    time.sleep(1)
-                    self.start_thread(self.update('kill_camera','False'))
-                    time.sleep(1)
+                    self.sock_opts([{'kill_camera':'True'},{'stop_motion':'False'},{'kill_camera':'False'}],1)
                     self.start_thread(Server().capture)
                     time.sleep(1)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
-                    self.start_thread(self.update('kill_camera','True'))
-                    time.sleep(1)
+                    self.sock_opts([{'kill_camera':'True'}],1)
                 elif(message == 'probe'):
                     print("Server is alive.")
                 else:
