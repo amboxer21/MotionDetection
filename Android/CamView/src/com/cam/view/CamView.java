@@ -151,7 +151,7 @@ public class CamView extends Activity implements OnTouchListener {
             webView.loadUrl(addr);
             buttonLive.setText("Live");
           }
-        }, 3000);
+        }, 4000);
       }
     });
 

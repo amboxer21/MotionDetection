@@ -29,8 +29,6 @@ class SQLDB(object):
                 try:
                     cursor.execute('select * from motion')
                     data = cursor.fetchall()
-                    #for d in data:
-                        #print("data['name'] => " + str(d['name']) + " - data['state'] => " + str(d['state']))
                     return data
                 except sqlite3.OperationalError as e:
                     if re.search('no such table:', str(e), re.I | re.M):
@@ -68,24 +66,12 @@ class SQLDB(object):
         with self.db:
             cursor = self.db.cursor()
             try:
-                print("select state from motion where name = '" + column + "';")
                 data = cursor.execute("select state from motion where name = '" + column + "';")
             except Exception as e:
                 print("Exception e => " + e)
                 pass
         for d in data:
-            print "state => " + str(d['state'])
-            return d['state']
-
-    def kill_camera_state(self):
-        for d in self.select_all():
-            if re.search('kill_camera', str(d["name"])):
-                return d['state']
-
-    def kill_motion_state(self):
-        for d in self.select_all():
-            if re.search('kill_camera', str(d["name"])):
-                return d['state']
+            return d[0]
 
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -98,11 +84,10 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
         while True:
             try:
+
                 read, image = streamCamera.read()
-                #if not read:
-                    #continue
-                print "select_state_from 'kill_camera' => " + str(self.select_state_from('kill_camera'))
-                if killCamera is True:
+
+                if re.search('True',Server().select_state_from('kill_camera'), re.M | re.I):
                     print("[CamHandler] Killing cam.")
                     del(streamCamera)
                     break
@@ -134,12 +119,10 @@ class Stream(object):
         global killCamera
         global streamCamera
 
-        time.sleep(0.5)
+        time.sleep(1)
         streamCamera = cv2.VideoCapture(self.cam_location)
         streamCamera.set(3,160)
         streamCamera.set(4,120)
-        print "streamCamera.get(3) => " + str(streamCamera.get(3))
-        print "streamCamera.get(4) => " + str(streamCamera.get(4))
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             print("Streaming HTTPServer started")
@@ -218,11 +201,10 @@ class MotionDetection(object):
         killCamera = True
 
     def capture(self):
-        time.sleep(1)
-        print("Motion Detection system initialed.")
+        print("Motion Detection system initialed.\n")
+        time.sleep(3)
     
         global cam
-        global stopMotion
         global cam_deleted
    
         is_moving   = True
@@ -238,13 +220,18 @@ class MotionDetection(object):
     
         while(True):
 
-            #print "str(self.kill_camera_state()) => " + str(sqldb.select_state_from('kill_camera'))
-
-            #if killCamera is True or stopMotion:
-            if killCamera is True:
-                print("Killing cam.")
-                del(cam)
-                break
+            if (re.search('True',Server().select_state_from('kill_camera'), re.M | re.I) or
+                re.search('True',Server().select_state_from('stop_motion'), re.M | re.I)):
+                    print("Killing cam.")
+                    del(cam)
+                    break
+            else:
+                m = re.search('True',Server().select_state_from('kill_camera'), re.M | re.I)
+                if m is not None:
+                    print "m.group() => " + str(m.group())
+                else:
+                    print "m.group() is None"
+                  
       
             global count
             global is_sent
@@ -263,7 +250,8 @@ class MotionDetection(object):
                 del(cam)
                 cam_deleted = True
                 self.takePicture()
-                self.notify()
+                if self.email is not None:
+                    self.notify()
             elif delta_count < 100:
                 count += 1
                 time.sleep(0.1)
@@ -332,11 +320,13 @@ class Server(Stream,MotionDetection,SQLDB):
         for _file in os.listdir('/dev/'):
             name = re.search("(\wideo)(\d)", _file, re.M | re.I)
             if name is not None:
-                return min(_ids.append(int(name.group(2))))
-            else:
-                print("\n -> Cannot find a camera. Please use the -c option" + 
-                    "\n    and specifiy the cameras location manually.\n")
-                sys.exit(0)
+                _ids.append(int(name.group(2)))
+        if _ids is None:
+            print("\n -> Cannot find a camera. Please use the -c option" + 
+                "\n    and specifiy the cameras location manually.\n")
+            sys.exit(0)
+        else:
+            return min(_ids)
 
     def sock_opts(list,time):
         for dict in list:
@@ -345,7 +335,6 @@ class Server(Stream,MotionDetection,SQLDB):
                 time.sleep(int(time))
 
     def start_thread(self,proc):
-        time.sleep(1)
         try:
             t = threading.Thread(target=proc)
             t.daemon = True
@@ -356,7 +345,6 @@ class Server(Stream,MotionDetection,SQLDB):
     def main(self):
 
         global sock
-        global stopMotion
         global killCamera
 
         try:
@@ -380,41 +368,32 @@ class Server(Stream,MotionDetection,SQLDB):
 
                 if(message == 'start_monitor'):
                     print("Starting Stream!")
-                    killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
-                    killCamera = False
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().stream_main)
                     time.sleep(1)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
-                    killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
-                    killCamera = False
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().capture)
-                    time.sleep(1)
+                    #time.sleep(1)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
-                    killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
-                    stopMotion = False
                     self.start_thread(self.update('stop_motion','False'))
                     time.sleep(1)
-                    killCamera = False
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().capture)
-                    time.sleep(1)
+                    #time.sleep(1)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
-                    stopMotion = True
-                    killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
                 elif(message == 'probe'):

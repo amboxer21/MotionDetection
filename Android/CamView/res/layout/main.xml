@@ -18,8 +18,9 @@
       android:layout_alignParentTop="true">
 
       <Button
-        android:elevation="10dp"
         android:text="Go Live"
+        android:textSize="10sp"
+        android:elevation="10dp"
         android:id="@+id/buttonLive"
         android:textColor="#009900"
         android:layout_width="50dp"
@@ -30,8 +31,9 @@
         android:background="@drawable/circle"/>
 
       <Button
-        android:elevation="10dp"
         android:text="Stop"
+        android:textSize="10sp"
+        android:elevation="10dp"
         android:id="@+id/buttonCam"
         android:textColor="#009900"
         android:layout_width="50dp"
@@ -42,8 +44,23 @@
         android:background="@drawable/circle"
         android:layout_below="@+id/buttonLive"/>
 
+      <Button
+        android:textSize="10sp"
+        android:elevation="10dp"
+        android:text="Configure"
+        android:id="@+id/buttonConfig"
+        android:textColor="#009900"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="right"
+        android:layout_marginTop="130dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/circle"
+        android:layout_below="@+id/buttonCam"/>
+
       <WebView
         android:elevation="0dp"
+        android:scrollbars="none"
         android:id="@+id/webView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>

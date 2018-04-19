@@ -48,6 +48,19 @@ class SQLDB():
                 pass
             self.db.commit()
 
+    def select_state_from(self,column):
+        with self.db:
+            cursor = self.db.cursor()
+            try:
+                print("select state from motion where name = '" + column + "';")
+                data = cursor.execute("select state from motion where name = '" + column + "';")
+            except Exception as e:
+                print("Exception e => " + e)
+                pass
+        for d in data:
+            print d['state']
+            return d['state']
+
     def kill_camera_state(self):
         for d in self.select_all():
             if re.search('kill_camera', str(d["name"])):
@@ -61,3 +74,4 @@ class SQLDB():
 if __name__ == '__main__':
     sqldb = SQLDB('motiondetection.db')
     sqldb.select_all()
+    sqldb.select_state_from('kill_camera')
