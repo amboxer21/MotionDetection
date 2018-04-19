@@ -374,7 +374,7 @@ class Server(Stream,MotionDetection,SQLDB):
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().capture)
-                    #time.sleep(1)
+                    time.sleep(1)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     self.start_thread(self.update('kill_camera','True'))
@@ -384,7 +384,7 @@ class Server(Stream,MotionDetection,SQLDB):
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().capture)
-                    #time.sleep(1)
+                    time.sleep(1)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     self.start_thread(self.update('kill_camera','True'))
