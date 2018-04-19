@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import Image
+from PIL import Image
 from __init__ import *
 from optparse import OptionParser
 
@@ -288,18 +288,20 @@ class Server(Stream,MotionDetection,SQLDB):
 
     def __init__(self):
         parser = OptionParser()
-        parser.add_option("-i",
-            "--ip", dest='ip', help='"This is the IP address of the server."',default='0.0.0.0')
-        parser.add_option("-S",
-            "--server-port", dest='server_port', help='"Server port defaults to port 50050"', type="int", default=50050)
         parser.add_option("-e",
-            "--email", dest='email', help='"This argument is required!"')
+            "--email",dest='email',help='"This argument is required!"')
         parser.add_option("-p",
-            "--password", dest='password', help='"This argument is required!"')
+            "--password",dest='password',help='"This argument is required!"')
         parser.add_option("-c",
-            "--camera-location", dest='cam_location', help='"Camera index number."', type="int")
+            "--camera-location",dest='cam_location',help='"Camera index number."',type="int")
+        parser.add_option("-i",
+            "--ip", dest='ip',help='"This is the IP address of the server."',default='0.0.0.0')
         parser.add_option("-E",
-            "--email-port", dest='email_port', help='"E-mail port defaults to port 587"', type="int", default=587)
+            "--email-port",dest='email_port',help='"E-mail port defaults to port 587"',type="int",default=587)
+        parser.add_option("-S",
+            "--server-port",dest='server_port',help='"Server port defaults to port 50050"',type="int",default=50050)
+        parser.add_option("-D",
+            "--disable-email",dest='disable_email',help='"Disable E-mail notifications"',default=False,action="store_true")
         (options, args) = parser.parse_args()
 
         self.ip = options.ip
@@ -307,12 +309,14 @@ class Server(Stream,MotionDetection,SQLDB):
         self.password = options.password
         self.email_port = options.email_port
         self.server_port = options.server_port
-        if options.cam_locationi is None:
+        self.disable_email = options.disable_email
+
+        if options.cam_location is None:
             self.cam_location = self.video_id()
         else:
             self.cam_location = options.cam_location
 
-        if self.email is None or self.password is None:
+        if not self.disable_email and (self.email is None or self.password is None):
             print("\nERROR: Both E-mail and password are required!\n")
             parser.print_help()
             sys.exit(0)
@@ -328,8 +332,17 @@ class Server(Stream,MotionDetection,SQLDB):
         for _file in os.listdir('/dev/'):
             name = re.search("(\wideo)(\d)", _file, re.M | re.I)
             if name is not None:
-                _ids.append(int(name.group(2)))
-        return min(_ids)
+                return min(_ids.append(int(name.group(2))))
+            else:
+                print("\n -> Cannot find a camera. Please use the -c option" + 
+                    "\n    and specifiy the cameras location manually.\n")
+                sys.exit(0)
+
+    def sock_opts(list,time):
+        for dict in list:
+            for d in dict:
+                self.start_thread(self.update(d,dict[d]))
+                time.sleep(int(time))
 
     def start_thread(self,proc):
         time.sleep(1)
@@ -367,7 +380,6 @@ class Server(Stream,MotionDetection,SQLDB):
 
                 if(message == 'start_monitor'):
                     print("Starting Stream!")
-                    #con.send("Starting camera!")
                     killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
@@ -375,9 +387,9 @@ class Server(Stream,MotionDetection,SQLDB):
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().stream_main)
+                    time.sleep(1)
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
-                    #con.send("Killing camera!")
                     killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
@@ -385,33 +397,32 @@ class Server(Stream,MotionDetection,SQLDB):
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().capture)
+                    time.sleep(1)
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
                     stopMotion = False
+                    self.start_thread(self.update('stop_motion','False'))
+                    time.sleep(1)
                     killCamera = False
                     self.start_thread(self.update('kill_camera','False'))
                     time.sleep(1)
                     self.start_thread(Server().capture)
-                    #con.send("Starting motion sensor!")
+                    time.sleep(1)
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     stopMotion = True
                     killCamera = True
                     self.start_thread(self.update('kill_camera','True'))
                     time.sleep(1)
-                    #con.send("Killing motion sensor!")
                 elif(message == 'probe'):
                     print("Server is alive.")
-                    #con.send("Server is alive.")
                 else:
                     print(message + " is not a known command.")
-                    #con.send(message + " is not a konwn command!")
             except Exception as eAccept:
                 print("Socket accept error: " + str(eAccept))
-                print("self.server_port => " + str(self.server_port))
         con.close()
 
 if __name__ == '__main__':

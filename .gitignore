@@ -1,4 +1,5 @@
 Android/CamView/bin/*
 Android/CamView/gen/*
 Android/CamView/build.xml
+motiondetection.db
 *.sw*
