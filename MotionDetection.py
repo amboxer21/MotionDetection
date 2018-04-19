@@ -327,6 +327,10 @@ class Server(Stream,MotionDetection,SQLDB):
         else:
             return min(_ids)
 
+    # Takes a list of dicts as its first param then an int as an arg to sleep.
+    # sock_opts calls an sqlite3 update function via thread method and calls a sleep
+    # function directoly after. This function was created to compress 3-6 lines in the 
+    # server classes socket flow control below into 1 line per section.
     def sock_opts(list,time):
         for dict in list:
             for d in dict:
@@ -341,7 +345,7 @@ class Server(Stream,MotionDetection,SQLDB):
         except Exception as eStartThread:
             print("Threading exception eStartThread => " + str(eStartThread))
 
-    def main(self):
+    def server_main(self):
 
         global sock
 
@@ -392,4 +396,4 @@ class Server(Stream,MotionDetection,SQLDB):
 
 if __name__ == '__main__':
     server = Server()
-    server.main()
+    server.server_main()
