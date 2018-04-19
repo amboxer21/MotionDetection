@@ -333,6 +333,7 @@ class Server(Stream,MotionDetection,SQLDB):
         # Instantiating all child classes with the necessary variables passed as lists
         super(Server, self).__init__(streamList,motionList,sqlite3.connect('motiondetection.db'))
 
+    # A method to automatically find the lowest cam index if it's present and named videoX
     def video_id(self):
         _ids = []
         for _file in os.listdir('/dev/'):
@@ -387,21 +388,27 @@ class Server(Stream,MotionDetection,SQLDB):
                 print("Received connection from " + str(addr))
                 message = con.recv(1024)
 
+                # Start Live Stream feature.
                 if(message == 'start_monitor'):
                     print("Starting Stream!")
+                    # First example and use of the method to comress the sqlite3 update
+                    # calls passed via list of dicts.
                     self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
                     self.start_thread(Server().stream_main)
                     time.sleep(1)
+                # Stop Live Stream feature.
                 elif(message == 'kill_monitor'):
                     print("Killing camera!")
                     self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
                     self.start_thread(Server().capture)
                     time.sleep(1)
+                # Start Motion Detection feature.
                 elif(message == 'start_motion'):
                     print("Starting motion sensor!")
                     self.sock_opts([{'kill_camera':'True'},{'stop_motion':'False'},{'kill_camera':'False'}],1)
                     self.start_thread(Server().capture)
                     time.sleep(1)
+                # Stop Motion Detection feature.
                 elif(message == 'kill_motion'):
                     print("Killing motion sensor!")
                     self.sock_opts([{'kill_camera':'True'}],1)
