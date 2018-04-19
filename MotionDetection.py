@@ -159,9 +159,13 @@ class MotionDetection(object):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
         return re.search("(\w+)", str(comm.stdout.read())).group()
     
-    def now(self):
+    def time_now(self):
         return time.asctime(time.localtime(time.time()))
     
+    # This program takes pictures when movement is detected. It saves the picture with the name
+    # captureX.png X being a number. This method finds the capture with the highest number and 
+    # returns that number. So if capture66.png was the picture with the higest number this
+    # method will return that number.
     def img_num(self):
         _list = []
         os.chdir("/home/" + self.user_name() + "/.motiondetection/")
@@ -226,6 +230,7 @@ class MotionDetection(object):
     
         while(True):
 
+            # if kill_camera and stop_motion:
             if (re.search('True',Server().select_state_from('kill_camera'), re.M | re.I) or
                 re.search('True',Server().select_state_from('stop_motion'), re.M | re.I)):
                     print("Killing cam.")
@@ -242,10 +247,14 @@ class MotionDetection(object):
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
+            # Movement is measure here and then represented by the delta_count variable.
+            # If the measured movement is above and below a specific threshold then we 
+            # take a picture and notify the user of the program. If the threshold stays
+            # below 100 for 1 minute, we allow the system to work again; that means emails and pics.
             if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
                 count = 0
                 is_moving = False
-                print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
+                print("MOVEMENT: " + self.time_now() + ", Delta: " + str(delta_count))
                 del(cam)
                 cam_deleted = True
                 self.takePicture()
@@ -271,6 +280,10 @@ class MotionDetection(object):
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
+# Parent class inherits multiple child classes to circumvent the use of global variables.
+# This is a neater and cleaner way to pass variables between the classes. This also allows
+# me to call a method in from one class in multiple classes without ever having to instantiate
+# that class multiple times.
 class Server(Stream,MotionDetection,SQLDB):
 
     def __init__(self):
@@ -298,6 +311,11 @@ class Server(Stream,MotionDetection,SQLDB):
         self.server_port = options.server_port
         self.disable_email = options.disable_email
 
+        # If cam location is not passed as an option on the command line
+        # then we will attempt to automatically try to find the camera. If
+        # we are unable to find a camera automatically, then we will exit
+        # after telling the user that they need to manually specify the cam
+        # location.
         if options.cam_location is None:
             self.cam_location = self.video_id()
         else:
@@ -308,11 +326,12 @@ class Server(Stream,MotionDetection,SQLDB):
             parser.print_help()
             sys.exit(0)
 
-        streamDict = [self.cam_location]
-        motionDict = [self.ip,self.server_port,
+        streamList = [self.cam_location]
+        motionList = [self.ip,self.server_port,
             self.email,self.password,self.email_port,self.cam_location]
 
-        super(Server, self).__init__(streamDict,motionDict,sqlite3.connect('motiondetection.db'))
+        # Instantiating all child classes with the necessary variables passed as lists
+        super(Server, self).__init__(streamList,motionList,sqlite3.connect('motiondetection.db'))
 
     def video_id(self):
         _ids = []
