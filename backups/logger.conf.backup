@@ -1,0 +1,21 @@
+[loggers]
+keys=motion_detection
+
+[handlers]
+keys=motion_detection
+
+[formatters]
+keys=formatter
+
+[logger_motion_detection]
+level=DEBUG
+handlers=motion_detection
+
+[handler_motion_detection]
+class=MotionDetectionLogger
+level=DEBUG
+formatter=formatter
+args=(sys.stderr,sys.stdout)
+
+[formatter_formatter]
+format=%(asctime)s %(name)-12s %(levelname)-8s %(message)s
