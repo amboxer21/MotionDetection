@@ -395,13 +395,13 @@ class Server(Stream,MotionDetection,SQLDB):
         fileConfig('logger.conf')
         logger = logging.getLogger()
         print(message)
-        if re.match('warn', level, re.M | re.I)
+        if re.match('warn', level, re.M | re.I):
             logger.warn(message)
-        elif re.match('error', level, re.M | re.I)
+        elif re.match('error', level, re.M | re.I):
             logger.error(message)
-        elif re.match('debug', level, re.M | re.I)
+        elif re.match('debug', level, re.M | re.I):
             logger.debug(message)
-        elif re.match('info', level, re.M | re.I)
+        elif re.match('info', level, re.M | re.I):
             logger.info(message)
 
     # A method to automatically find the lowest cam index if it's present and named videoX
@@ -414,7 +414,7 @@ class Server(Stream,MotionDetection,SQLDB):
             if name is not None:
                 _ids.append(int(name.group(2)))
         if not _ids:
-            Server().log("\n -> Cannot find a camera. Please use the -c option" +
+            self.log("\n -> Cannot find a camera. Please use the -c option" +
                 "\n    and specifiy the cameras location manually.\n",warn)
             sys.exit(0)
         else:
@@ -425,23 +425,23 @@ class Server(Stream,MotionDetection,SQLDB):
     # function directoly after. This function was created to compress 3-6 lines in the 
     # server classes socket flow control below into 1 line per section.
     def sock_opts(self,list,seconds):
-        Server().log("(Server)[sock_opts] def sock_opts()",info)
+        self.log("(Server)[sock_opts] def sock_opts()",info)
         for dict in list:
             for d in dict:
                 self.start_thread(self.update(d,dict[d]))
                 time.sleep(int(seconds))
 
     def start_thread(self,proc):
-        Server().log("(Server)[server_main] def start_thread()",info)
+        self.log("(Server)[server_main] def start_thread()",info)
         try:
             t = threading.Thread(target=proc)
             t.daemon = True
             t.start()
         except Exception as e:
-            Server().log("(Server)[start_thread] Exception e => " + str(e),error)
+            self.log("(Server)[start_thread] Exception e => " + str(e),error)
 
     def server_main(self):
-        Server().log("(Server)[server_main] def server_main()",info)
+        self.log("(Server)[server_main] def server_main()",info)
 
         global sock
 
@@ -454,9 +454,9 @@ class Server(Stream,MotionDetection,SQLDB):
             self.start_thread(Server().capture)
             time.sleep(1)
         except Exception as e:
-            Server().log("(Server)[server_main] Exception e => " + str(e),error)
+            self.log("(Server)[server_main] Exception e => " + str(e),error)
 
-        Server().log("(Server)[server_main] Listening for connections.",info)
+        self.log("(Server)[server_main] Listening for connections.",info)
         while(True):
             time.sleep(0.05)
             try:
@@ -466,7 +466,7 @@ class Server(Stream,MotionDetection,SQLDB):
 
                 # Start Live Stream feature.
                 if(message == 'start_monitor'):
-                    Server().log("(Server)[server_main] start_monitor!",info)
+                    self.log("(Server)[server_main] start_monitor!",info)
                     # First example and use of the method to comress the sqlite3 update
                     # calls passed via list of dicts.
                     #self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
@@ -474,30 +474,30 @@ class Server(Stream,MotionDetection,SQLDB):
                     self.start_thread(Server().stream_main)
                 # Stop Live Stream feature.
                 elif(message == 'kill_monitor'):
-                    Server().log("(Server)[server_main] kill_monitor!",info)
+                    self.log("(Server)[server_main] kill_monitor!",info)
                     self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
                     (self.start_thread(Server().capture) and time.sleep(1))
                 # Start Motion Detection feature.
                 elif(message == 'start_motion'):
-                    Server().log("(Server)[server_main] start_motion!",info)
+                    self.log("(Server)[server_main] start_motion!",info)
                     self.sock_opts([{'kill_camera':'True'},{'stop_motion':'False'},{'kill_camera':'False'}],1)
                     (self.start_thread(Server().capture) and time.sleep(1))
                 # Stop Motion Detection feature.
                 elif(message == 'kill_motion'):
-                    Server().log("(Server)[server_main] kill_motion!",info)
+                    self.log("(Server)[server_main] kill_motion!",info)
                     self.sock_opts([{'kill_camera':'True'}],1)
                 elif(message == 'probe'):
-                    Server().log("(Server)[server_main] probe!",info)
-                    Server().log("Server is alive.",info)
+                    self.log("(Server)[server_main] probe!",info)
+                    self.log("Server is alive.",info)
                 else:
-                    Server().log(message + " is not a known command.",warn)
+                    self.log(message + " is not a known command.",warn)
             except KeyboardInterrupt:
-                Server().log("\n\nControl + c was pressed. Re-initializing database then closing program out.\n",info)
-                Server().log("(Server)[server_main] KeyboardInterrupt",error)
+                self.log("\n\nControl + c was pressed. Re-initializing database then closing program out.\n",info)
+                self.log("(Server)[server_main] KeyboardInterrupt",error)
                 Server().init_db()
                 sys.exit(0)
             except Exception as e:
-                Server().log("(Server)[server_main] Exception e => " + str(e),error)
+                self.log("(Server)[server_main] Exception e => " + str(e),error)
             con.close()
 
 if __name__ == '__main__':
