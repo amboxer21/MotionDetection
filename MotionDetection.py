@@ -8,10 +8,11 @@ from email.MIMEImage import MIMEImage
 from email.MIMEMultipart import MIMEMultipart
 
 from SocketServer import ThreadingMixIn
+from logging.config import fileConfig
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 import modules.datetime.datetime as datetime
-import cv2,sys,time,smtplib,threading,glob,re
+import cv2,sys,time,smtplib,threading,glob,re,logging
 import StringIO,socket,threading,os,subprocess,sqlite3
 
 class SQLDB(object):
@@ -22,28 +23,28 @@ class SQLDB(object):
    
     # Used to re-initialize the database when exiting the program. It will set all columns to False
     def init_db(self):
-        print("(SQLDB)[init_db] def init_db()")
+        Server().log("(SQLDB)[init_db] def init_db()",info)
         self.select_all()
         with self.db:
             self.db.row_factory = sqlite3.Row
             cursor = self.db.cursor()
             try:
-                print("(SQLDB)[init_db] self.update('is_sent','False')")
+                Server().log("(SQLDB)[init_db] self.update('is_sent','False')",info)
                 self.update('is_sent','False')
-                print("(SQLDB)[init_db] self.update('cam_deleted','False')")
+                Server().log("(SQLDB)[init_db] self.update('cam_deleted','False')",info)
                 self.update('cam_deleted','False')
-                print("(SQLDB)[init_db] self.update('kill_camera','False')")
+                Server().log("(SQLDB)[init_db] self.update('kill_camera','False')",info)
                 self.update('kill_camera','False')
-                print("(SQLDB)[init_db] self.update('stop_motion','False')")
+                Server().log("(SQLDB)[init_db] self.update('stop_motion','False')",info)
                 self.update('stop_motion','False')
             except Exception as e:
-                print("(SQLDB)[init_db] Exception e => " + str(e))
+                Server().log("(SQLDB)[init_db] Exception e => " + str(e),error)
             self.db.commit()
 
     # Used to initialize the database. It will create the
     # database, columns and tables if they do not exist and then return. 
     def select_all(self):
-        print("(SQLDB)[select_all] def select_all()")
+        Server().log("(SQLDB)[select_all] def select_all()",info)
         while(True):
             with self.db:
                 self.db.row_factory = sqlite3.Row
@@ -53,16 +54,16 @@ class SQLDB(object):
                     data = cursor.fetchall()
                     return data
                 except sqlite3.OperationalError as e:
-                    print("(SQLDB)[select_all] Exception sqlite3.OperationalError e => " + str(e))
+                    Server().log("(SQLDB)[select_all] Exception sqlite3.OperationalError e => " + str(e),error)
                     if re.search('no such table:', str(e), re.I | re.M):
-                        print("(SQLDB)[select_all] Exception sqlite3.OperationalError 'no such table'")
+                        Server().log("(SQLDB)[select_all] Exception sqlite3.OperationalError 'no such table'",info)
                         cursor.execute('Create table motion(id INTEGER PRIMARY KEY NOT NULL, name TEXT, state TEXT)')
                         cursor.execute("Insert into motion (name, state) values('is_sent','False')")
                         cursor.execute("Insert into motion (name, state) values('cam_deleted','False')")
                         cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
                         cursor.execute("Insert into motion (name, state) values('stop_motion','False')")
                     elif re.search('no such column:', str(e), re.I | re.M):
-                        print("(SQLDB)[select_all] Exception sqlite3.OperationalError 'no such column'")
+                        Server().log("(SQLDB)[select_all] Exception sqlite3.OperationalError 'no such column'",info)
                         cursor.execute("Insert into motion (name, state) values('is_sent','False')")
                         cursor.execute("Insert into motion (name, state) values('cam_deleted','False')")
                         cursor.execute("Insert into motion (name, state) values('kill_camera','False')")
@@ -70,24 +71,24 @@ class SQLDB(object):
                     self.db.commit()
 
     def insert(self,column,value):
-        print("(SQLDB)[insert] def insert()")
+        Server().log("(SQLDB)[insert] def insert()",info)
         with self.db:
             cursor = self.db.cursor()
             try:
                 cursor.execute("insert into motion (name,state) values('" + column + "','" + values + "');")
             except Exception as e:
-                print("(SQLDB)[insert] Exception e => " + str(e))
+                Server().log("(SQLDB)[insert] Exception e => " + str(e),error)
                 pass
             self.db.commit()
 
     def update(self,column,value):
-        print("(SQLDB)[update] def update()")
+        Server().log("(SQLDB)[update] def update()",info)
         with self.db:
             cursor = self.db.cursor()
             try:
                 cursor.execute("update motion set state = '" + value + "' where name = '" + column + "';")
             except Exception as e:
-                print("(SQLDB)[update] Exception e => " + str(e))
+                Server().log("(SQLDB)[update] Exception e => " + str(e),error)
                 pass
             self.db.commit()
 
@@ -101,7 +102,7 @@ class SQLDB(object):
             try:
                 data = cursor.execute("select state from motion where name = '" + column + "';")
             except Exception as e:
-                print("(SQLDB)[select_state_from] Exception e => " + str(e))
+                Server().log("(SQLDB)[select_state_from] Exception e => " + str(e),error)
                 pass
         for d in data:
             return d[0]
@@ -115,7 +116,7 @@ if __name__ == '__main__':
 class CamHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        print("(CamHandler)[do_GET] def do_GET()")
+        Server().log("(CamHandler)[do_GET] def do_GET()",info)
 
         #global streamCamera
         time.sleep(1)
@@ -136,7 +137,7 @@ class CamHandler(BaseHTTPRequestHandler):
 
                 # if kill_camera:
                 if re.search('True',Server().select_state_from('kill_camera'), re.M | re.I):
-                    print("(CamHandler)[do_GET] Killing cam.")
+                    Server().log("(CamHandler)[do_GET] Killing cam.",info)
                     del(streamCamera)
                     break
 
@@ -154,7 +155,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 #print("(CamHandler)[do_GET] Exception e => " + str(e))
                 break
             except KeyboardInterrupt:
-                print("(CamHandler)[do_GET] KeyboardInterrupt.")
+                Server().log("(CamHandler)[do_GET] KeyboardInterrupt.",error)
                 del(streamCamera)
                 break
         return
@@ -168,7 +169,7 @@ class Stream(object):
         self.cam_location = opts[0] # cam_location
 
     def stream_main(self):
-        print("(Stream)[stream_main] def stream_main()")
+        Server().log("(Stream)[stream_main] def stream_main()",info)
 
         '''
         global streamCamera
@@ -182,17 +183,17 @@ class Stream(object):
         Server().sock_opts([{'kill_camera':'False'}],0)
 
         try:
-            print("(Stream)[stream_main] Streaming HTTPServer started")
+            Server().log("(Stream)[stream_main] Streaming HTTPServer started",info)
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             server.serve_forever()
         except KeyboardInterrupt:
-            print("(Stream)[stream_main] KeyboardInterrupt")
+            Server().log("(Stream)[stream_main] KeyboardInterrupt",error)
             del(streamCamera)
             Server().socket.close()
         except Exception as e:
             if re.search('Address already in use', str(e)).group():
-                print("(Server)[server_main] Exception e - re.search('Address already in use') ")
-            print("(Stream)[stream_main] Exception e => " + str(e))
+                Server().log("(Server)[server_main] Exception e - re.search('Address already in use')",error)
+            Server().log("(Stream)[stream_main] Exception e => " + str(e),error)
             pass
 
 class MotionDetection(object):
@@ -207,12 +208,12 @@ class MotionDetection(object):
         self.cam_location = opts[5] # cam_location
 
     def user_name(self):
-        print("(MotionDetection)[user_name] def user_name()")
+        Server().log("(MotionDetection)[user_name] def user_name()",info)
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
         return re.search("(\w+)", str(comm.stdout.read())).group()
     
     def time_now(self):
-        print("(MotionDetection)[time_now] def time_now()")
+        Server().log("(MotionDetection)[time_now] def time_now()",info)
         return time.asctime(time.localtime(time.time()))
     
     # This program takes pictures when movement is detected. It saves the picture with the name
@@ -220,7 +221,7 @@ class MotionDetection(object):
     # returns that number. So if capture66.png was the picture with the higest number this
     # method will return that number.
     def img_num(self):
-        print("(MotionDetection)[img_num] def img_num()")
+        Server().log("(MotionDetection)[img_num] def img_num()",info)
         _list = []
         os.chdir("/home/" + self.user_name() + "/.motiondetection/")
         for file_name in glob.glob("*.png"):
@@ -229,7 +230,7 @@ class MotionDetection(object):
         return max(_list)
     
     def send_mail(self,sender,to,password,port,subject,body):
-        print("(MotionDetection)[send_mail] def send_mail()")
+        Server().log("(MotionDetection)[send_mail] def send_mail()",info)
         try:
             message = MIMEMultipart()
             message['Body'] = body
@@ -240,21 +241,21 @@ class MotionDetection(object):
             mail.starttls()
             mail.login(sender,password)
             mail.sendmail(sender, to, message.as_string())
-            print("(MotionDetection)[send_mail] Security ALERT: - Sent email successfully!\n")
+            Server().log("(MotionDetection)[send_mail] Security ALERT: - Sent email successfully!\n",info)
         except smtplib.SMTPAuthenticationError:
-            print("(MotionDetection)[send_mail] Could not athenticate with password and username!")
+            Server().log("(MotionDetection)[send_mail] Could not athenticate with password and username!",error)
         except Exception as e:
-            print("(MotionDetection)[send_mail] Exception e => " + str(e))
+            Server().log("(MotionDetection)[send_mail] Exception e => " + str(e),error)
     
     def notify(self):
-        print("(MotionDetection)[notify] def notify()")
+        Server().log("(MotionDetection)[notify] def notify()",info)
         global is_sent
         if is_sent is not True:
             self.send_mail(self.email,self.email,self.password,self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
             is_sent = True
     
     def takePicture(self):
-        print("(MotionDetection)[take_picture] def take_picture()")
+        Server().log("(MotionDetection)[take_picture] def take_picture()",info)
         camera = cv2.VideoCapture(self.cam_location)
         if not camera.isOpened():
             return
@@ -267,8 +268,8 @@ class MotionDetection(object):
         del(camera)
 
     def capture(self):
-        print("Motion Detection system initialed.\n")
-        print("(MotionDetection)[capture] def capture()")
+        Server().log("Motion Detection system initialed.\n",info)
+        Server().log("(MotionDetection)[capture] def capture()",info)
         time.sleep(3)
     
         global cam
@@ -290,7 +291,7 @@ class MotionDetection(object):
             # if kill_camera and stop_motion:
             if (re.search('True',Server().select_state_from('kill_camera'), re.M | re.I) or
                 re.search('True',Server().select_state_from('stop_motion'), re.M | re.I)):
-                    print("(MotionDetection)[capture] Killing cam.")
+                    Server().log("(MotionDetection)[capture] Killing cam.",info)
                     Server().sock_opts([{'kill_camera':'False'}],1)
                     del(cam)
                     break
@@ -312,7 +313,7 @@ class MotionDetection(object):
             if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
                 count = 0
                 is_moving = False
-                print("(MotionDetection)[capture] MOVEMENT: " + self.time_now() + ", Delta: " + str(delta_count))
+                Server().log("(MotionDetection)[capture] MOVEMENT: " + self.time_now() + ", Delta: " + str(delta_count),info)
                 del(cam)
                 cam_deleted = True
                 self.takePicture()
@@ -323,7 +324,7 @@ class MotionDetection(object):
                 time.sleep(0.1)
                 is_moving = True
                 if count == 120:
-                    print("(MotionDetection)[capture] Resetting counter.")
+                    Server().log("(MotionDetection)[capture] Resetting counter.",info)
                     count = 0
                     is_sent = False
     
@@ -379,7 +380,7 @@ class Server(Stream,MotionDetection,SQLDB):
             self.cam_location = options.cam_location
 
         if not self.disable_email and (self.email is None or self.password is None):
-            print("\nERROR: Both E-mail and password are required!\n")
+            Server().log("\nERROR: Both E-mail and password are required!\n",warn)
             parser.print_help()
             sys.exit(0)
 
@@ -389,6 +390,19 @@ class Server(Stream,MotionDetection,SQLDB):
 
         # Instantiating all child classes with the necessary variables passed as lists
         super(Server, self).__init__(streamList,motionList,sqlite3.connect('motiondetection.db'))
+
+    def log(self,message,level):
+        fileConfig('logger.conf')
+        logger = logging.getLogger()
+        print(message)
+        if re.match('warn', level, re.M | re.I)
+            logger.warn(message)
+        elif re.match('error', level, re.M | re.I)
+            logger.error(message)
+        elif re.match('debug', level, re.M | re.I)
+            logger.debug(message)
+        elif re.match('info', level, re.M | re.I)
+            logger.info(message)
 
     # A method to automatically find the lowest cam index if it's present and named videoX
     def video_id(self):
@@ -400,8 +414,8 @@ class Server(Stream,MotionDetection,SQLDB):
             if name is not None:
                 _ids.append(int(name.group(2)))
         if not _ids:
-            print("\n -> Cannot find a camera. Please use the -c option" + 
-                "\n    and specifiy the cameras location manually.\n")
+            Server().log("\n -> Cannot find a camera. Please use the -c option" +
+                "\n    and specifiy the cameras location manually.\n",warn)
             sys.exit(0)
         else:
             return min(_ids)
@@ -411,23 +425,23 @@ class Server(Stream,MotionDetection,SQLDB):
     # function directoly after. This function was created to compress 3-6 lines in the 
     # server classes socket flow control below into 1 line per section.
     def sock_opts(self,list,seconds):
-        print("(Server)[sock_opts] def sock_opts()")
+        Server().log("(Server)[sock_opts] def sock_opts()",info)
         for dict in list:
             for d in dict:
                 self.start_thread(self.update(d,dict[d]))
                 time.sleep(int(seconds))
 
     def start_thread(self,proc):
-        print("(Server)[server_main] def start_thread()")
+        Server().log("(Server)[server_main] def start_thread()",info)
         try:
             t = threading.Thread(target=proc)
             t.daemon = True
             t.start()
         except Exception as e:
-            print("(Server)[start_thread] Exception e => " + str(e))
+            Server().log("(Server)[start_thread] Exception e => " + str(e),error)
 
     def server_main(self):
-        print("(Server)[server_main] def server_main()")
+        Server().log("(Server)[server_main] def server_main()",info)
 
         global sock
 
@@ -440,19 +454,19 @@ class Server(Stream,MotionDetection,SQLDB):
             self.start_thread(Server().capture)
             time.sleep(1)
         except Exception as e:
-            print("(Server)[server_main] Exception e => " + str(e))
+            Server().log("(Server)[server_main] Exception e => " + str(e),error)
 
-        print("(Server)[server_main] Listening for connections.")
+        Server().log("(Server)[server_main] Listening for connections.",info)
         while(True):
             time.sleep(0.05)
             try:
                 con, addr = sock.accept()
-                print("(Server)[server_main] Received connection from " + str(addr))
+                Server().log("(Server)[server_main] Received connection from " + str(addr),info)
                 message = con.recv(1024)
 
                 # Start Live Stream feature.
                 if(message == 'start_monitor'):
-                    print("(Server)[server_main] start_monitor!")
+                    Server().log("(Server)[server_main] start_monitor!",info)
                     # First example and use of the method to comress the sqlite3 update
                     # calls passed via list of dicts.
                     #self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
@@ -460,30 +474,30 @@ class Server(Stream,MotionDetection,SQLDB):
                     self.start_thread(Server().stream_main)
                 # Stop Live Stream feature.
                 elif(message == 'kill_monitor'):
-                    print("(Server)[server_main] kill_monitor!")
+                    Server().log("(Server)[server_main] kill_monitor!",info)
                     self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
                     (self.start_thread(Server().capture) and time.sleep(1))
                 # Start Motion Detection feature.
                 elif(message == 'start_motion'):
-                    print("(Server)[server_main] start_motion!")
+                    Server().log("(Server)[server_main] start_motion!",info)
                     self.sock_opts([{'kill_camera':'True'},{'stop_motion':'False'},{'kill_camera':'False'}],1)
                     (self.start_thread(Server().capture) and time.sleep(1))
                 # Stop Motion Detection feature.
                 elif(message == 'kill_motion'):
-                    print("(Server)[server_main] kill_motion!")
+                    Server().log("(Server)[server_main] kill_motion!",info)
                     self.sock_opts([{'kill_camera':'True'}],1)
                 elif(message == 'probe'):
-                    print("(Server)[server_main] probe!")
-                    print("Server is alive.")
+                    Server().log("(Server)[server_main] probe!",info)
+                    Server().log("Server is alive.",info)
                 else:
-                    print(message + " is not a known command.")
+                    Server().log(message + " is not a known command.",warn)
             except KeyboardInterrupt:
-                print("\n\nControl + c was pressed. Re-initializing database then closing program out.\n")
-                print("(Server)[server_main] KeyboardInterrupt")
+                Server().log("\n\nControl + c was pressed. Re-initializing database then closing program out.\n",info)
+                Server().log("(Server)[server_main] KeyboardInterrupt",error)
                 Server().init_db()
                 sys.exit(0)
             except Exception as e:
-                print("(Server)[server_main] Exception e => " + str(e))
+                Server().log("(Server)[server_main] Exception e => " + str(e),error)
             con.close()
 
 if __name__ == '__main__':
