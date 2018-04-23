@@ -15,8 +15,6 @@ import cv2,sys,time,smtplib,threading,glob,re,logging
 import StringIO,socket,threading,os,subprocess,sqlite3
 
 class Logger(object):
-    def __init__(self):
-        pass
 
     def log(self,message,level):
         logging.basicConfig(filename='motion_detection.log',filemode='a',
