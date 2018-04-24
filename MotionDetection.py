@@ -283,9 +283,9 @@ class MotionDetection(object):
         del(camera)
 
     def capture(self):
-        self.logger.log("Motion Detection system initialed.\n",'info')
+        self.logger.log("(MotionDetection)[capture] Motion Detection system initialized.\n",'info')
         self.logger.log("(MotionDetection)[capture] def capture()",'info')
-        time.sleep(3)
+        time.sleep(0.2)
     
         global cam
         global cam_deleted
@@ -294,13 +294,12 @@ class MotionDetection(object):
         cam_deleted = False
     
         cam = cv2.VideoCapture(self.cam_location)
-
         read,frame_now = cam.read()
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
         frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
         frame_prior = frame_now
-    
+   
         while(True):
 
             # if kill_camera and stop_motion:
@@ -496,7 +495,7 @@ class Server(Stream,MotionDetection,SQLDB):
                 else:
                     self.logger.log(message + " is not a known command.",'warn')
             except KeyboardInterrupt:
-                self.logger.log("\n\nControl + c was pressed. Re-initializing database then closing program out.\n",'info')
+                self.logger.log("\n\n(Server)[server_main] Control + c was pressed. Re-initializing database then closing program out.\n",'info')
                 self.logger.log("(Server)[server_main] KeyboardInterrupt",'error')
                 Server().init_db()
                 sys.exit(0)
