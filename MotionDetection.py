@@ -131,7 +131,7 @@ if __name__ == '__main__':
 class CamHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        self.logger.log("(CamHandler)[do_GET] def do_GET()",'info')
+        Logger().log("(CamHandler)[do_GET] def do_GET()",'info')
 
         #global streamCamera
         time.sleep(1)
@@ -152,7 +152,7 @@ class CamHandler(BaseHTTPRequestHandler):
 
                 # if kill_camera:
                 if re.search('True',Server().select_state_from('kill_camera'), re.M | re.I):
-                    self.logger.log("(CamHandler)[do_GET] Killing cam.",'info')
+                    Logger().log("(CamHandler)[do_GET] Killing cam.",'info')
                     del(streamCamera)
                     break
 
@@ -170,7 +170,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 #print("(CamHandler)[do_GET] Exception e => " + str(e))
                 break
             except KeyboardInterrupt:
-                self.logger.log("(CamHandler)[do_GET] KeyboardInterrupt.",'error')
+                Logger.log("(CamHandler)[do_GET] KeyboardInterrupt.",'error')
                 del(streamCamera)
                 break
         return
@@ -182,9 +182,11 @@ class Stream(object):
     def __init__(self,opts,*args):
         super(Stream, self).__init__(*args)
         self.cam_location = opts[0] # cam_location
+        self.logger = Logger()
 
     def stream_main(self):
         self.logger.log("(Stream)[stream_main] def stream_main()",'info')
+        time.sleep(1)
 
         '''
         global streamCamera
@@ -195,7 +197,7 @@ class Stream(object):
         streamCamera.set(4,120) # Set height
         '''
 
-        Server().sock_opts([{'kill_camera':'False'}],0)
+        Server().sock_opts([{'kill_camera':'False'}],1)
 
         try:
             self.logger.log("(Stream)[stream_main] Streaming HTTPServer started",'info')
@@ -285,7 +287,7 @@ class MotionDetection(object):
     def capture(self):
         self.logger.log("(MotionDetection)[capture] Motion Detection system initialized.\n",'info')
         self.logger.log("(MotionDetection)[capture] def capture()",'info')
-        time.sleep(0.2)
+        time.sleep(3)
     
         global cam
         global cam_deleted
@@ -473,7 +475,7 @@ class Server(Stream,MotionDetection,SQLDB):
                     # First example and use of the method to comress the sqlite3 update
                     # calls passed via list of dicts.
                     #self.sock_opts([{'kill_camera':'True'},{'kill_camera':'False'}],1)
-                    self.sock_opts([{'kill_camera':'True'}],0)
+                    self.sock_opts([{'kill_camera':'True'}],1)
                     self.start_thread(Server().stream_main)
                 # Stop Live Stream feature.
                 elif(message == 'kill_monitor'):
