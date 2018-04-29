@@ -276,7 +276,7 @@ class MotionDetection(object):
         Logger().log("(MotionDetection)[capture] Motion Detection system initialized.\n",'info')
         Logger().log("(MotionDetection)[capture] def capture()",'info')
         self.sock_opts([{'kill_camera':'False'}],0)
-        #time.sleep(1)
+        time.sleep(1)
     
         global cam
         global cam_deleted
@@ -420,7 +420,8 @@ class Server(Stream,MotionDetection,SQLDB):
         Logger().log("(Server)[sock_opts] def sock_opts()",'info')
         for dict in list:
             for d in dict:
-                self.start_thread(Server().update(d,dict[d]))
+                #self.start_thread(Server().update(d,dict[d]))
+                Server().update(d,dict[d])
                 time.sleep(int(seconds))
 
     def start_thread(self,proc):
