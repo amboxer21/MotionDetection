@@ -216,7 +216,7 @@ class MotionDetection(object):
                 is_moving = True
                 #Logging.log("INFO", "count: " + str(count))
                 if count == 120:
-                    Logging.log("INFO", "Resetting counter.")
+                    #Logging.log("INFO", "Resetting counter.")
                     count = 0
                     self.is_sent = False
     
