@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 
+import re
+import os
+import cv2
+import sys
+import time
+import glob
+import socket
+import smtplib
+import logging
+import StringIO
+import threading
+import subprocess
+import logging.handlers
+
+import modules.datetime.datetime as datetime
+
 from PIL import Image
 from __init__ import *
 from optparse import OptionParser
@@ -10,14 +26,46 @@ from email.MIMEMultipart import MIMEMultipart
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
-import modules.datetime.datetime as datetime
-import cv2,sys,time,smtplib,threading,glob,re
-import StringIO,socket,threading,os,subprocess
+class Logging(object):
+
+    @staticmethod
+    def log(level,message,verbose=True):
+        comm = re.search("(WARN|INFO|ERROR)", str(level), re.M)
+        try:
+            handler = logging.handlers.WatchedFileHandler(
+                os.environ.get("LOGFILE","/var/log/motiondetection.log"))
+            formatter = logging.Formatter(logging.BASIC_FORMAT)
+            handler.setFormatter(formatter)
+            root = logging.getLogger()
+            root.setLevel(os.environ.get("LOGLEVEL", str(level)))
+            root.addHandler(handler)
+            # Log all calls to this class in the logfile no matter what.
+            if comm is None:
+                print(level + " is not a level. Use: WARN, ERROR, or INFO!")
+                return
+            elif comm.group() == 'ERROR':
+                logging.error("(" + str(level) + ") " + "ImageCapture - " + str(message))
+            elif comm.group() == 'INFO':
+                logging.info("(" + str(level) + ") " + "ImageCapture - " + str(message))
+            elif comm.group() == 'WARN':
+                logging.warn("(" + str(level) + ") " + "ImageCapture - " + str(message))
+            # Print to stdout only if the verbose option is passed or log level = ERROR.
+            if verbose or str(level) == 'ERROR':
+                print("(" + str(level) + ") " + "ImageCapture - " + str(message))
+        except IOError as e:
+            if re.search('\[Errno 13\] Permission denied:', str(e), re.M | re.I):
+                print("(ERROR) ImageCapture - Must be sudo to run ImageCapture!")
+                sys.exit(0)
+            print("(ERROR) ImageCapture - IOError in Logging class => " + str(e))
+            logging.error("(ERROR) ImageCapture - IOError => " + str(e))
+        except Exception as e:
+            print("(ERROR) ImageCapture - Exception in Logging class => " + str(e))
+            logging.error("(ERROR) ImageCapture - Exception => " + str(e))
+            pass
+        return
 
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-
-        global streamCamera
 
         if self.path.endswith('.mjpg'):
             self.send_response(200)
@@ -25,12 +73,12 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
         while True:
             try:
-                read, image = streamCamera.read()
+                (read, image) = self.streamCamera.read()
                 #if not read:
                     #continue
-                if killCamera is True:
-                    print("[CamHandler] Killing cam.")
-                    del(streamCamera)
+                if self.killCamera is True:
+                    Logging.log("INFO","Killing cam.")
+                    del(self.streamCamera)
                     break
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
@@ -43,45 +91,36 @@ class CamHandler(BaseHTTPRequestHandler):
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
             except KeyboardInterrupt:
-                del(streamCamera)
+                del(self.streamCamera)
                 break
         return
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
-class Stream():
-    def __init__(self,cam_location):
-        self.cam_location = cam_location
-
-    def main(self):
-
-        global killCamera
-        global streamCamera
-
-        streamCamera = cv2.VideoCapture(self.cam_location)
-        streamCamera.set(3,320)
-        streamCamera.set(4,320)
+class Stream(object):
+    def __init__(self):
+        self.streamCamera = cv2.VideoCapture(self.cam_location)
+        self.streamCamera.set(3,320)
+        self.streamCamera.set(4,320)
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
-            print("Streaming HTTPServer started")
+            Logging.log("INFO", "Streaming HTTPServer started")
             server.serve_forever()
         except KeyboardInterrupt:
-            del(streamCamera)
+            del(self.streamCamera)
             server.socket.close()
         except Exception as eThreadedHTTPServer:
             pass
 
-class MotionDetection():
+class MotionDetection(object):
 
-    def __init__(self,ip,server_port,email,password,email_port,cam_location):
-
-        self.ip = ip
-        self.email = email
-        self.password = password
-        self.email_port = email_port
-        self.server_port = server_port
-        self.cam_location = cam_location
+    def __init__(self):
+        self.cam = None
+        self.stopMotion = False
+        self.is_sent = False
+        self.cam_deleted = False
+        pass
 
     def user_name(self):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
@@ -109,24 +148,22 @@ class MotionDetection():
             mail.starttls()
             mail.login(sender,password)
             mail.sendmail(sender, to, message.as_string())
-            print("MotionDetection.py Security ALERT: - Sent email successfully!\n")
+            Logging.log("INFO", "Sent email successfully!\n")
         except smtplib.SMTPAuthenticationError:
-            print("MotionDetection.py - Could not athenticate with password and username!")
+            Logging.log("WARN", "Could not athenticate with password and username!")
         except Exception as e:
-            print( "Error: %s " % str(e) )
-            print("MotionDetection.py - Unexpected error in sendMail():")
+            Logging.log("ERROR", "Unexpected error in sendMail() error e => " + str(e))
     
     def notify(self):
-        global is_sent
-        if is_sent is not True:
+        if self.is_sent is not True:
             self.sendMail(self.email,self.email,self.password,self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
-            is_sent = True
+            self.is_sent = True
     
     def takePicture(self):
         camera = cv2.VideoCapture(self.cam_location)
         if not camera.isOpened():
             return
-        ret, frame = camera.read()
+        (ret, frame) = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.1)
         picture_name = "/home/pi/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
@@ -134,23 +171,19 @@ class MotionDetection():
         del(camera)
 
     def kill_cam(self):
-        global kill
-        print("def kill_cam(self):")
-        killCamera = True
+        Logging.log("INFO", "def kill_cam(self):")
+        self.killCamera = True
 
     def capture(self):
-        print("Motion Detection system initialed.")
+        Logging.log("INFO", "Motion Detection system initialed!")
     
-        global cam
-        global cam_deleted
-   
-        is_moving   = True
-        cam_deleted = False
+        count     = 0
+        is_moving = True
     
-        cam = cv2.VideoCapture(self.cam_location)
+        self.cam  = cv2.VideoCapture(self.cam_location)
 
-        frame_now = cam.read()[1]
-        frame_now = cam.read()[1]
+        frame_now = self.cam.read()[1]
+        frame_now = self.cam.read()[1]
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
         frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
@@ -158,14 +191,11 @@ class MotionDetection():
     
         while(True):
 
-            if killCamera is True or stopMotion:
-                print("Killing cam.")
-                del(cam)
+            if self.killCamera is True or self.stopMotion:
+                Logging.log("INFO", "Killing cam.")
+                del(self.cam)
                 break
       
-            global count
-            global is_sent
-
             frame_delta = cv2.absdiff(frame_prior, frame_now)
             frame_delta = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)[1]
             delta_count = cv2.countNonZero(frame_delta)
@@ -176,136 +206,152 @@ class MotionDetection():
             if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
                 count = 0
                 is_moving = False
-                print("MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
-                del(cam)
-                cam_deleted = True
+                Logging.log("INFO", "MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
+                del(self.cam)
+                self.cam_deleted = True
                 self.takePicture()
                 self.notify()
             elif delta_count < 100:
                 count += 1
                 time.sleep(0.1)
                 is_moving = True
-                #print("count: " + str(count))
+                #Logging.log("INFO", "count: " + str(count))
                 if count == 120:
-                    print("Resetting counter.")
+                    Logging.log("INFO", "Resetting counter.")
                     count = 0
-                    is_sent = False
+                    self.is_sent = False
     
-            if cam_deleted:
-                cam = cv2.VideoCapture(self.cam_location)
+            if self.cam_deleted:
+                self.cam = cv2.VideoCapture(self.cam_location)
     
-                cam_deleted = False
+                self.cam_deleted = False
     
             # keep the frames moving.
             frame_prior = frame_now
-            frame_now = cam.read()[1]
+            frame_now = self.cam.read()[1]
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
-class Server():
+class Server(MotionDetection, Stream):
 
-    def __init__(self):
-        parser = OptionParser()
-        parser.add_option("-i",
-            "--ip", dest='ip', help='"This is the IP address of the server."',default='0.0.0.0')
-        parser.add_option("-S",
-            "--server-port", dest='server_port', help='"Server port defaults to port 50050"', type="int", default=50050)
-        parser.add_option("-e",
-            "--email", dest='email', help='"This argument is required!"')
-        parser.add_option("-p",
-            "--password", dest='password', help='"This argument is required!"')
-        parser.add_option("-c",
-            "--camera-location", dest='cam_location', help='"Camera index number."', type="int", default=0)
-        parser.add_option("-E",
-            "--email-port", dest='email_port', help='"E-mail port defaults to port 587"', type="int", default=587)
-        (options, args) = parser.parse_args()
+    def __init__(self, options_dict={}):
+        super(Server, self).__init__()
 
-        self.ip = options.ip
-        self.email = options.email
-        self.password = options.password
-        self.email_port = options.email_port
-        self.server_port = options.server_port
-        self.cam_location = options.cam_location
+        self.killCamera = False
+        self.streamCamera = False
+        self.sock = socket.socket()
+
+        self.ip = options_dict['ip']
+        self.email = options_dict['email']
+        self.password = options_dict['password']
+        self.email_port = options_dict['email_port']
+        self.server_port = options_dict['server_port']
+        self.cam_location = options_dict['cam_location']
 
         if self.email is None or self.password is None:
-            print("\nERROR: Both E-mail and password are required!\n")
+            Logging.log("ERROR", "Both E-mail and password are required!")
             parser.print_help()
             sys.exit(0)
 
-    def start_thread(self,proc):
+    def start_thread(self, proc):
         try:
             t = threading.Thread(target=proc)
             t.daemon = True
             t.start()
         except Exception as eStartThread:
-            print("Threading exception eStartThread => " + str(eStartThread))
+            Logging.log("ERROR", "Threading exception eStartThread => " + str(eStartThread))
 
     def main(self):
 
-        global sock
-	global stopMotion
-        global killCamera
-
-        stream = Stream(self.cam_location)
-        motionDetection = MotionDetection(self.ip,self.server_port,self.email,self.password,self.email_port,self.cam_location)
-
         try:
-            sock = socket.socket()
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(('', self.server_port))
-            sock.listen(5)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.bind(('', self.server_port))
+            self.sock.listen(5)
             time.sleep(1)
-            self.start_thread(motionDetection.capture)
+            self.start_thread(self.capture)
             time.sleep(1)
         except Exception as eSock:
-            print("Sock exception eSock => " + str(eSock))
+            Logging.log("ERROR", "Sock exception eSock => " + str(eSock))
 
-        print("Listening for connections.")
+        Logging.log("INFO", "Listening for connections.")
         while(True):
             time.sleep(0.05)
             try:
-                con, addr = sock.accept()
-                print("Received connection from " + str(addr))
+                (con, addr) = self.sock.accept()
+                Logging.log("INFO", "Received connection from " + str(addr))
                 message = con.recv(1024)
 
                 if(message == 'start_monitor'):
-                    print("Starting camera!")
+                    Logging.log("INFO", "Starting camera!")
                     #con.send("Starting camera!")
-                    killCamera = True
+                    self.killCamera = True
                     time.sleep(1)
-                    killCamera = False
+                    self.killCamera = False
                     self.start_thread(stream.main)
                 elif(message == 'kill_monitor'):
-                    print("Killing camera!")
+                    Logging.log("INFO", "Killing camera!")
                     #con.send("Killing camera!")
-                    killCamera = True
+                    self.killCamera = True
                     time.sleep(1)
-                    killCamera = False
-                    self.start_thread(motionDetection.capture)
+                    self.killCamera = False
+                    self.start_thread(self.capture)
                 elif(message == 'start_motion'):
-                    print("Starting motion sensor!")
-                    killCamera = True
+                    Logging.log("INFO", "Starting motion sensor!")
+                    self.killCamera = True
                     time.sleep(1)
-                    stopMotion = False
-                    killCamera = False
-                    self.start_thread(motionDetection.capture)
+                    self.stopMotion = False
+                    self.killCamera = False
+                    self.start_thread(self.capture)
                     #con.send("Starting motion sensor!")
                 elif(message == 'kill_motion'):
-                    print("Killing motion sensor!")
-                    stopMotion = True
-                    killCamera = True
+                    Logging.log("INFO", "Killing motion sensor!")
+                    self.stopMotion = True
+                    self.killCamera = True
                     time.sleep(1)
                     #con.send("Killing motion sensor!")
                 elif(message == 'probe'):
-                    print("Server is alive.")
+                    Logging.log("INFO", "Server is alive.")
                     #con.send("Server is alive.")
                 else:
-                    print(message + " is not a known command.")
+                    Logging.log("ERROR", message + " is not a known command.")
                     #con.send(message + " is not a konwn command!")
+            except KeyboardInterrupt:
+                print("\n")
+                Logging.log("INFO", "Caught control + c, exiting now.")
+                print("\n")
+                sys.exit(0)
             except Exception as eAccept:
-                print("Socket accept error: " + str(eAccept))
+                Logging.log("ERROR", "Socket accept error: " + str(eAccept))
         con.close()
 
 if __name__ == '__main__':
-    server = Server()
+
+    parser = OptionParser()
+    parser.add_option("-i", "--ip",
+        dest='ip', default='0.0.0.0',
+        help='"This is the IP address of the server."')
+    parser.add_option("-S", "--server-port",
+        dest='server_port', type="int", default=50050,
+        help='"Server port defaults to port 50050"')
+    parser.add_option("-e", "--email",
+        dest='email',
+        help='"This argument is required!"')
+    parser.add_option("-p", "--password",
+        dest='password',
+        help='"This argument is required!"')
+    parser.add_option("-c", "--camera-location",
+        dest='cam_location', type="int", default=0,
+        help='"Camera index number."')
+    parser.add_option("-E", "--email-port",
+        dest='email_port', type="int", default=587,
+        help='"E-mail port defaults to port 587"')
+    (options, args) = parser.parse_args()
+
+    options_dict = {
+        'ip': options.ip, 'server_port': options.server_port,
+        'email': options.email, 'password': options.password,
+        'cam_location': options.cam_location, 'email_port': options.email_port
+    }
+
+    server = Server(options_dict)
     server.main()
