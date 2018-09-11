@@ -61,6 +61,12 @@ class Logging(object):
             pass
         return
 
+class User(object):
+    @staticmethod
+    def name():
+        comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
+        return re.search("(\w+)", str(comm.stdout.read())).group()
+
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
 
@@ -119,10 +125,6 @@ class MotionDetection(object):
         self.cam_deleted = False
         pass
 
-    def user_name(self):
-        comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
-        return re.search("(\w+)", str(comm.stdout.read())).group()
-    
     def now(self):
         return time.asctime(time.localtime(time.time()))
     
@@ -139,7 +141,7 @@ class MotionDetection(object):
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            #message.attach(MIMEImage(file("/home/" + self.user_name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
+            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
             message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
