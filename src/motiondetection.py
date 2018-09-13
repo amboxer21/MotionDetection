@@ -236,6 +236,7 @@ class Server(MotionDetection, Stream):
     def __init__(self, options_dict={}):
         super(Server, self).__init__()
 
+
         self.killCamera = False
         self.streamCamera = False
         self.sock = socket.socket()
@@ -265,7 +266,7 @@ class Server(MotionDetection, Stream):
         try:
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind(('', self.server_port))
-            self.sock.listen(5)
+            #self.sock.listen(5)
             time.sleep(1)
             self.start_thread(self.capture)
             time.sleep(1)
@@ -276,19 +277,22 @@ class Server(MotionDetection, Stream):
         while(True):
             time.sleep(0.05)
             try:
+                self.sock.listen(5)
                 (con, addr) = self.sock.accept()
                 Logging.log("INFO", "Received connection from " + str(addr))
                 message = con.recv(1024)
 
                 if(message == 'start_monitor'):
                     Logging.log("INFO", "Starting camera!")
+                    Logging.log("INFO", "start_camera")
                     #con.send("Starting camera!")
                     self.killCamera = True
                     time.sleep(1)
                     self.killCamera = False
-                    self.start_thread(stream.main)
+                    self.start_thread(self.main)
                 elif(message == 'kill_monitor'):
                     Logging.log("INFO", "Killing camera!")
+                    Logging.log("INFO", "kill_camera")
                     #con.send("Killing camera!")
                     self.killCamera = True
                     time.sleep(1)
@@ -296,6 +300,7 @@ class Server(MotionDetection, Stream):
                     self.start_thread(self.capture)
                 elif(message == 'start_motion'):
                     Logging.log("INFO", "Starting motion sensor!")
+                    Logging.log("INFO", "start_motion")
                     self.killCamera = True
                     time.sleep(1)
                     self.stopMotion = False
@@ -304,6 +309,7 @@ class Server(MotionDetection, Stream):
                     #con.send("Starting motion sensor!")
                 elif(message == 'kill_motion'):
                     Logging.log("INFO", "Killing motion sensor!")
+                    Logging.log("INFO", "kill_motion")
                     self.stopMotion = True
                     self.killCamera = True
                     time.sleep(1)
