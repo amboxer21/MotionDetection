@@ -68,6 +68,9 @@ class User(object):
         return re.search("(\w+)", str(comm.stdout.read())).group()
 
 class CamHandler(BaseHTTPRequestHandler):
+    def __init__(self):
+        pass
+
     def do_GET(self):
 
         if self.path.endswith('.mjpg'):
@@ -76,12 +79,12 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
         while True:
             try:
-                (read, image) = self.streamCamera.read()
-                #if not read:
-                    #continue
+                (read_cam, image) = self.streamCamera.read()
+                if not read_cam:
+                    continue
                 if self.killCamera is True:
                     Logging.log("INFO","Killing cam.")
-                    del(self.streamCamera)
+                    self.streamCamera.release()
                     break
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
@@ -94,7 +97,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
             except KeyboardInterrupt:
-                del(self.streamCamera)
+                self.streamCamera.release()
                 break
         return
 
@@ -103,15 +106,19 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 class Stream(object):
     def __init__(self):
+        time.sleep(1)
         self.streamCamera = cv2.VideoCapture(self.cam_location)
         self.streamCamera.set(3,320)
         self.streamCamera.set(4,320)
+
+    @staticmethod
+    def stream_main():
         try:
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             Logging.log("INFO", "Streaming HTTPServer started")
             server.serve_forever()
         except KeyboardInterrupt:
-            del(self.streamCamera)
+            self.streamCamera.release()
             server.socket.close()
         except Exception as eThreadedHTTPServer:
             pass
@@ -236,10 +243,8 @@ class Server(MotionDetection, Stream):
     def __init__(self, options_dict={}):
         super(Server, self).__init__()
 
-
         self.killCamera = False
         self.streamCamera = False
-        self.sock = socket.socket()
 
         self.ip = options_dict['ip']
         self.email = options_dict['email']
@@ -253,7 +258,14 @@ class Server(MotionDetection, Stream):
             parser.print_help()
             sys.exit(0)
 
-    def start_thread(self, proc):
+        try:
+            self.sock = socket.socket()
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.bind(('', self.server_port))
+        except Exception as eSock:
+            Logging.log("ERROR", "Sock exception eSock => " + str(eSock))
+
+    def start_thread(self,proc):
         try:
             t = threading.Thread(target=proc)
             t.daemon = True
@@ -261,17 +273,11 @@ class Server(MotionDetection, Stream):
         except Exception as eStartThread:
             Logging.log("ERROR", "Threading exception eStartThread => " + str(eStartThread))
 
-    def main(self):
+    def server_main(self):
 
-        try:
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind(('', self.server_port))
-            #self.sock.listen(5)
-            time.sleep(1)
-            self.start_thread(self.capture)
-            time.sleep(1)
-        except Exception as eSock:
-            Logging.log("ERROR", "Sock exception eSock => " + str(eSock))
+        time.sleep(1)
+        self.start_thread(self.capture)
+        time.sleep(1)
 
         Logging.log("INFO", "Listening for connections.")
         while(True):
@@ -289,7 +295,7 @@ class Server(MotionDetection, Stream):
                     self.killCamera = True
                     time.sleep(1)
                     self.killCamera = False
-                    self.start_thread(self.main)
+                    self.start_thread(self.stream_main())
                 elif(message == 'kill_monitor'):
                     Logging.log("INFO", "Killing camera!")
                     Logging.log("INFO", "kill_camera")
@@ -318,7 +324,7 @@ class Server(MotionDetection, Stream):
                     Logging.log("INFO", "Server is alive.")
                     #con.send("Server is alive.")
                 else:
-                    Logging.log("ERROR", message + " is not a known command.")
+                    #Logging.log("ERROR", message + " is not a known command.")
                     #con.send(message + " is not a konwn command!")
             except KeyboardInterrupt:
                 print("\n")
@@ -358,5 +364,4 @@ if __name__ == '__main__':
         'cam_location': options.cam_location, 'email_port': options.email_port
     }
 
-    server = Server(options_dict)
-    server.main()
+    Server(options_dict).server_main()
