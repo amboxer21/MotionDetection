@@ -23,6 +23,16 @@ from email.MIMEMultipart import MIMEMultipart
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
+class Accepts(object):
+    @staticmethod
+    def boolean(func):
+        def wrapper(*args):
+            for arg in args:
+                if not str(arg) in ('True','False'):
+                    raise TypeError('"' + str(arg) + '" is not a bool type!')
+            return func
+        return wrapper
+
 class Logging(object):
 
     @staticmethod
@@ -176,9 +186,11 @@ class MotionDetection(object):
         cv2.imwrite(picture_name, frame)
         del(camera)
 
-    def kill_cam(self):
+    @staticmethod
+    @Accepts.boolean
+    def kill_cam(self,value):
         Logging.log("INFO", "def kill_cam(self):")
-        self.killCamera = True
+        self.killCamera = value
 
     def capture(self):
         Logging.log("INFO", "Motion Detection system initialed!")
@@ -275,9 +287,7 @@ class Server(MotionDetection, Stream):
 
     def server_main(self):
 
-        time.sleep(1)
         self.start_thread(self.capture)
-        time.sleep(1)
 
         Logging.log("INFO", "Listening for connections.")
         while(True):
@@ -291,10 +301,7 @@ class Server(MotionDetection, Stream):
                 if(message == 'start_monitor'):
                     Logging.log("INFO", "Starting camera!")
                     Logging.log("INFO", "start_camera")
-                    #con.send("Starting camera!")
-                    self.killCamera = True
-                    time.sleep(1)
-                    self.killCamera = False
+                    Server.kill_cam(True)
                     self.start_thread(self.stream_main())
                 elif(message == 'kill_monitor'):
                     Logging.log("INFO", "Killing camera!")
@@ -324,7 +331,7 @@ class Server(MotionDetection, Stream):
                     Logging.log("INFO", "Server is alive.")
                     #con.send("Server is alive.")
                 else:
-                    #Logging.log("ERROR", message + " is not a known command.")
+                    Logging.log("ERROR", message + " is not a known command.")
                     #con.send(message + " is not a konwn command!")
             except KeyboardInterrupt:
                 print("\n")
