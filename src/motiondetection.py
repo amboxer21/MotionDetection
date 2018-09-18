@@ -118,7 +118,9 @@ class MotionDetection(object):
         self.server_port   = options_dict['server_port']
         self.cam_location  = options_dict['cam_location']
 
+        self.count         = global_vars_dict['count']
         self.is_sent       = global_vars_dict['is_sent']
+        self.is_moving     = global_vars_dict['is_moving']
         self.cam_deleted   = global_vars_dict['cam_deleted'] 
         self.stop_motion   = global_vars_dict['stop_motion'] 
         self.kill_camera   = global_vars_dict['kill_camera'] 
@@ -173,10 +175,8 @@ class MotionDetection(object):
             self.is_sent = True
 
     def capture(self):
+
         Logging.log("INFO", "Motion Detection system initialed!")
-    
-        count     = 0
-        is_moving = True
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
 
@@ -201,26 +201,25 @@ class MotionDetection(object):
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
-            if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
+            if(delta_count > 1300 and delta_count < 10000 and self.is_moving is True):
                 count = 0
-                is_moving = False
+                self.is_moving = False
                 Logging.log("INFO", "MOVEMENT: " + Time.now() + ", Delta: " + str(delta_count))
                 del(self.camera_motion)
                 self.cam_deleted = True
                 self.takePicture()
                 self.notify()
             elif delta_count < 100:
-                count += 1
+                self.count += 1
                 time.sleep(0.1)
-                is_moving = True
+                self.is_moving = True
                 #Reset counter
-                if count == 120:
-                    count = 0
+                if self.count == 120:
+                    self.count = 0
                     self.is_sent = False
     
             if self.cam_deleted:
                 self.camera_motion = cv2.VideoCapture(self.cam_location)
-    
                 self.cam_deleted = False
     
             # keep the frames moving.
@@ -232,7 +231,7 @@ class MotionDetection(object):
 class Mail(MotionDetection):
 
     def __init__(self):
-        super(Mail, self).__init__()
+        super(Mail, self).__init__(options_dict,global_vars_dict)
 
     @staticmethod
     def send(sender,to,password,port,subject,body,img_num):
@@ -255,7 +254,7 @@ class Mail(MotionDetection):
 class Server(MotionDetection):
 
     def __init__(self):
-        super(Server, self).__init__(options_dict)
+        super(Server, self).__init__(options_dict,global_vars_dict)
 
         try:
             self.sock = socket.socket()
@@ -281,9 +280,6 @@ class Server(MotionDetection):
         while(True):
             time.sleep(0.05)
             try:
-                self.sock = socket.socket()
-                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.sock.bind(('', self.server_port))
                 self.sock.listen(5)
                 (con, addr) = self.sock.accept()
                 Logging.log("INFO", "Received connection from " + str(addr))
@@ -345,7 +341,7 @@ if __name__ == '__main__':
     }
 
     global_vars_dict = {
-        'is_sent': False, 'cam_deleted': False,
+        'count': 0, 'is_sent': False, 'is_moving': True, 'cam_deleted': False,
         'stop_motion': False, 'kill_camera': False, 'stream_camera': False,
     }
 
