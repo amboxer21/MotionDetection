@@ -102,30 +102,33 @@ class User(object):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
         return re.search("(\w+)", str(comm.stdout.read())).group()
 
+class Time(object):
+    @staticmethod
+     def now():
+         return time.asctime(time.localtime(time.time()))
+
 class MotionDetection(object):
 
-    def __init__(self,options_dict={}):
-        self.is_sent     = False
-        self.cam_deleted = False
-        self.stop_motion = False
-        self.kill_camera = False
-        self.stream_camera = False
+    def __init__(self,options_dict={},global_vars_dict={}):
 
-        self.ip = options_dict['ip']
-        self.email = options_dict['email']
-        self.password = options_dict['password']
-        self.email_port = options_dict['email_port']
-        self.server_port = options_dict['server_port']
-        self.cam_location = options_dict['cam_location']
+        self.ip            = options_dict['ip']
+        self.email         = options_dict['email']
+        self.password      = options_dict['password']
+        self.email_port    = options_dict['email_port']
+        self.server_port   = options_dict['server_port']
+        self.cam_location  = options_dict['cam_location']
+
+        self.is_sent       = global_vars_dict['is_sent']
+        self.cam_deleted   = global_vars_dict['cam_deleted'] 
+        self.stop_motion   = global_vars_dict['stop_motion'] 
+        self.kill_camera   = global_vars_dict['kill_camera'] 
+        self.stream_camera = global_vars_dict['stream_camera']
 
         if self.email is None or self.password is None:
             Logging.log("ERROR", "Both E-mail and password are required!")
             parser.print_help()
             sys.exit(0)
 
-    def now(self):
-        return time.asctime(time.localtime(time.time()))
-    
     def img_num(self):
         _list = []
         os.chdir("/home/pi/.motiondetection/")
@@ -146,19 +149,19 @@ class MotionDetection(object):
         del(camera)
 
     @Accepts.boolean
-    def stream_camera(value):
+    def stream_camera(self,value):
         time.sleep(0.5)
         Logging.log("INFO", "def stream_camera(" + value + "):")
         self.stream_camera = value
 
     @Accepts.boolean
-    def stop_motion(value):
+    def stop_motion(self,value):
         time.sleep(0.5)
         Logging.log("INFO", "def stop_motion(" + value + "):")
-        self.stopMotion = value
+        self.stop_motion = value
 
     @Accepts.boolean
-    def kill_camera(value):
+    def kill_camera(self,value):
         time.sleep(0.5)
         Logging.log("INFO", "def kill_camera(" + value + "):")
         self.kill_camera = value
@@ -201,7 +204,7 @@ class MotionDetection(object):
             if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
                 count = 0
                 is_moving = False
-                Logging.log("INFO", "MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
+                Logging.log("INFO", "MOVEMENT: " + Time.now() + ", Delta: " + str(delta_count))
                 del(self.camera_motion)
                 self.cam_deleted = True
                 self.takePicture()
@@ -341,4 +344,9 @@ if __name__ == '__main__':
         'cam_location': options.cam_location, 'email_port': options.email_port
     }
 
-    MotionDetection(options_dict).capture()
+    global_vars_dict = {
+        'is_sent': False, 'cam_deleted': False,
+        'stop_motion': False, 'kill_camera': False, 'stream_camera': False,
+    }
+
+    MotionDetection(options_dict,global_vars_dict).capture()
