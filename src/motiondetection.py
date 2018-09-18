@@ -104,8 +104,8 @@ class User(object):
 
 class Time(object):
     @staticmethod
-     def now():
-         return time.asctime(time.localtime(time.time()))
+    def now():
+        return time.asctime(time.localtime(time.time()))
 
 class MotionDetection(object):
 
