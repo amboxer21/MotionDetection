@@ -131,13 +131,14 @@ class MotionDetection(object):
             parser.print_help()
             sys.exit(0)
 
-    def img_num(self):
-        _list = []
+    @staticmethod
+    def img_num():
+        img_list = []
         os.chdir("/home/pi/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
-            _list.append(int(num.group(2)))
-        return max(_list)
+            img_list.append(int(num.group(2)))
+        return max(img_list)
     
     def takePicture(self):
         camera = cv2.VideoCapture(self.cam_location)
@@ -146,32 +147,29 @@ class MotionDetection(object):
         (ret, frame) = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.5)
-        picture_name = "/home/pi/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
+        picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
 
     @Accepts.boolean
     def stream_camera(self,value):
-        time.sleep(0.5)
         Logging.log("INFO", "def stream_camera(" + value + "):")
         self.stream_camera = value
 
     @Accepts.boolean
     def stop_motion(self,value):
-        time.sleep(0.5)
         Logging.log("INFO", "def stop_motion(" + value + "):")
         self.stop_motion = value
 
     @Accepts.boolean
     def kill_camera(self,value):
-        time.sleep(0.5)
         Logging.log("INFO", "def kill_camera(" + value + "):")
         self.kill_camera = value
 
     def notify(self):
         if self.is_sent is not True:
             Mail.send(self.email,self.email,self.password,
-                self.email_port,'Motion Detected','MotionDecetor.py detected movement!', self.img_num())
+                self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
             self.is_sent = True
 
     def capture(self):
@@ -234,13 +232,15 @@ class Mail(MotionDetection):
         super(Mail, self).__init__(options_dict,global_vars_dict)
 
     @staticmethod
-    def send(sender,to,password,port,subject,body,img_num):
+    def send(sender,to,password,port,subject,body):
         try:
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(img_num) + ".png").read()))
-            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(img_num) + ".png").read()))
+            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(MotionDetection.img_num()) + ".png").read()))
+            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
+                + str(MotionDetection.img_num())
+                + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
@@ -346,3 +346,4 @@ if __name__ == '__main__':
     }
 
     MotionDetection(options_dict,global_vars_dict).capture()
+    #Server().server_main()
