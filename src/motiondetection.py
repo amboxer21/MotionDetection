@@ -24,12 +24,24 @@ from SocketServer import ThreadingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
 class Accepts(object):
+
     @staticmethod
     def boolean(func):
         def wrapper(*args):
-            for arg in args:
-                if not str(arg) in ('True','False'):
-                    raise TypeError('"' + str(arg) + '" is not a bool type!')
+            length = len(args)
+            for index in range(1,(int(length))):
+                if not str(args[int(index)]) in ('True','False'):
+                    raise TypeError('"' + str(args[int(index)]) + '" is not a bool type!')
+            return func
+        return wrapper
+
+    @staticmethod
+    def integer(func):
+        def wrapper(*args):
+            length = len(args)
+            for index in range(1,(int(length))):
+                if re.search(r'\d+\b', args[int(index)]) is None:
+                    raise TypeError('"' + str(args[int(index)]) + '" is not an integer!')
             return func
         return wrapper
 
@@ -80,6 +92,7 @@ class User(object):
 class MotionDetection(object):
 
     def __init__(self,options_dict={}):
+        self.is_sent     = False
         self.cam_deleted = False
         self.stop_motion = False
         self.kill_camera = False
@@ -107,29 +120,6 @@ class MotionDetection(object):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             _list.append(int(num.group(2)))
         return max(_list)
-    
-    def sendMail(self,sender,to,password,port,subject,body):
-        try:
-            message = MIMEMultipart()
-            message['Body'] = body
-            message['Subject'] = subject
-            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
-            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(self.img_num()) + ".png").read()))
-            mail = smtplib.SMTP('smtp.gmail.com',port)
-            mail.starttls()
-            mail.login(sender,password)
-            mail.sendmail(sender, to, message.as_string())
-            Logging.log("INFO", "Sent email successfully!\n")
-        except smtplib.SMTPAuthenticationError:
-            Logging.log("WARN", "Could not athenticate with password and username!")
-        except Exception as e:
-            Logging.log("ERROR", "Unexpected error in sendMail() error e => " + str(e))
-    
-    def notify(self):
-        if self.is_sent is not True:
-            self.sendMail(self.email,self.email,self.password,
-                self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
-            self.is_sent = True
     
     def takePicture(self):
         camera = cv2.VideoCapture(self.cam_location)
@@ -159,6 +149,12 @@ class MotionDetection(object):
         time.sleep(0.5)
         Logging.log("INFO", "def kill_camera(" + value + "):")
         self.kill_camera = value
+
+    def notify(self):
+        if self.is_sent is not True:
+            Mail.send(self.email,self.email,self.password,
+                self.email_port,'Motion Detected','MotionDecetor.py detected movement!', self.img_num())
+            self.is_sent = True
 
     def capture(self):
         Logging.log("INFO", "Motion Detection system initialed!")
@@ -217,6 +213,29 @@ class MotionDetection(object):
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
+class Mail(MotionDetection):
+
+    def __init__(self):
+        super(Mail, self).__init__()
+
+    @staticmethod
+    def send(sender,to,password,port,subject,body,img_num):
+        try:
+            message = MIMEMultipart()
+            message['Body'] = body
+            message['Subject'] = subject
+            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(img_num) + ".png").read()))
+            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(img_num) + ".png").read()))
+            mail = smtplib.SMTP('smtp.gmail.com',port)
+            mail.starttls()
+            mail.login(sender,password)
+            mail.sendmail(sender, to, message.as_string())
+            Logging.log("INFO", "Sent email successfully!\n")
+        except smtplib.SMTPAuthenticationError:
+            Logging.log("WARN", "Could not athenticate with password and username!")
+        except Exception as e:
+            Logging.log("ERROR", "Unexpected error in Mail.send() error e => " + str(e))
+
 class Server(MotionDetection):
 
     def __init__(self):
@@ -237,7 +256,7 @@ class Server(MotionDetection):
         except Exception as eStartThread:
             Logging.log("ERROR", "Threading exception eStartThread => " + str(eStartThread))
 
-    def __call__(self):
+    def server_main(self):
 
         self.start_thread(self.capture)
 
