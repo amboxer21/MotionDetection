@@ -111,37 +111,43 @@ class User(object):
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
         return re.search("(\w+)", str(comm.stdout.read())).group()
 
+class Time(object):
+    @staticmethod
+    def now():
+        return time.asctime(time.localtime(time.time()))
+
 class MotionDetection(object):
 
-    def __init__(self,options_dict={}):
-        self.is_sent     = False
-        self.cam_deleted = False
-        self.stop_motion = False
-        self.kill_camera = False
-        self.stream_camera = False
+    def __init__(self,options_dict={},global_vars_dict={}):
 
-        self.ip = options_dict['ip']
-        self.email = options_dict['email']
-        self.password = options_dict['password']
-        self.email_port = options_dict['email_port']
-        self.server_port = options_dict['server_port']
-        self.cam_location = options_dict['cam_location']
+        self.ip            = options_dict['ip']
+        self.email         = options_dict['email']
+        self.password      = options_dict['password']
+        self.email_port    = options_dict['email_port']
+        self.server_port   = options_dict['server_port']
+        self.cam_location  = options_dict['cam_location']
+
+        self.count         = global_vars_dict['count']
+        self.is_sent       = global_vars_dict['is_sent']
+        self.is_moving     = global_vars_dict['is_moving']
+        self.cam_deleted   = global_vars_dict['cam_deleted'] 
+        self.stop_motion   = global_vars_dict['stop_motion'] 
+        self.kill_camera   = global_vars_dict['kill_camera'] 
+        self.stream_camera = global_vars_dict['stream_camera']
 
         if self.email is None or self.password is None:
             Logging.log("ERROR", "Both E-mail and password are required!")
             parser.print_help()
             sys.exit(0)
 
-    def now(self):
-        return time.asctime(time.localtime(time.time()))
-    
-    def img_num(self):
-        _list = []
+    @staticmethod
+    def img_num():
+        img_list = []
         os.chdir("/home/pi/.motiondetection/")
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
-            _list.append(int(num.group(2)))
-        return max(_list)
+            img_list.append(int(num.group(2)))
+        return max(img_list)
     
     def takePicture(self):
         camera = cv2.VideoCapture(self.cam_location)
@@ -150,39 +156,34 @@ class MotionDetection(object):
         (ret, frame) = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
         time.sleep(0.5)
-        picture_name = "/home/pi/.motiondetection/capture" + str(self.img_num() + 1) + ".png"
+        picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
 
     @Accepts.boolean
-    def stream_camera(value):
-        time.sleep(0.5)
+    def stream_camera(self,value):
         Logging.log("INFO", "def stream_camera(" + value + "):")
         self.stream_camera = value
 
     @Accepts.boolean
-    def stop_motion(value):
-        time.sleep(0.5)
+    def stop_motion(self,value):
         Logging.log("INFO", "def stop_motion(" + value + "):")
-        self.stopMotion = value
+        self.stop_motion = value
 
     @Accepts.boolean
-    def kill_camera(value):
-        time.sleep(0.5)
+    def kill_camera(self,value):
         Logging.log("INFO", "def kill_camera(" + value + "):")
         self.kill_camera = value
 
     def notify(self):
         if self.is_sent is not True:
             Mail.send(self.email,self.email,self.password,
-                self.email_port,'Motion Detected','MotionDecetor.py detected movement!', self.img_num())
+                self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
             self.is_sent = True
 
     def capture(self):
+
         Logging.log("INFO", "Motion Detection system initialed!")
-    
-        count     = 0
-        is_moving = True
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
 
@@ -207,26 +208,25 @@ class MotionDetection(object):
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
-            if(delta_count > 1300 and delta_count < 10000 and is_moving is True):
+            if(delta_count > 1300 and delta_count < 10000 and self.is_moving is True):
                 count = 0
-                is_moving = False
-                Logging.log("INFO", "MOVEMENT: " + self.now() + ", Delta: " + str(delta_count))
+                self.is_moving = False
+                Logging.log("INFO", "MOVEMENT: " + Time.now() + ", Delta: " + str(delta_count))
                 del(self.camera_motion)
                 self.cam_deleted = True
                 self.takePicture()
                 self.notify()
             elif delta_count < 100:
-                count += 1
+                self.count += 1
                 time.sleep(0.1)
-                is_moving = True
+                self.is_moving = True
                 #Reset counter
-                if count == 120:
-                    count = 0
+                if self.count == 120:
+                    self.count = 0
                     self.is_sent = False
     
             if self.cam_deleted:
                 self.camera_motion = cv2.VideoCapture(self.cam_location)
-    
                 self.cam_deleted = False
     
             # keep the frames moving.
@@ -238,16 +238,18 @@ class MotionDetection(object):
 class Mail(MotionDetection):
 
     def __init__(self):
-        super(Mail, self).__init__()
+        super(Mail, self).__init__(options_dict,global_vars_dict)
 
     @staticmethod
-    def send(sender,to,password,port,subject,body,img_num):
+    def send(sender,to,password,port,subject,body):
         try:
             message = MIMEMultipart()
             message['Body'] = body
             message['Subject'] = subject
-            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(img_num) + ".png").read()))
-            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture" + str(img_num) + ".png").read()))
+            #message.attach(MIMEImage(file("/home/" + User.name() + "/.motiondetection/capture" + str(MotionDetection.img_num()) + ".png").read()))
+            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
+                + str(MotionDetection.img_num())
+                + ".png").read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
@@ -261,7 +263,7 @@ class Mail(MotionDetection):
 class Server(MotionDetection):
 
     def __init__(self):
-        super(Server, self).__init__(options_dict)
+        super(Server, self).__init__(options_dict,global_vars_dict)
 
         try:
             self.sock = socket.socket()
@@ -287,9 +289,6 @@ class Server(MotionDetection):
         while(True):
             time.sleep(0.05)
             try:
-                self.sock = socket.socket()
-                self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                self.sock.bind(('', self.server_port))
                 self.sock.listen(5)
                 (con, addr) = self.sock.accept()
                 Logging.log("INFO", "Received connection from " + str(addr))
@@ -350,4 +349,10 @@ if __name__ == '__main__':
         'cam_location': options.cam_location, 'email_port': options.email_port
     }
 
-    MotionDetection(options_dict).capture()
+    global_vars_dict = {
+        'count': 0, 'is_sent': False, 'is_moving': True, 'cam_deleted': False,
+        'stop_motion': False, 'kill_camera': False, 'stream_camera': False,
+    }
+
+    MotionDetection(options_dict,global_vars_dict).capture()
+    #Server().server_main()
