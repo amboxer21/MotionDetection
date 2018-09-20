@@ -283,7 +283,6 @@ class Server(MotionDetection):
     @Accepts.tuple
     def handle_incoming_message(*message):
         for(ret, msg) in enumerate(message):
-            print msg
             if(msg == 'start_monitor'):
                 Logging.log("INFO", "Starting camera!")
                 Logging.log("INFO", "start_camera")
