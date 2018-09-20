@@ -67,6 +67,21 @@ class Accepts(object):
             return func(args)
         return wrapper
 
+    @classmethod
+    def tuple(cls,func):
+        arg_count = func.__code__.co_argcount
+        def wrapper(*args):
+            for arg in args:
+                if re.search(r'<__main__',str(arg)) is not None:
+                    pass
+                elif not isinstance(args, tuple):
+                    raise TypeError('"' + str(arg) + '" is not a tuple!')
+                else:
+                    if int(arg_count) > 1:
+                        return func(cls,arg)
+                    return func(arg)
+        return wrapper
+
 class Logging(object):
 
     @staticmethod
@@ -265,6 +280,28 @@ class Server(MotionDetection):
         except Exception as eSock:
             print("eSock error e => " + str(eSock))
 
+    @Accepts.tuple
+    def handle_incoming_message(*message):
+        for(ret, msg) in enumerate(message):
+            print msg
+            if(msg == 'start_monitor'):
+                Logging.log("INFO", "Starting camera!")
+                Logging.log("INFO", "start_camera")
+            elif(msg == 'kill_monitor'):
+                Logging.log("INFO", "Killing camera!")
+                Logging.log("INFO", "kill_camera")
+            elif(msg == 'start_motion'):
+                Logging.log("INFO", "Starting motion sensor!")
+                Logging.log("INFO", "start_motion")
+            elif(msg == 'kill_motion'):
+                Logging.log("INFO", "Killing motion sensor!")
+                Logging.log("INFO", "kill_motion")
+            elif(msg == 'probe'):
+                Logging.log("INFO", "Server is alive.")
+            else:
+                pass
+                #con.send(message + " is not a konwn command!")
+
     def start_thread(self,proc):
         try:
             t = threading.Thread(target=proc)
@@ -287,23 +324,8 @@ class Server(MotionDetection):
                 Logging.log("INFO", "Received connection from " + str(addr))
                 message = con.recv(1024)
 
-                if(message == 'start_monitor'):
-                    Logging.log("INFO", "Starting camera!")
-                    Logging.log("INFO", "start_camera")
-                elif(message == 'kill_monitor'):
-                    Logging.log("INFO", "Killing camera!")
-                    Logging.log("INFO", "kill_camera")
-                elif(message == 'start_motion'):
-                    Logging.log("INFO", "Starting motion sensor!")
-                    Logging.log("INFO", "start_motion")
-                elif(message == 'kill_motion'):
-                    Logging.log("INFO", "Killing motion sensor!")
-                    Logging.log("INFO", "kill_motion")
-                elif(message == 'probe'):
-                    Logging.log("INFO", "Server is alive.")
-                else:
-                    Logging.log("ERROR", message + " is not a known command.")
-                    #con.send(message + " is not a konwn command!")
+                self.handle_incoming_message(message)
+
             except KeyboardInterrupt:
                 print("\n")
                 Logging.log("INFO", "Caught control + c, exiting now.")
@@ -347,5 +369,5 @@ if __name__ == '__main__':
         'stop_motion': False, 'kill_camera': False, 'stream_camera': False,
     }
 
-    MotionDetection(options_dict,global_vars_dict).capture()
-    #Server().server_main()
+    MotionDetection(options_dict,global_vars_dict)
+    Server().server_main()
