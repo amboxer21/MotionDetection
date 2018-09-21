@@ -154,6 +154,9 @@ class Mail(object):
 
 class CamHandler(BaseHTTPRequestHandler):
 
+    def __init__(self,stream_camera):
+        self.stream_camera = stream_camera
+
     def do_GET(self):
 
         if self.path.endswith('.mjpg'):
@@ -162,13 +165,13 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
         while True:
             try:
-                (read_cam, image) = self.streamCamera.read()
+                (read_cam, image) = self.stream_camera.read()
                 if not read_cam:
                     continue
-                if self.killCamera is True:
+                '''if self.kill_camera is True:
                     Logging.log("INFO","Killing cam.")
                     self.streamCamera.release()
-                    break
+                    break'''
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -180,7 +183,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
             except KeyboardInterrupt:
-                self.streamCamera.release()
+                self.stream_camera.release()
                 break
         return
 
@@ -188,20 +191,19 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 class Stream(object):
-    def __init__(self):
-        time.sleep(1)
-        self.streamCamera = cv2.VideoCapture(self.cam_location)
-        self.streamCamera.set(3,320)
-        self.streamCamera.set(4,320)
+    def __init__(self,cam_location):
+        self.cam_location = cam_location
 
-    @staticmethod
-    def stream_main():
+    def stream_main(self):
         try:
-            server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
+            stream_camera = cv2.VideoCapture(self.cam_location)
+            stream_camera.set(3,320)
+            stream_camera.set(4,320)
+            server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler(self.stream_camera))
             Logging.log("INFO", "Streaming HTTPServer started")
             server.serve_forever()
         except KeyboardInterrupt:
-            self.streamCamera.release()
+            self.stream_camera.release()
             server.socket.close()
         except Exception as eThreadedHTTPServer:
             pass
@@ -446,6 +448,7 @@ if __name__ == '__main__':
 
     queue  = Queue()
     server = Server()
+    stream = Stream(options_dict['cam_location'])
     motion_detection = MotionDetection(options_dict,global_vars_dict)
 
     multiprocessing_queue = multiprocessing.Queue()
