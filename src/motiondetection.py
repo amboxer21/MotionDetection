@@ -10,8 +10,8 @@ import socket
 import smtplib
 import logging
 import StringIO
-import threading
 import subprocess
+import multiprocessing
 import logging.handlers
 
 from PIL import Image
@@ -211,7 +211,7 @@ class MotionDetection(object):
         Logging.log("INFO", "def kill_camera(" + value + "):")
         self.kill_camera = value
 
-    def capture(self):
+    def capture(self,queue):
 
         Logging.log("INFO", "Motion Detection system initialed!")
     
@@ -238,17 +238,19 @@ class MotionDetection(object):
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
-            if(delta_count > 1300 and delta_count < 10000 and self.is_moving is True):
-                count = 0
-                self.is_moving = False
-                Logging.log("INFO", "MOVEMENT: " + Time.now() + ", Delta: " + str(delta_count))
-                del(self.camera_motion)
-                self.cam_deleted = True
-                self.takePicture()
-                if not self.is_sent:
-                    Mail.send(self.email,self.email,self.password,
-                        self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
-                    self.is_sent = True
+            if(self.is_moving is True
+                and delta_count > self.motion_thresh_min
+                and delta_count < self.motion_thresh_max):
+                    count = 0
+                    self.is_moving = False
+                    Logging.log("INFO", "MOVEMENT: " + Time.now() + ", Delta: " + str(delta_count))
+                    del(self.camera_motion)
+                    self.cam_deleted = True
+                    self.takePicture()
+                    if not self.is_sent:
+                        Mail.send(self.email,self.email,self.password,
+                            self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
+                        self.is_sent = True
             elif delta_count < 100:
                 self.count += 1
                 time.sleep(0.1)
@@ -301,17 +303,17 @@ class Server(MotionDetection):
                 pass
                 #con.send(message + " is not a konwn command!")
 
-    def start_thread(self,proc):
+    def queue_process(self,func):
+        queue = multiprocessing.Queue()
         try:
-            t = threading.Thread(target=proc)
-            t.daemon = True
-            t.start()
-        except Exception as eStartThread:
-            Logging.log("ERROR", "Threading exception eStartThread => " + str(eStartThread))
+            process = multiprocessing.Process(target=func, args=(queue,))
+            process.start()
+        except Exception as eQueueProcess:
+            Logging.log("ERROR", "Queue exception eQueueProcess => " + str(eQueueProcess))
 
     def server_main(self):
 
-        self.start_thread(self.capture)
+        self.queue_process(self.capture)
 
         Logging.log("INFO", "Listening for connections.")
 
@@ -355,12 +357,24 @@ if __name__ == '__main__':
     parser.add_option("-E", "--email-port",
         dest='email_port', type="int", default=587,
         help='"E-mail port defaults to port 587"')
+    parser.add_option("-m", "--motion-threshold-min",
+        dest='motion_thresh_min', type="int", default=1300,
+        help='"Sets the minimum movement threshold '
+            +'to trigger the programs image capturing routine.'
+            +' The default value is set at 1300."')
+    parser.add_option("-M", "--motion-threshold-max",
+        dest='motion_thresh_max', type="int", default=10000,
+        help='"Sets the maximum movement threshold when the '
+            +'programs image capturing routine stops working.'
+            +' The default value is set at 10000."')
     (options, args) = parser.parse_args()
 
     options_dict = {
         'ip': options.ip, 'server_port': options.server_port,
         'email': options.email, 'password': options.password,
-        'cam_location': options.cam_location, 'email_port': options.email_port
+        'cam_location': options.cam_location, 'email_port': options.email_port,
+        'options.motion_thresh_min': options.motion_thresh_min, 
+        'options.motion_thresh_max': options.motion_thresh_max
     }
 
     global_vars_dict = {
