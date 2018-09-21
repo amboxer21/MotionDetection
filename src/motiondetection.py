@@ -151,11 +151,74 @@ class Mail(object):
             Logging.log("WARN", "Could not athenticate with password and username!")
         except Exception as e:
             Logging.log("ERROR", "Unexpected error in Mail.send() error e => " + str(e))
+
+class CamHandler(BaseHTTPRequestHandler):
+
+    def do_GET(self):
+
+        if self.path.endswith('.mjpg'):
+            self.send_response(200)
+            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
+            self.end_headers()
+        while True:
+            try:
+                (read_cam, image) = self.streamCamera.read()
+                if not read_cam:
+                    continue
+                if self.killCamera is True:
+                    Logging.log("INFO","Killing cam.")
+                    self.streamCamera.release()
+                    break
+                rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+                jpg = Image.fromarray(rgb)
+                jpg_file = StringIO.StringIO()
+                jpg.save(jpg_file,'JPEG')
+                self.wfile.write("--jpgboundary")
+                self.send_header('Content-type','image/jpeg')
+                self.send_header('Content-length',str(jpg_file.len))
+                self.end_headers()
+                jpg.save(self.wfile,'JPEG')
+                time.sleep(0.05)
+            except KeyboardInterrupt:
+                self.streamCamera.release()
+                break
+        return
+
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    pass
+
+class Stream(object):
+    def __init__(self):
+        time.sleep(1)
+        self.streamCamera = cv2.VideoCapture(self.cam_location)
+        self.streamCamera.set(3,320)
+        self.streamCamera.set(4,320)
+
+    @staticmethod
+    def stream_main():
+        try:
+            server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
+            Logging.log("INFO", "Streaming HTTPServer started")
+            server.serve_forever()
+        except KeyboardInterrupt:
+            self.streamCamera.release()
+            server.socket.close()
+        except Exception as eThreadedHTTPServer:
+            pass
+
+class Queue(object):
+
+    def queue_process(self,func,queue):
+        try:
+            process = multiprocessing.Process(target=func, args=(queue,))
+            process.start()
+        except Exception as eQueueProcess:
+            Logging.log("ERROR", "Queue exception eQueueProcess => " + str(eQueueProcess))
  
 class MotionDetection(object):
 
     def __init__(self,options_dict={},global_vars_dict={}):
-
+        super(MotionDetection,self).__init__()
         self.ip            = options_dict['ip']
         self.email         = options_dict['email']
         self.password      = options_dict['password']
@@ -170,6 +233,9 @@ class MotionDetection(object):
         self.stop_motion   = global_vars_dict['stop_motion'] 
         self.kill_camera   = global_vars_dict['kill_camera'] 
         self.stream_camera = global_vars_dict['stream_camera']
+
+        self.motion_thresh_min = options_dict['motion_thresh_min']
+        self.motion_thresh_max = options_dict['motion_thresh_max']
 
         if self.email is None or self.password is None:
             Logging.log("ERROR", "Both E-mail and password are required!")
@@ -223,13 +289,15 @@ class MotionDetection(object):
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
         frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
         frame_prior = frame_now
-    
+
         while(True):
 
-            if self.kill_camera or self.stop_motion:
-                Logging.log("INFO", "Killing cam.")
-                del(self.camera_motion)
-                break
+            if (not queue.empty()
+                and queue.get() != 'kill_camera'
+                or queue.get() != 'stop_motion'):
+                    Logging.log("INFO", "Killing cam.")
+                    del(self.camera_motion)
+                    break
       
             frame_delta = cv2.absdiff(frame_prior, frame_now)
             frame_delta = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)[1]
@@ -283,37 +351,32 @@ class Server(MotionDetection):
             print("eSock error e => " + str(eSock))
 
     @Accepts.tuple
-    def handle_incoming_message(*message):
-        for(ret, msg) in enumerate(message):
-            if(msg == 'start_monitor'):
+    def handle_incoming_message(*messages):
+        for(ret, (message,queue)) in enumerate(messages):
+            if(message == 'start_monitor'):
                 Logging.log("INFO", "Starting camera!")
                 Logging.log("INFO", "start_camera")
-            elif(msg == 'kill_monitor'):
+                queue.put('start_monitor')
+            elif(message == 'kill_monitor'):
                 Logging.log("INFO", "Killing camera!")
                 Logging.log("INFO", "kill_camera")
-            elif(msg == 'start_motion'):
+                queue.put('kill_monitor')
+            elif(message == 'start_motion'):
                 Logging.log("INFO", "Starting motion sensor!")
                 Logging.log("INFO", "start_motion")
-            elif(msg == 'kill_motion'):
+                queue.put('start_motion')
+            elif(message == 'kill_motion'):
                 Logging.log("INFO", "Killing motion sensor!")
                 Logging.log("INFO", "kill_motion")
-            elif(msg == 'probe'):
+                queue.put('kill_motion')
+            elif(message == 'probe'):
                 Logging.log("INFO", "Server is alive.")
+                queue.put('probe')
             else:
                 pass
                 #con.send(message + " is not a konwn command!")
 
-    def queue_process(self,func):
-        queue = multiprocessing.Queue()
-        try:
-            process = multiprocessing.Process(target=func, args=(queue,))
-            process.start()
-        except Exception as eQueueProcess:
-            Logging.log("ERROR", "Queue exception eQueueProcess => " + str(eQueueProcess))
-
-    def server_main(self):
-
-        self.queue_process(self.capture)
+    def server_main(self,queue):
 
         Logging.log("INFO", "Listening for connections.")
 
@@ -323,9 +386,8 @@ class Server(MotionDetection):
                 self.sock.listen(5)
                 (con, addr) = self.sock.accept()
                 Logging.log("INFO", "Received connection from " + str(addr))
-                message = con.recv(1024)
 
-                self.handle_incoming_message(message)
+                self.handle_incoming_message((con.recv(1024),queue))
 
             except KeyboardInterrupt:
                 print("\n")
@@ -373,8 +435,8 @@ if __name__ == '__main__':
         'ip': options.ip, 'server_port': options.server_port,
         'email': options.email, 'password': options.password,
         'cam_location': options.cam_location, 'email_port': options.email_port,
-        'options.motion_thresh_min': options.motion_thresh_min, 
-        'options.motion_thresh_max': options.motion_thresh_max
+        'motion_thresh_min': options.motion_thresh_min, 
+        'motion_thresh_max': options.motion_thresh_max
     }
 
     global_vars_dict = {
@@ -382,5 +444,10 @@ if __name__ == '__main__':
         'stop_motion': False, 'kill_camera': False, 'stream_camera': False,
     }
 
-    MotionDetection(options_dict,global_vars_dict)
-    Server().server_main()
+    queue  = Queue()
+    server = Server()
+    motion_detection = MotionDetection(options_dict,global_vars_dict)
+
+    multiprocessing_queue = multiprocessing.Queue()
+    queue.queue_process(server.server_main,multiprocessing_queue)
+    queue.queue_process(motion_detection.capture,multiprocessing_queue)
