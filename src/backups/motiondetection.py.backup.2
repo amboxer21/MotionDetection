@@ -11,6 +11,7 @@ import smtplib
 import logging
 import StringIO
 import subprocess
+import threading
 import multiprocessing
 import logging.handlers
 
@@ -132,6 +133,7 @@ class Time(object):
         return time.asctime(time.localtime(time.time()))
 
 class Mail(object):
+
     @staticmethod
     def send(sender,to,password,port,subject,body):
         try:
@@ -154,10 +156,11 @@ class Mail(object):
 # Metaclass for locking video camera
 class VideoFeed(type):
 
+    __has_cam__ = {}
     __classes__ = []
 
     def __new__(meta,name,bases,dct):
-        VideoFeed.__classes__.append(name)
+        VideoFeed.__classes__.append(name) 
         if not hasattr(meta,'video_capture'):
             meta.video_capture = cv2.VideoCapture(0)
             meta.video_capture.set(3,320)
@@ -166,49 +169,35 @@ class VideoFeed(type):
 
     def __init__(cls,name,bases,dct):
         if not hasattr(cls,'video_capture'):
-            Logging.log("INFO",
-                '(VideoFeed.__init__) - Passing videocapture object to class "'+cls.__name__+'"')
-            cls.video_capture = meta.video_capture
-        if not hasattr(cls, 'rest'):
-            Logging.log("INFO",
-                '(VideoFeed.__init__) - Setting "rest" attribute in class "'+cls.__name__+'"')
-            cls.rest = False
+            return meta.video_capture 
         super(VideoFeed,cls).__init__(name,bases,dct)
 
-    def video_feed(cls):
+    def capture_feed(cls):
         return VideoFeed.video_capture
  
     def release(cls):
-        Logging.log("INFO", "(VideoFeed.release) - Releasing cam!")
-        if hasattr(cls,'video_capture'):
-            try:
-                delattr(cls,'video_capture')
-                Logging.log("INFO",
-                    "video_capture attribute deleted from class '"+cls.__name__+"'")
-            except AttributeError:
-                pass
+        print('Releasing cam!')
+        #del(VideoFeed.video_capture) 
+        #delattr(VideoFeed,'video_capture')
 
 class CamHandler(BaseHTTPRequestHandler,object):
 
     __metaclass__ = VideoFeed
 
     def do_GET(self):
-
+        print 'CamHandler.video_capture',CamHandler.video_capture
         if self.path.endswith('.mjpg'):
             self.send_response(200)
-            self.send_header('Content-type',
-                'multipart/x-mixed-replace; boundary=--jpgboundary')
+            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
-        #while True:
-        while(not CamHandler.rest):
+        while True:
             try:
-                (read_cam, image) = CamHandler.video_capture.read()
+                (read_cam, image) = CamHandler.capture.read()
                 if not read_cam:
                     continue
-                '''if not queue.empty() and queue.get() == 'stop_monitor':
-                    Logging.log("INFO", "(CamHandler.do_GET) - Killing CamView.")
-                    CamHandler.release()
-                    break'''
+                if self.kill_camera is True:
+                    Logging.log("INFO","(CamHandler.do_GET) - Killing cam.")
+                    break
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -220,10 +209,8 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
             except KeyboardInterrupt:
-                CamHandler.release()
+                del(stream_camera)
                 break
-            except Exception as e:
-                print("(CamHandler.do_GET) - Exception e => "+ str(e))
         return
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -233,28 +220,26 @@ class Stream(object):
 
     __metaclass__ = VideoFeed
 
-    def stream_main(self,queue=None):
+    def stream_main(self):
+        Logging.log("INFO", "(Stream.stream_main) - Stream class initialized!")
         try:
-            Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
+            Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
             server.serve_forever()
         except KeyboardInterrupt:
+            self.stream_camera.release()
             server.socket.close()
-            Stream.release()
         except Exception as eThreadedHTTPServer:
-            print("(Stream.stream_main) - Exception eThreadedHTTPServer => "
-                + str(eThreadedHTTPServer))
             pass
 
-class Queues(object):
+class Queue(object):
 
     def queue_process(self,func,queue=None):
         try:
             process = multiprocessing.Process(target=func, args=(queue,))
             process.start()
         except Exception as eQueueProcess:
-            Logging.log("ERROR",
-                "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
+            Logging.log("ERROR", "(Queue.queue_process) - Queue exception eQueueProcess => " + str(eQueueProcess))
  
 class MotionDetection(object):
 
@@ -262,9 +247,6 @@ class MotionDetection(object):
 
     def __init__(self,options_dict={},global_vars_dict={}):
         super(MotionDetection,self).__init__()
-
-        Logging.log("INFO", "(MotionDetection.__init__) - Initializing MotionDetection!")
-
         self.ip            = options_dict['ip']
         self.email         = options_dict['email']
         self.password      = options_dict['password']
@@ -284,8 +266,7 @@ class MotionDetection(object):
         self.motion_thresh_max = options_dict['motion_thresh_max']
 
         if self.email is None or self.password is None:
-            Logging.log("ERROR",
-                "(MotionDetection.__init__) - Both E-mail and password are required!")
+            Logging.log("ERROR", "(MotionDetection.__init__) - Both E-mail and password are required!")
             parser.print_help()
             sys.exit(0)
 
@@ -299,7 +280,7 @@ class MotionDetection(object):
         return max(img_list)
     
     def take_picture(self):
-        camera = MotionDetection.video_capture
+        camera = MotionDetection.capture_feed()
         if not camera.isOpened():
             return
         (ret, frame) = camera.read()
@@ -307,7 +288,7 @@ class MotionDetection(object):
         time.sleep(0.5)
         picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
-        MotionDetection.release()
+        del(camera)
 
     @Accepts.boolean
     def stream_camera(self,value):
@@ -324,25 +305,25 @@ class MotionDetection(object):
         Logging.log("INFO", "(MotionDetection.kill_camera) - " + value + "):")
         self.kill_camera = value
 
-    def capture(self,queue=None):
+    def capture(self,queue):
 
         Logging.log("INFO", "(MotionDetection.capture) - Motion Detection system initialed!")
+    
+        self.motion_camera = MotionDetection.capture_feed()
 
-        self.camera_motion = MotionDetection.video_capture
-
-        frame_now = self.camera_motion.read()[1]
-        frame_now = self.camera_motion.read()[1]
+        frame_now = self.motion_camera.read()[1]
+        frame_now = self.motion_camera.read()[1]
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
         frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
         frame_prior = frame_now
 
-        while(not MotionDetection.rest):
+        while(True):
 
-            '''if not queue.empty() and queue.get() == 'start_monitor':
-                Logging.log("INFO", "(MotionDetection.capture) - (Queues message) -> Killing camera.")
-                MotionDetection.release()
-                break'''
+            if not queue.empty() and queue.get() == 'start_monitor':
+                Logging.log("INFO", "(MotionDetection.capture_feed()) - Killing motiondetection system!")
+                del(self.motion_camera)
+                break
       
             frame_delta = cv2.absdiff(frame_prior, frame_now)
             frame_delta = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)[1]
@@ -356,13 +337,10 @@ class MotionDetection(object):
                 and delta_count < self.motion_thresh_max):
                     count = 0
                     self.is_moving = False
-                    Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
-                        + Time.now()
-                        + ", Delta: "
-                        + str(delta_count))
-                    MotionDetection.release()
+                    Logging.log("INFO", "(MotionDetection.capture_feed()) - MOVEMENT: " + Time.now() + ", Delta: " + str(delta_count))
+                    #del(self.motion_camera)
+                    self.cam_deleted = True
                     self.take_picture()
-                    self.camera_motion = MotionDetection.video_capture
                     if not self.is_sent:
                         Mail.send(self.email,self.email,self.password,
                             self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
@@ -376,18 +354,27 @@ class MotionDetection(object):
                     self.count = 0
                     self.is_sent = False
     
+            if self.cam_deleted:
+                self.motion_camera = cv2.VideoCapture(self.cam_location)
+                self.cam_deleted = False
+    
             # keep the frames moving.
             frame_prior = frame_now
-            frame_now = self.camera_motion.read()[1]
+            frame_now = self.motion_camera.read()[1]
             frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
             frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
 
-class Server(MotionDetection):
+class Server(MotionDetection,Queue):
 
-    __metaclass__ = VideoFeed
+    __metclass__ = VideoFeed
 
     def __init__(self):
         super(Server, self).__init__(options_dict,global_vars_dict)
+
+        self.multiprocessing_queue = multiprocessing.Queue()
+
+        Server.release()
+        Logging.log("INFO", "(Server.__init__) - Initializing Server class!")
 
         try:
             self.sock = socket.socket()
@@ -400,19 +387,11 @@ class Server(MotionDetection):
     def handle_incoming_message(*messages):
         for(ret, (message,queue)) in enumerate(messages):
             if(message == 'start_monitor'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
+                Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_camera)")
                 queue.put('start_monitor')
-                MotionDetection.rest = True
-                MotionDetection.release()
-                CamHandler.rest = False
-                Queues().queue_process(Stream().stream_main)
             elif(message == 'kill_monitor'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
+                Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_camera)")
                 queue.put('kill_monitor')
-                CamHandler.rest = True
-                CamHandler.release()
-                MotionDetection.rest = False
-                Queues().queue_process(MotionDetection(options_dict,global_vars_dict).capture)
             elif(message == 'start_motion'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Starting motion sensor! -> (start_motion)")
                 queue.put('start_motion')
@@ -426,9 +405,11 @@ class Server(MotionDetection):
                 pass
                 #con.send(message + " is not a konwn command!")
 
-    def server_main(self,queue):
+    def server_main(self):
 
         Logging.log("INFO", "(Server.server_main) - Listening for connections.")
+
+        self.queue_process(self.capture,self.multiprocessing_queue)
 
         while(True):
             time.sleep(0.05)
@@ -495,5 +476,4 @@ if __name__ == '__main__':
     }
 
     motion_detection = MotionDetection(options_dict,global_vars_dict)
-
-    Queues().queue_process(Server().server_main,multiprocessing.Queue())
+    server = Server().server_main()
