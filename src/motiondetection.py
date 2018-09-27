@@ -182,10 +182,9 @@ class VideoFeed(type):
             except AttributeError:
                 pass
 
-class CamHandler(BaseHTTPRequestHandler):
+class CamHandler(BaseHTTPRequestHandler,object):
 
-    def __init__(self,stream_camera):
-        self.stream_camera = stream_camera
+    __metaclass__ = VideoFeed
 
     def do_GET(self):
 
@@ -196,12 +195,12 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
         while True:
             try:
-                (read_cam, image) = self.stream_camera.read()
+                (read_cam, image) = CamHandler.video_capture.read()
                 if not read_cam:
                     continue
-                '''if self.kill_camera is True:
-                    Logging.log("INFO","(CamHandler.do_GET) - Killing cam.")
-                    self.streamCamera.release()
+                '''if not queue.empty() and queue.get() == 'stop_monitor':
+                    Logging.log("INFO", "(CamHandler.do_GET) - Killing CamView.")
+                    CamHandler.release()
                     break'''
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
@@ -214,29 +213,30 @@ class CamHandler(BaseHTTPRequestHandler):
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
             except KeyboardInterrupt:
-                self.stream_camera.release()
+                CamHandler.release()
                 break
+            except Exception as e:
+                print("(CamHandler.do_GET) - Exception e => "+ str(e))
         return
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 class Stream(object):
-    def __init__(self,cam_location):
-        self.cam_location = cam_location
 
-    def stream_main(self):
+    #__metaclass__ = VideoFeed
+
+    def stream_main(self,queue):
         try:
-            stream_camera = cv2.VideoCapture(self.cam_location)
-            stream_camera.set(3,320)
-            stream_camera.set(4,320)
-            server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler(self.stream_camera))
             Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
+            server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler)
             server.serve_forever()
         except KeyboardInterrupt:
-            self.stream_camera.release()
+            #Stream.release()
             server.socket.close()
         except Exception as eThreadedHTTPServer:
+            print("(Stream.stream_main) - Exception eThreadedHTTPServer => "
+                + str(eThreadedHTTPServer))
             pass
 
 class Queue(object):
@@ -332,6 +332,8 @@ class MotionDetection(object):
             if not queue.empty() and queue.get() == 'start_monitor':
                 Logging.log("INFO", "(MotionDetection.capture) - (Queue message) -> Killing camera.")
                 MotionDetection.release()
+                Queue().queue_process(Stream().stream_main,queue)
+                #Stream().stream_main
                 break
       
             frame_delta = cv2.absdiff(frame_prior, frame_now)
@@ -478,9 +480,10 @@ if __name__ == '__main__':
 
     queue  = Queue()
     server = Server()
-    stream = Stream(options_dict['cam_location'])
+    stream = Stream()
     motion_detection = MotionDetection(options_dict,global_vars_dict)
 
     multiprocessing_queue = multiprocessing.Queue()
     queue.queue_process(server.server_main,multiprocessing_queue)
     queue.queue_process(motion_detection.capture,multiprocessing_queue)
+    #queue.queue_process(stream.stream_main,multiprocessing_queue)
