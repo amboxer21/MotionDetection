@@ -185,6 +185,7 @@ class VideoFeed(type):
                 pass
 
 class Queue(object):
+
     def queue_process(self,func,queue=None):
         try:
             process = multiprocessing.Process(target=func, args=(queue,))
@@ -206,7 +207,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
             self.end_headers()
         while True:
             try:
-                (read_cam, image) = self.server.video_capture.read()
+                (read_cam, image) = CamHandler.video_capture.read()
                 if not read_cam:
                     continue
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
@@ -234,14 +235,13 @@ class CamHandler(BaseHTTPRequestHandler,object):
         return
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-    def __init__(self, server_address, RequestHandlerClass, queue, video_capture, bind_and_activate=True):
+    def __init__(self, server_address, RequestHandlerClass, queue, bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.queue = queue
-        self.video_capture = video_capture 
 
 class Stream(object):
 
-    #__metaclass__ = VideoFeed
+    __metaclass__ = VideoFeed
 
     def stream_main(self,queue=None):
         try:
@@ -249,9 +249,6 @@ class Stream(object):
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler,queue)
             server.timeout = 2
             server.queue = queue
-            server.video_capture = cv2.VideoCapture(0)
-            server.video_capture.set(3,320)
-            server.video_capture.set(4,320)
             server.serve_forever()
         except KeyboardInterrupt:
             Stream.release()
@@ -262,7 +259,7 @@ class Stream(object):
 
 class MotionDetection(object):
 
-    #__metaclass__ = VideoFeed
+    __metaclass__ = VideoFeed
 
     def __init__(self,options_dict={},global_vars_dict={}):
         super(MotionDetection,self).__init__()
@@ -329,10 +326,7 @@ class MotionDetection(object):
 
         Logging.log("INFO", "(MotionDetection.capture) - Motion Detection system initialed!")
     
-        #self.camera_motion = MotionDetection.video_capture
-        self.camera_motion = cv2.VideoCapture(0)
-        self.camera_motion.set(3,320)
-        self.camera_motion.set(4,320)
+        self.camera_motion = MotionDetection.video_capture
         time.sleep(1)
 
         frame_now = self.camera_motion.read()[1]
