@@ -169,22 +169,6 @@ class VideoFeed(type):
             cls.lock = multiprocessing.Lock()
         super(VideoFeed,cls).__init__(name,bases,dct)
 
-    def video_feed_video_capture(meta):
-        return meta.video_capture
-
-    def video_feed_lock(meta):
-        return meta.lock
- 
-    def release(cls):
-        Logging.log("INFO", "(VideoFeed.release) - Releasing camera from "+cls.__name__+" class!")
-        if hasattr(cls,'video_capture'):
-            try:
-                del(cls.video_capture)
-                delattr(cls,'video_capture')
-                Logging.log("INFO", "video_capture attribute deleted from class '"+cls.__name__+"'")
-            except AttributeError:
-                pass
-
 class Queues(object):
 
     def queue_process(self,func,queue=None):
