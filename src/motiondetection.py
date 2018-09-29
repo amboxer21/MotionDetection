@@ -203,21 +203,21 @@ class CamHandler(BaseHTTPRequestHandler,object):
         CamHandler.lock.acquire()
         Logging.log("INFO", "(CamHandler.do_GET) - Lock acquired!")
         if self.path.endswith('.mjpg'):
-            self.rfile._sock.settimeout(10)
+            self.rfile._sock.settimeout(1)
             self.send_response(200)
             self.send_header('Content-type',
                 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
         while True:
             try:
-                (read_cam, image) = self.server.video_capture.read()
-                if not read_cam:
-                    continue
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
                     Logging.log("INFO",'(CamHandler.do_GET) - Killing CamView feed!')
                     del(self.server.video_capture)
                     CamHandler.lock.release()
                     break
+                (read_cam, image) = self.server.video_capture.read()
+                if not read_cam:
+                    continue
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -253,15 +253,16 @@ class Stream(object):
         Stream.lock.acquire()
         Logging.log("INFO", "(Stream.stream_main) - Lock acquired!")
         try:
-            Stream.lock.release()
             video_capture = cv2.VideoCapture(0)
             video_capture.set(3,320)
             video_capture.set(4,320)
+            Stream.lock.release()
             Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
             server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler,queue,video_capture)
-            server.timeout = 2
+            server.timeout = 1
             server.queue = queue
             server.video_capture = video_capture
+            del(video_capture)
             server.serve_forever()
         except KeyboardInterrupt:
             Stream.lock.release()
@@ -284,9 +285,6 @@ class MotionDetection(object):
         self.cam_location  = options_dict['cam_location']
 
         self.count         = global_vars_dict['count']
-        self.is_sent       = global_vars_dict['is_sent']
-        self.is_moving     = global_vars_dict['is_moving']
-        self.cam_deleted   = global_vars_dict['cam_deleted'] 
         self.stop_motion   = global_vars_dict['stop_motion'] 
         self.kill_camera   = global_vars_dict['kill_camera'] 
         self.stream_camera = global_vars_dict['stream_camera']
@@ -340,7 +338,7 @@ class MotionDetection(object):
         MotionDetection.lock.acquire()
         Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!")
 
-        Logging.log("INFO", "(MotionDetection.capture) - Motion Detection system initialed!")
+        Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!")
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
 
@@ -366,36 +364,26 @@ class MotionDetection(object):
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
              
-            if(self.is_moving is True
-                and delta_count > self.motion_thresh_min
-                and delta_count < self.motion_thresh_max):
-                    count = 0
-                    self.is_moving = False
+            if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
+                    self.count = 0
                     Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
                         + Time.now()
                         + ", Delta: "
                         + str(delta_count))
                     del(self.camera_motion)
-                    self.cam_deleted = True
                     self.take_picture()
-                    if not self.is_sent:
-                        Mail.send(self.email,self.email,self.password,
-                            self.email_port,'Motion Detected','MotionDecetor.py detected movement!')
-                        self.is_sent = True
+                    self.camera_motion = cv2.VideoCapture(self.cam_location)
+                    if self.count == 0:
+                        Mail.send(self.email,self.email,self.password,self.email_port,
+                            'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < 100:
                 self.count += 1
                 time.sleep(0.1)
-                self.is_moving = True
                 #Reset counter
                 if self.count == 120:
                     print('Resetting counter!')
                     self.count = 0
-                    self.is_sent = False
 
-            if self.cam_deleted:
-                self.camera_motion = cv2.VideoCapture(self.cam_location)
-                self.cam_deleted = False
-    
             # keep the frames moving.
             frame_prior = frame_now
             frame_now = self.camera_motion.read()[1]
@@ -426,7 +414,6 @@ class Server(MotionDetection):
             elif(message == 'kill_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
-                MotionDetection.lock.release()
                 Queues().queue_process(MotionDetection(options_dict,global_vars_dict).capture,queue)
             elif(message == 'start_motion'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Starting motion sensor! -> (start_motion)")
@@ -507,8 +494,8 @@ if __name__ == '__main__':
     }
 
     global_vars_dict = {
-        'count': 0, 'is_sent': False, 'is_moving': True, 'cam_deleted': False,
-        'stop_motion': False, 'kill_camera': False, 'stream_camera': False,
+        'count': 0, 'stop_motion': False,
+        'kill_camera': False, 'stream_camera': False,
     }
 
     motion_detection = MotionDetection(options_dict,global_vars_dict)
