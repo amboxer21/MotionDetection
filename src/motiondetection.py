@@ -336,8 +336,8 @@ class MotionDetection(object):
     def capture(self,queue=None):
 
         MotionDetection.lock.acquire()
-        Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!")
 
+        Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!")
         Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!")
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
@@ -352,7 +352,8 @@ class MotionDetection(object):
         while(True):
 
             if not queue.empty() and queue.get() == 'start_monitor':
-                Logging.log("INFO", "(MotionDetection.capture) - (Queue message) -> Killing camera.")
+                Logging.log("INFO",
+                    "(MotionDetection.capture) - (Queue message) -> Killing camera.")
                 del(self.camera_motion)
                 MotionDetection.lock.release()
                 break
@@ -365,24 +366,21 @@ class MotionDetection(object):
             frame_delta = cv2.flip(frame_delta, 1)
              
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
+                Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
+                    + Time.now()
+                    + ", Delta: "
+                    + str(delta_count))
+                del(self.camera_motion)
+                self.take_picture()
+                self.camera_motion = cv2.VideoCapture(self.cam_location)
+                if self.count >= 120:
+                    #Reset counter
                     self.count = 0
-                    Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
-                        + Time.now()
-                        + ", Delta: "
-                        + str(delta_count))
-                    del(self.camera_motion)
-                    self.take_picture()
-                    self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    if self.count == 0:
-                        Mail.send(self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
+                    Mail.send(self.email,self.email,self.password,self.email_port,
+                        'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < 100:
                 self.count += 1
                 time.sleep(0.1)
-                #Reset counter
-                if self.count == 120:
-                    print('Resetting counter!')
-                    self.count = 0
 
             # keep the frames moving.
             frame_prior = frame_now
@@ -494,7 +492,7 @@ if __name__ == '__main__':
     }
 
     global_vars_dict = {
-        'count': 0, 'stop_motion': False,
+        'count': 120, 'stop_motion': False,
         'kill_camera': False, 'stream_camera': False,
     }
 
