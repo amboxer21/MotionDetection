@@ -20,7 +20,7 @@
       <Button
         android:elevation="10dp"
         android:text="Go Live"
-        android:id="@+id/buttonLive"
+        android:id="@+id/buttonCam"
         android:textColor="#009900"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -32,7 +32,7 @@
       <Button
         android:elevation="10dp"
         android:text="Stop"
-        android:id="@+id/buttonCam"
+        android:id="@+id/buttonState"
         android:textColor="#009900"
         android:layout_width="50dp"
         android:layout_height="50dp"
@@ -40,7 +40,7 @@
         android:layout_marginTop="70dp"
         android:layout_marginRight="5dp"
         android:background="@drawable/circle"
-        android:layout_below="@+id/buttonLive"/>
+        android:layout_below="@+id/buttonCam"/>
 
       <WebView
         android:elevation="0dp"

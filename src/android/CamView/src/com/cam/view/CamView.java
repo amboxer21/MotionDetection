@@ -39,16 +39,16 @@ public class CamView extends Activity implements OnTouchListener {
   private static ClientAsyncTask clientAsyncTask;
 
   private static Button buttonCam;
-  private static Button buttonLive;
+  private static Button buttonState;
 
   private static EditText ipAddress;
   private static EditText camPortNumber;
   private static EditText serverPortNumber;
   private static DatabaseHandler db;
 
-  private static String buttonCamDb;
   private static String ipAddressDb;
-  private static String buttonLiveDb;
+  private static String buttonCamDb;
+  private static String buttonStateDb;
   private static String camPortNumberDb;
   private static String serverPortNumberDb;
 
@@ -81,27 +81,23 @@ public class CamView extends Activity implements OnTouchListener {
   @Override
   public void onPause() {
     super.onPause();
-    clientAsyncTask = new ClientAsyncTask();
-    clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
-    //buttonCam.setText("Stop");
-    buttonLive.setText("Go Live");
+    if(buttonCam.getText().toString().equals("Live")) {
+      clientAsyncTask = new ClientAsyncTask();
+      clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+    }
   }
 
   public void onStop() {
     super.onStop();
-    clientAsyncTask = new ClientAsyncTask();
-    clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
-    //buttonCam.setText("Stop");
-    buttonLive.setText("Go Live");
+    if(buttonCam.getText().toString().equals("Live")) {
+      clientAsyncTask = new ClientAsyncTask();
+      clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+    }
   }
 
   @Override
   public void onDestroy() {
     super.onDestroy();
-    clientAsyncTask = new ClientAsyncTask();
-    clientAsyncTask.execute(ipAddressDb, "50050", "kill_monitor");
-    //buttonCam.setText("Stop");
-    buttonLive.setText("Go Live");
   } 
 
   @Override
@@ -109,39 +105,35 @@ public class CamView extends Activity implements OnTouchListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    buttonCam = (Button) findViewById(R.id.buttonCam);
-    buttonLive = (Button) findViewById(R.id.buttonLive);
-    ipAddress = (EditText) findViewById(R.id.editIPAddress);
-    camPortNumber = (EditText) findViewById(R.id.editCamPort);
+    buttonCam   = (Button) findViewById(R.id.buttonCam);
+    buttonState = (Button) findViewById(R.id.buttonState);
+    ipAddress   = (EditText) findViewById(R.id.editIPAddress);
+    camPortNumber    = (EditText) findViewById(R.id.editCamPort);
     serverPortNumber = (EditText) findViewById(R.id.editServerPort);
 
     db = new DatabaseHandler(CamView.this);
 
     databaseGetter();
 
-    if(!String.valueOf(buttonCamDb).isEmpty() && String.valueOf(buttonCamDb).equals("Stop")) {
-      buttonCam.setText("Start");
-    }
-    else if(!String.valueOf(buttonCamDb).isEmpty()) {
-      buttonCam.setText("Stop");
-    }
+    buttonCam.setText("Go Live");
+    buttonState.setText("Stop");
 
     final Handler handler = new Handler();
     final WebView webView = (WebView) findViewById(R.id.webView);
 
-    buttonLive.setOnClickListener(new OnClickListener() {
+    buttonCam.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
 
-        sanityCheck("buttonLive");
+        sanityCheck();
 
-        String ip = String.valueOf(sIPAddress);
+        String ipAddress = String.valueOf(sIPAddress); 
         String camPort = String.valueOf(sCamPortNumber);
         String serverPort = String.valueOf(sServerPortNumber);
-        final String addr = "http://" + ip + ":" + camPort + "/cam.mjpg";
+        final String addr = "http://" + ipAddress + ":" + camPort + "/cam.mjpg";
 
         clientAsyncTask = new ClientAsyncTask();
-        clientAsyncTask.execute(ipAddressDb, "50050", "start_monitor");
+        clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_monitor");
 
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
@@ -149,31 +141,24 @@ public class CamView extends Activity implements OnTouchListener {
         handler.postDelayed(new Runnable() {
           public void run() {
             webView.loadUrl(addr);
-            buttonLive.setText("Live");
+            buttonCam.setText("Live");
           }
         }, 3000);
       }
     });
 
-    buttonCam.setOnClickListener(new OnClickListener() {
+    buttonState.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
 
-        sanityCheck("buttonCam");
-
-        if(buttonLive.getText().toString().equals("Live")) {
-          Toast.makeText(getApplicationContext(), "Cannot stop MotionDetection while Live!", Toast.LENGTH_LONG).show();
+        if(buttonCam.getText().toString().equals("Go Live")) {
+          Toast.makeText(getApplicationContext(), "Feed isn't live!", Toast.LENGTH_LONG).show();
           return;
         }
-        else if(String.valueOf(buttonCamDb).equals("Stop")) {
+        else {
           clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, "50050", "start_motion");
-          buttonCam.setText("Stop");
-        }
-        else if(String.valueOf(buttonCamDb).equals("Start")) {
-          clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, "50050", "kill_motion");
-          buttonCam.setText("Start");
+          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+          buttonCam.setText("Go Live");
         }
       }
     });
@@ -194,7 +179,7 @@ public class CamView extends Activity implements OnTouchListener {
 
   }
 
-  public void sanityCheck(String button_name) {
+  public void sanityCheck() {
 
     try {
       sIPAddress  = ipAddress.getText().toString();
@@ -215,12 +200,11 @@ public class CamView extends Activity implements OnTouchListener {
         return;
       }
       else if(String.valueOf(sServerPortNumber).isEmpty()) {
-        Toast.makeText(this,"Server port Number cannot be empty.", Toast.LENGTH_SHORT).show();
-        return;
+        sServerPortNumber = "50050";
       }
       else {
+        databaseSetter();
         databaseGetter();
-        databaseSetter(button_name);
       }
     }
     catch(Exception e) {
@@ -243,56 +227,31 @@ public class CamView extends Activity implements OnTouchListener {
       ipAddressDb  = url.getIPAddress();
       camPortNumberDb = url.getCamPortNumber();
       serverPortNumberDb = url.getServerPortNumber();
-      buttonCamDb = url.getCamState();
-      Log.d("CamView","databaseGetter() url.getIPAddress() => " + String.valueOf(url.getIPAddress()));
-      Log.d("CamView","databaseGetter() url.getCamPortNumber() => " + String.valueOf(url.getCamPortNumber()));
-      Log.d("CamView","databaseGetter() url.getServerPortNumber() => " + String.valueOf(url.getServerPortNumber()));
-      Log.d("CamView","databaseGetter() url.getCamState() => " + String.valueOf(url.getCamState()));
 
       ip = String.valueOf(ipAddressDb);
       camPort = String.valueOf(camPortNumberDb);
       serverPort = String.valueOf(serverPortNumberDb);
 
       ipAddress.setText(ip);
-      camPortNumber.setText(camPort);
-      serverPortNumber.setText(serverPort);
+
+      if(camPort == null) {
+        camPortNumber.setText("5000");
+        serverPortNumber.setText("50050");
+      }
+      else {
+        camPortNumber.setText(camPort);
+        serverPortNumber.setText(serverPort);
+      }
     }
   }
 
-  public void databaseSetter(String button_name) {
+  public void databaseSetter() {
 
     if(ipAddressDb != null) {
-      Log.d("CamView","getSetDatabaseInfo() ipAddressDb != null");
-      if(String.valueOf(buttonCamDb).equals("Start")) {
-        Log.d("CamView","databaseSetter() if(buttonCamDb.equals('Start')))");
-        if(button_name.equals("buttonCam")) {
-          Log.d("CamView","databaseSetter() button_name.equals('buttonCam')");
-          db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber,"Stop"));
-        }
-        else {
-          Log.d("CamView","databaseSetter() !button_name.equals('buttonCam')");
-          db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber,"none"));
-        }
-      }
-      else if(String.valueOf(buttonCamDb).equals("Stop")) {
-        Log.d("CamView","databaseSetter() else if(buttonCamDb.equals('Stop'))");
-        if(button_name.equals("buttonCam")) {
-          Log.d("CamView","databaseSetter() button_name.equals('buttonCam')");
-          db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber,"Start"));
-        }
-        else {
-          Log.d("CamView","databaseSetter() !button_name.equals('buttonCam')");
-          db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber,"none"));
-        }
-      }
-      else {
-        Log.d("CamView","databaseSetter() else");
-        db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber,"none"));
-      }
+      db.updateAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber));
     }
     else {
-      Log.d("CamView","databaseSetter() ipAddressDb == null");
-      db.addAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber,"Start"));
+      db.addAddress(new Address(1,sIPAddress,sCamPortNumber,sServerPortNumber));
     }
   }
 

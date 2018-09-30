@@ -5,15 +5,13 @@ public class Address {
   int _id;
 
   String _ip_address;
-  String _cam_state;
   String _cam_port_number;
   String _server_port_number;
 
   public Address() { }
      
-  public Address(int id, String ip_address, String cam_port_number, String server_port_number, String cam_state) {
+  public Address(int id, String ip_address, String cam_port_number, String server_port_number) {
       this._id = id;
-      this._cam_state = cam_state;
       this._ip_address  = ip_address;
       this._cam_port_number = cam_port_number;
       this._server_port_number = server_port_number;
@@ -49,14 +47,6 @@ public class Address {
 
   public void setServerPortNumber(String server_port_number){
     this._server_port_number = server_port_number;
-  }
-
-  public String getCamState(){
-    return this._cam_state;
-  }
-
-  public void setCamState(String cam_state){
-    this._cam_state = cam_state;
   }
      
 }
