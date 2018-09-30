@@ -81,10 +81,9 @@ public class CamView extends Activity implements OnTouchListener {
   @Override
   public void onPause() {
     super.onPause();
-    if(buttonCam.getText().toString().equals("Live")) {
-      clientAsyncTask = new ClientAsyncTask();
-      clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
-    }
+    clientAsyncTask = new ClientAsyncTask();
+    clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+    buttonCam.setText("Go Live");
   }
 
   public void onStop() {
