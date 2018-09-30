@@ -184,19 +184,20 @@ class CamHandler(BaseHTTPRequestHandler,object):
     __metaclass__ = VideoFeed
 
     def do_GET(self):
-        CamHandler.lock.acquire()
-        Logging.log("INFO", "(CamHandler.do_GET) - Lock acquired!")
-        if self.path.endswith('.mjpg'):
-            self.rfile._sock.settimeout(1)
-            self.send_response(200)
-            self.send_header('Content-type',
-                'multipart/x-mixed-replace; boundary=--jpgboundary')
-            self.end_headers()
-        while True:
-            try:
+        try:
+            CamHandler.lock.acquire()
+            Logging.log("INFO", "(CamHandler.do_GET) - Lock acquired!")
+            if self.path.endswith('.mjpg'):
+                self.rfile._sock.settimeout(1)
+                self.send_response(200)
+                self.send_header('Content-type',
+                    'multipart/x-mixed-replace; boundary=--jpgboundary')
+                self.end_headers()
+            while True:
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
-                    Logging.log("INFO",'(CamHandler.do_GET) - Killing CamView feed!')
+                    Logging.log("INFO",'(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                     del(self.server.video_capture)
+                    self.server.queue.put('close_socket')
                     CamHandler.lock.release()
                     break
                 (read_cam, image) = self.server.video_capture.read()
@@ -212,15 +213,12 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 self.end_headers()
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
-            except KeyboardInterrupt:
-                del(self.server.video_capture)
-                CamHandler.lock.release()
-                break
-            except Exception as e:
-                if re.search('[Errno 32] Broken pipe',str(e), re.M | re.I):
-                    Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
-                    break
-                pass
+        except KeyboardInterrupt:
+            del(self.server.video_capture)
+            CamHandler.lock.release()
+        except Exception as e:
+            if re.search('[Errno 32] Broken pipe',str(e), re.M | re.I):
+                Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
         return
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -228,6 +226,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.queue = queue
         self.video_capture = video_capture
+        HTTPServer.allow_reuse_address = True
 
 class Stream(object):
 
@@ -247,13 +246,18 @@ class Stream(object):
             server.queue = queue
             server.video_capture = video_capture
             del(video_capture)
-            server.serve_forever()
+            #server.serve_forever()
+            while(True):
+                server.handle_request()
+                if not queue.empty() and queue.get() == 'close_socket':
+                    CamHandler.shutdown()
+                    CamHandler.server_close()
         except KeyboardInterrupt:
             Stream.lock.release()
+            server.shutdown()
             server.server_close()
         except Exception as eThreadedHTTPServer:
-            print("(Stream.stream_main) - Exception eThreadedHTTPServer => "
-                + str(eThreadedHTTPServer))
+            pass
 
 class MotionDetection(object):
 
@@ -397,15 +401,6 @@ class Server(MotionDetection):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
                 Queues().queue_process(MotionDetection(options_dict,global_vars_dict).capture,queue)
-            elif(message == 'start_motion'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Starting motion sensor! -> (start_motion)")
-                queue.put('start_motion')
-            elif(message == 'kill_motion'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Killing motion sensor! -> (kill_motion)")
-                queue.put('kill_motion')
-            elif(message == 'probe'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Server is alive -> (probe).")
-                queue.put('probe')
             else:
                 pass
                 #con.send(message + " is not a known command!")
