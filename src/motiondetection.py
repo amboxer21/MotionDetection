@@ -219,7 +219,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
         except Exception as e:
             if re.search('[Errno 32] Broken pipe',str(e), re.M | re.I):
                 Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
-        return
+        return CamHandler
 
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     def __init__(self, server_address, RequestHandlerClass, queue, video_capture, bind_and_activate=True):
@@ -252,6 +252,7 @@ class Stream(object):
                 if not queue.empty() and queue.get() == 'close_socket':
                     CamHandler.shutdown()
                     CamHandler.server_close()
+                    break
         except KeyboardInterrupt:
             Stream.lock.release()
             server.shutdown()
