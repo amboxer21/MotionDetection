@@ -57,6 +57,7 @@ public class CamView extends Activity implements OnTouchListener {
   private static String sServerPortNumber = "";
 
   private static long backPressedTime = 0;
+  private static boolean Kill_monitor_string_sent = false;
 
   @Override
   public void onBackPressed() {
@@ -81,9 +82,6 @@ public class CamView extends Activity implements OnTouchListener {
   @Override
   public void onPause() {
     super.onPause();
-    clientAsyncTask = new ClientAsyncTask();
-    clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
-    buttonCam.setText("Go Live");
   }
 
   public void onStop() {
@@ -91,6 +89,7 @@ public class CamView extends Activity implements OnTouchListener {
     if(buttonCam.getText().toString().equals("Live")) {
       clientAsyncTask = new ClientAsyncTask();
       clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+      buttonCam.setText("Go Live");
     }
   }
 
