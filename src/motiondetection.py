@@ -179,6 +179,16 @@ class Queues(object):
             Logging.log("ERROR",
                 "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
 
+    @staticmethod
+    def queue_background_process(func):
+        try:
+            process = multiprocessing.Process(target=func)
+            process.daemon = True
+            process.start()
+        except Exception as eQueueProcess:
+            Logging.log("ERROR",
+                "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
+
 class CamHandler(BaseHTTPRequestHandler,object):
 
     __metaclass__ = VideoFeed
@@ -370,7 +380,7 @@ class MotionDetection(object):
                     del(self.camera_motion)
                     self.take_picture()
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    Queues().queue_process(Mail.send(self.email,self.email,self.password,self.email_port,
+                    Queues.queue_background_process(Mail.send(self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!'))
                 elif self.tracker >= 120:
                     # Reset tracker
@@ -378,7 +388,7 @@ class MotionDetection(object):
                     del(self.camera_motion)
                     self.take_picture()
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    Queues().queue_process(Mail.send(self.email,self.email,self.password,self.email_port,
+                    Queues.queue_background_process(Mail.send(self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!'))
             elif delta_count < 100:
                 self.count += 1
