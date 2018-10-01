@@ -267,8 +267,8 @@ class MotionDetection(object):
     def __init__(self,options_dict={}):
         super(MotionDetection,self).__init__()
 
-        self.tracker       = 0
         self.count         = 120
+        self.tracker       = 120
         self.stop_motion   = False 
         self.kill_camera   = False 
         self.stream_camera = False 
@@ -357,13 +357,24 @@ class MotionDetection(object):
             frame_delta = cv2.flip(frame_delta, 1)
              
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
+                self.tracker += 1
                 Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
                     + Time.now()
                     + ", Delta: "
                     + str(delta_count))
                 if self.count >= 120:
-                    #Reset counter
+                    # Reset counter
                     self.count = 0
+                    # Reset tracker
+                    self.tracker = 0
+                    del(self.camera_motion)
+                    self.take_picture()
+                    self.camera_motion = cv2.VideoCapture(self.cam_location)
+                    Queues().queue_process(Mail.send(self.email,self.email,self.password,self.email_port,
+                        'Motion Detected','MotionDecetor.py detected movement!'))
+                elif self.tracker >= 120:
+                    # Reset tracker
+                    self.tracker = 0
                     del(self.camera_motion)
                     self.take_picture()
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
@@ -371,6 +382,8 @@ class MotionDetection(object):
                         'Motion Detected','MotionDecetor.py detected movement!'))
             elif delta_count < 100:
                 self.count += 1
+                # Reset tracker
+                self.tracker = 0
                 time.sleep(0.1)
 
             # keep the frames moving.
