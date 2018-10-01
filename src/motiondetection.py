@@ -264,19 +264,21 @@ class MotionDetection(object):
 
     __metaclass__ = VideoFeed
 
-    def __init__(self,options_dict={},global_vars_dict={}):
+    def __init__(self,options_dict={}):
         super(MotionDetection,self).__init__()
+
+        self.tracker       = 0
+        self.count         = 120
+        self.stop_motion   = False 
+        self.kill_camera   = False 
+        self.stream_camera = False 
+
         self.ip            = options_dict['ip']
         self.email         = options_dict['email']
         self.password      = options_dict['password']
         self.email_port    = options_dict['email_port']
         self.server_port   = options_dict['server_port']
         self.cam_location  = options_dict['cam_location']
-
-        self.count         = global_vars_dict['count']
-        self.stop_motion   = global_vars_dict['stop_motion'] 
-        self.kill_camera   = global_vars_dict['kill_camera'] 
-        self.stream_camera = global_vars_dict['stream_camera']
 
         self.motion_thresh_min = options_dict['motion_thresh_min']
         self.motion_thresh_max = options_dict['motion_thresh_max']
@@ -359,14 +361,14 @@ class MotionDetection(object):
                     + Time.now()
                     + ", Delta: "
                     + str(delta_count))
-                del(self.camera_motion)
-                self.take_picture()
-                self.camera_motion = cv2.VideoCapture(self.cam_location)
                 if self.count >= 120:
                     #Reset counter
                     self.count = 0
-                    Mail.send(self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!')
+                    del(self.camera_motion)
+                    self.take_picture()
+                    self.camera_motion = cv2.VideoCapture(self.cam_location)
+                    Queues().queue_process(Mail.send(self.email,self.email,self.password,self.email_port,
+                        'Motion Detected','MotionDecetor.py detected movement!'))
             elif delta_count < 100:
                 self.count += 1
                 time.sleep(0.1)
@@ -382,7 +384,7 @@ class Server(MotionDetection):
     __metaclass__ = VideoFeed
 
     def __init__(self):
-        super(Server, self).__init__(options_dict,global_vars_dict)
+        super(Server, self).__init__(options_dict)
 
         try:
             self.sock = socket.socket()
@@ -401,7 +403,7 @@ class Server(MotionDetection):
             elif(message == 'kill_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
-                Queues().queue_process(MotionDetection(options_dict,global_vars_dict).capture,queue)
+                Queues().queue_process(MotionDetection(options_dict).capture,queue)
             else:
                 pass
                 #con.send(message + " is not a known command!")
@@ -410,7 +412,7 @@ class Server(MotionDetection):
 
         Logging.log("INFO", "(Server.server_main) - Listening for connections.")
 
-        Queues().queue_process(MotionDetection(options_dict,global_vars_dict).capture,queue)
+        Queues().queue_process(MotionDetection(options_dict).capture,queue)
 
         while(True):
             time.sleep(0.05)
@@ -471,11 +473,6 @@ if __name__ == '__main__':
         'motion_thresh_max': options.motion_thresh_max
     }
 
-    global_vars_dict = {
-        'count': 120, 'stop_motion': False,
-        'kill_camera': False, 'stream_camera': False,
-    }
-
-    motion_detection = MotionDetection(options_dict,global_vars_dict)
+    motion_detection = MotionDetection(options_dict)
 
     Queues().queue_process(Server().server_main,multiprocessing.Queue())
