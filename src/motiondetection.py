@@ -176,15 +176,13 @@ class Queues(object):
             process = multiprocessing.Process(target=func, name=queue_name, args=(queue,))
             process.start()
         except Exception as eQueueProcess:
-            #Logging.log("ERROR",
-                #"(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
-            pass
+            Logging.log("ERROR",
+                "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
 
     @staticmethod
     def queue_background_process(func):
         try:
             process = multiprocessing.Process(target=func)
-            process.daemon = True
             process.start()
         except Exception as eQueueProcess:
             Logging.log("ERROR",
@@ -368,11 +366,7 @@ class MotionDetection(object):
              
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
                 self.tracker += 1
-                '''Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
-                    + Time.now()
-                    + ", Delta: "
-                    + str(delta_count))'''
-                if self.count >= 120:
+                if self.count >= 60:
                     # Reset counter
                     self.count = 0
                     # Reset tracker
@@ -382,7 +376,7 @@ class MotionDetection(object):
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
                     Queues.queue_background_process(Mail.send(self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!'))
-                elif self.tracker >= 120:
+                elif self.tracker >= 60:
                     # Reset tracker
                     self.tracker = 0
                     del(self.camera_motion)
@@ -446,7 +440,9 @@ class Server(MotionDetection):
 
         Logging.log("INFO", "(Server.server_main) - Listening for connections.")
 
-        Queues().queue_process(MotionDetection(options_dict).capture,queue)
+        process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='init',args=(queue,))
+        process.daemon = True
+        process.start()
 
         while(True):
             time.sleep(0.05)
@@ -509,4 +505,4 @@ if __name__ == '__main__':
 
     motion_detection = MotionDetection(options_dict)
 
-    Queues().queue_process(Server().server_main,multiprocessing.Queue())
+    Server().server_main(multiprocessing.Queue())
