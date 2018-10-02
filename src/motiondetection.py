@@ -171,13 +171,14 @@ class VideoFeed(type):
 
 class Queues(object):
 
-    def queue_process(self,func,queue=None):
+    def queue_process(self,func,queue=None,queue_name=None):
         try:
-            process = multiprocessing.Process(target=func, args=(queue,))
+            process = multiprocessing.Process(target=func, name=queue_name, args=(queue,))
             process.start()
         except Exception as eQueueProcess:
-            Logging.log("ERROR",
-                "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
+            #Logging.log("ERROR",
+                #"(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
+            pass
 
     @staticmethod
     def queue_background_process(func):
@@ -207,7 +208,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
                     Logging.log("INFO",'(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                     del(self.server.video_capture)
-                    self.server.queue.put('close_socket')
+                    self.server.queue.put('close_camview')
                     CamHandler.lock.release()
                     break
                 (read_cam, image) = self.server.video_capture.read()
@@ -256,12 +257,10 @@ class Stream(object):
             server.queue = queue
             server.video_capture = video_capture
             del(video_capture)
-            #server.serve_forever()
             while(True):
                 server.handle_request()
-                if not queue.empty() and queue.get() == 'close_socket':
-                    CamHandler.shutdown()
-                    CamHandler.server_close()
+                if not queue.empty() and queue.get() == 'close_camview':
+                    queue.close()
                     break
         except KeyboardInterrupt:
             Stream.lock.release()
@@ -356,6 +355,7 @@ class MotionDetection(object):
                 Logging.log("INFO",
                     "(MotionDetection.capture) - (Queue message) -> Killing camera.")
                 del(self.camera_motion)
+                queue.close()
                 MotionDetection.lock.release()
                 break
       
@@ -368,10 +368,10 @@ class MotionDetection(object):
              
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
                 self.tracker += 1
-                Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
+                '''Logging.log("INFO", "(MotionDetection.capture) - MOVEMENT: "
                     + Time.now()
                     + ", Delta: "
-                    + str(delta_count))
+                    + str(delta_count))'''
                 if self.count >= 120:
                     # Reset counter
                     self.count = 0
@@ -414,19 +414,30 @@ class Server(MotionDetection):
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
-            print("eSock error e => " + str(eSock))
+            Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
 
     @Accepts.tuple
     def handle_incoming_message(*messages):
+        process = None
         for(ret, (message,queue)) in enumerate(messages):
             if(message == 'start_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
+                if process is not None:
+                    if process.name() == 'capture':
+                        process.close()
                 queue.put('start_monitor')
-                Queues().queue_process(Stream().stream_main,queue)
+                process = multiprocessing.Process(target=Stream().stream_main, name='stream_main', args=(queue,))
+                process.daemon = True
+                process.start()
             elif(message == 'kill_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
+                if process is not None:
+                    if process.name() == 'stream_main':
+                        process.close()
                 queue.put('kill_monitor')
-                Queues().queue_process(MotionDetection(options_dict).capture,queue)
+                process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
+                process.daemon = True
+                process.start()
             else:
                 pass
                 #con.send(message + " is not a known command!")
