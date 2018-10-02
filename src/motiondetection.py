@@ -359,16 +359,16 @@ class MotionDetection(object):
                     del(self.camera_motion)
                     self.take_picture()
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    Queues.queue_background_process(Mail.send(self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!'))
+                    Mail.send(self.email,self.email,self.password,self.email_port,
+                        'Motion Detected','MotionDecetor.py detected movement!')
                 elif self.tracker >= 60:
                     # Reset tracker
                     self.tracker = 0
                     del(self.camera_motion)
                     self.take_picture()
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    Queues.queue_background_process(Mail.send(self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!'))
+                    Mail.send(self.email,self.email,self.password,self.email_port,
+                        'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < 100:
                 self.count += 1
                 # Reset tracker
