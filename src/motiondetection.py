@@ -169,25 +169,6 @@ class VideoFeed(type):
             cls.lock = multiprocessing.Lock()
         super(VideoFeed,cls).__init__(name,bases,dct)
 
-class Queues(object):
-
-    def queue_process(self,func,queue=None,queue_name=None):
-        try:
-            process = multiprocessing.Process(target=func, name=queue_name, args=(queue,))
-            process.start()
-        except Exception as eQueueProcess:
-            Logging.log("ERROR",
-                "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
-
-    @staticmethod
-    def queue_background_process(func):
-        try:
-            process = multiprocessing.Process(target=func)
-            process.start()
-        except Exception as eQueueProcess:
-            Logging.log("ERROR",
-                "(Queues.queue_process) - Queues exception eQueueProcess => " + str(eQueueProcess))
-
 class CamHandler(BaseHTTPRequestHandler,object):
 
     __metaclass__ = VideoFeed
