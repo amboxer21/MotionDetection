@@ -318,21 +318,6 @@ class MotionDetection(object):
         cv2.imwrite(picture_name, frame)
         del(camera)
 
-    @Accepts.boolean
-    def stream_camera(self,value):
-        Logging.log("INFO", "(MotionDetection.stream_camera) - " + value + "):")
-        self.stream_camera = value
-
-    @Accepts.boolean
-    def stop_motion(self,value):
-        Logging.log("INFO", "(MotionDetection.stop_motion) - " + value + "):")
-        self.stop_motion = value
-
-    @Accepts.boolean
-    def kill_camera(self,value):
-        Logging.log("INFO", "(MotionDetection.kill_camera) - " + value + "):")
-        self.kill_camera = value
-
     def capture(self,queue=None):
 
         MotionDetection.lock.acquire()
@@ -475,6 +460,9 @@ if __name__ == '__main__':
     parser.add_option("-S", "--server-port",
         dest='server_port', type="int", default=50050,
         help='"Server port defaults to port 50050"')
+    parser.add_option("-C", "--camview-port",
+        dest='camview_port', type="int", default=5000,
+        help='"CamView port defaults to port 5000"')
     parser.add_option("-e", "--email",
         dest='email',
         help='"This argument is required!"')
@@ -500,13 +488,10 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     options_dict = {
-        'ip': options.ip, 'server_port': options.server_port,
-        'email': options.email, 'password': options.password,
-        'cam_location': options.cam_location, 'email_port': options.email_port,
-        'motion_thresh_min': options.motion_thresh_min, 
-        'motion_thresh_max': options.motion_thresh_max
+        'motion_thresh_min': options.motion_thresh_min, 'motion_thresh_max': options.motion_thresh_max,
+        'ip': options.ip, 'server_port': options.server_port, 'email': options.email, 'password': options.password,
+        'cam_location': options.cam_location, 'email_port': options.email_port, 'camview_port': options.camview_port
     }
 
     motion_detection = MotionDetection(options_dict)
-
     Queues().queue_process(Server().server_main,multiprocessing.Queue())
