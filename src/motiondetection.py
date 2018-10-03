@@ -71,7 +71,7 @@ class Accepts(object):
     @classmethod
     def tuple(cls,func):
         arg_count = func.__code__.co_argcount
-        def wrapper(*args):
+        def wrapper(self,*args):
             for arg in args:
                 if re.search(r'<__main__',str(arg)) is not None:
                     pass
@@ -98,26 +98,38 @@ class Logging(object):
             root.addHandler(handler)
             # Log all calls to this class in the logfile no matter what.
             if comm is None:
-                print(level + " is not a level. Use: WARN, ERROR, or INFO!")
+                print(str(level) + " is not a level. Use: WARN, ERROR, or INFO!")
                 return
             elif comm.group() == 'ERROR':
-                logging.error("(" + str(level) + ") " + "ImageCapture - " + str(message))
+                logging.error(str(time.asctime(time.localtime(time.time()))
+                    + " - MotionDetection - "
+                    + str(message)))
             elif comm.group() == 'INFO':
-                logging.info("(" + str(level) + ") " + "ImageCapture - " + str(message))
+                logging.info(str(time.asctime(time.localtime(time.time()))
+                    + " - MotionDetection - "
+                    + str(message)))
             elif comm.group() == 'WARN':
-                logging.warn("(" + str(level) + ") " + "ImageCapture - " + str(message))
-            # Print to stdout only if the verbose option is passed or log level = ERROR.
+                logging.warn(str(time.asctime(time.localtime(time.time()))
+                    + " - MotionDetection - "
+                    + str(message)))
             if verbose or str(level) == 'ERROR':
-                print("(" + str(level) + ") " + "ImageCapture - " + str(message))
-        except IOError as e:
-            if re.search('\[Errno 13\] Permission denied:', str(e), re.M | re.I):
-                print("(ERROR) ImageCapture - Must be sudo to run ImageCapture!")
+                print("(" + str(level) + ") "
+                    + str(time.asctime(time.localtime(time.time()))
+                    + " - ImageCapture - "
+                    + str(message)))
+        except IOError as eIOError:
+            if re.search('\[Errno 13\] Permission denied:', str(eIOError), re.M | re.I):
+                print("(ERROR) MotionDetection - Must be sudo to run MotionDetection!")
                 sys.exit(0)
-            print("(ERROR) ImageCapture - IOError in Logging class => " + str(e))
-            logging.error("(ERROR) ImageCapture - IOError => " + str(e))
-        except Exception as e:
-            print("(ERROR) ImageCapture - Exception in Logging class => " + str(e))
-            logging.error("(ERROR) ImageCapture - Exception => " + str(e))
+            print("(ERROR) MotionDetection - IOError in Logging class => " + str(eIOError))
+            logging.error(str(time.asctime(time.localtime(time.time()))
+                + " - MotionDetection - IOError => "
+                + str(eIOError)))
+        except Exception as eLogging:
+            print("(ERROR) MotionDetection - Exception in Logging class => " + str(eLogging))
+            logging.error(str(time.asctime(time.localtime(time.time()))
+                + " - MotionDetection - Exception => " 
+                + str(eLogging)))
             pass
         return
 
@@ -188,7 +200,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
                     Logging.log("INFO",'(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                     del(self.server.video_capture)
                     self.server.queue.put('close_camview')
-                    CamHandler.lock.release()
+                    self.server.sock.close()
                     break
                 (read_cam, image) = self.server.video_capture.read()
                 if not read_cam:
@@ -237,16 +249,22 @@ class Stream(object):
             server.video_capture = video_capture
             del(video_capture)
             while(True):
-                server.handle_request()
                 if not queue.empty() and queue.get() == 'close_camview':
+                    CamHandler.lock.release()
                     queue.close()
                     break
+                server.handle_request()
         except KeyboardInterrupt:
+            CamHandler.lock.release()
             Stream.lock.release()
+            queue.close()
             server.shutdown()
             server.server_close()
         except Exception as eThreadedHTTPServer:
-            pass
+            Logging.log("ERROR", "(Stream.stream_main) - eThreadedHTTPServer => "+str(eThreadedHTTPServer))
+            queue.close()
+            server.shutdown()
+            server.server_close()
 
 class MotionDetection(object):
 
@@ -352,8 +370,15 @@ class Server(MotionDetection):
 
     __metaclass__ = VideoFeed
 
-    def __init__(self):
+    def __init__(self,queue):
         super(Server, self).__init__(options_dict)
+
+        self.queue = queue
+
+        self.process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
+        self.process.daemon = True
+        self.process.start()
+
         try:
             self.sock = socket.socket()
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -361,39 +386,34 @@ class Server(MotionDetection):
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
 
-    @Accepts.tuple
-    def handle_incoming_message(*messages):
-        process = None
+    #@Accepts.tuple
+    def handle_incoming_message(self,*messages):
         for(message,queue) in messages:
             if(message == 'start_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
-                if process is not None:
-                    if process.name() == 'capture':
-                        process.close()
                 queue.put('start_monitor')
-                process = multiprocessing.Process(target=Stream().stream_main, name='stream_main', args=(queue,))
-                process.daemon = True
-                process.start()
+                time.sleep(1)
+                if self.process.name == 'capture':
+                    self.process.terminate()
+                self.proc = multiprocessing.Process(target=Stream().stream_main, name='stream_main', args=(queue,))
+                self.proc.daemon = True
+                self.proc.start()
             elif(message == 'kill_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
-                if process is not None:
-                    if process.name() == 'stream_main':
-                        process.close()
                 queue.put('kill_monitor')
-                process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
-                process.daemon = True
-                process.start()
+                time.sleep(1)
+                if self.process.name == 'stream_main':
+                    self.process.terminate()
+                self.process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
+                self.process.daemon = True
+                self.process.start()
             else:
                 pass
                 #con.send(message + " is not a known command!")
 
-    def server_main(self,queue=None):
+    def server_main(self):
 
         Logging.log("INFO", "(Server.server_main) - Listening for connections.")
-
-        process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='init',args=(queue,))
-        process.daemon = True
-        process.start()
 
         while(True):
             time.sleep(0.05)
@@ -402,7 +422,7 @@ class Server(MotionDetection):
                 (con, addr) = self.sock.accept()
                 Logging.log("INFO", "(Server.server_main) - Received connection from " + str(addr))
 
-                self.handle_incoming_message((con.recv(1024),queue))
+                Server.handle_incoming_message(self,(con.recv(1024),self.queue))
 
             except KeyboardInterrupt:
                 print("\n")
@@ -437,6 +457,9 @@ if __name__ == '__main__':
     parser.add_option("-E", "--email-port",
         dest='email_port', type="int", default=587,
         help='"E-mail port defaults to port 587"')
+    parser.add_option("-l", "--log-file",
+        dest='logfile', default='/var/log/motiondetection.log',
+        help="Tail log defaults to /var/log/motiondetection.log.")
     parser.add_option("-m", "--motion-threshold-min",
         dest='motion_thresh_min', type="int", default=1300,
         help='"Sets the minimum movement threshold '
@@ -450,10 +473,11 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     options_dict = {
+        'logfile': options.logfile,
         'motion_thresh_min': options.motion_thresh_min, 'motion_thresh_max': options.motion_thresh_max,
         'ip': options.ip, 'server_port': options.server_port, 'email': options.email, 'password': options.password,
         'cam_location': options.cam_location, 'email_port': options.email_port, 'camview_port': options.camview_port
     }
 
     motion_detection = MotionDetection(options_dict)
-    Server().server_main(multiprocessing.Queue())
+    Server(multiprocessing.Queue()).server_main()
