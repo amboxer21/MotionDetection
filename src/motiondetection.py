@@ -255,11 +255,8 @@ class MotionDetection(object):
     def __init__(self,options_dict={}):
         super(MotionDetection,self).__init__()
 
+        self.tracker       = 0
         self.count         = 60
-        self.tracker       = 60
-        self.stop_motion   = False 
-        self.kill_camera   = False 
-        self.stream_camera = False 
 
         self.ip            = options_dict['ip']
         self.email         = options_dict['email']
@@ -331,17 +328,9 @@ class MotionDetection(object):
             frame_delta = cv2.flip(frame_delta, 1)
              
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
-                self.count = 0
                 self.tracker += 1
-                if self.count >= 60:
+                if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
-                    self.tracker = 0
-                    del(self.camera_motion)
-                    self.take_picture()
-                    self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    Mail.send(self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected continous movement for over a minute!')
-                elif self.tracker >= 60:
                     self.tracker = 0
                     del(self.camera_motion)
                     self.take_picture()
@@ -365,7 +354,6 @@ class Server(MotionDetection):
 
     def __init__(self):
         super(Server, self).__init__(options_dict)
-
         try:
             self.sock = socket.socket()
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -376,7 +364,7 @@ class Server(MotionDetection):
     @Accepts.tuple
     def handle_incoming_message(*messages):
         process = None
-        for(ret, (message,queue)) in enumerate(messages):
+        for(message,queue) in messages:
             if(message == 'start_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 if process is not None:
@@ -438,10 +426,10 @@ if __name__ == '__main__':
         dest='camview_port', type="int", default=5000,
         help='"CamView port defaults to port 5000"')
     parser.add_option("-e", "--email",
-        dest='email',
+        dest='email', type="str",
         help='"This argument is required!"')
     parser.add_option("-p", "--password",
-        dest='password',
+        dest='password', type="str",
         help='"This argument is required!"')
     parser.add_option("-c", "--camera-location",
         dest='cam_location', type="int", default=0,
