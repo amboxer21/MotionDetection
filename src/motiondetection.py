@@ -392,18 +392,22 @@ class Server(MotionDetection):
             if(message == 'start_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 queue.put('start_monitor')
-                time.sleep(1)
+                Server.lock.acquire()
                 if self.process.name == 'capture':
                     self.process.terminate()
+                    Logging.log("INFO", "Terminating "+str(self.process.name)+" process")
+                Server.lock.release()
                 self.proc = multiprocessing.Process(target=Stream().stream_main, name='stream_main', args=(queue,))
                 self.proc.daemon = True
                 self.proc.start()
             elif(message == 'kill_monitor'):
                 Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
-                time.sleep(1)
+                Server.lock.acquire()
                 if self.process.name == 'stream_main':
+                    Logging.log("INFO", "Terminating "+str(self.process.name)+" process")
                     self.process.terminate()
+                Server.lock.release()
                 self.process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
                 self.process.daemon = True
                 self.process.start()
