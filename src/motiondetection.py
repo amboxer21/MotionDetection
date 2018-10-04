@@ -163,6 +163,7 @@ class Mail(object):
             Logging.log("WARN", "(Mail.send) - Could not athenticate with password and username!")
         except Exception as e:
             Logging.log("ERROR", "(Mail.send) - Unexpected error in Mail.send() error e => " + str(e))
+            pass
 
 # Metaclass for locking video camera
 class VideoFeed(type):
@@ -395,7 +396,7 @@ class Server(MotionDetection):
                 Server.lock.acquire()
                 if self.process.name == 'capture':
                     self.process.terminate()
-                    Logging.log("INFO", "Terminating "+str(self.process.name)+" process")
+                    Logging.log("INFO", "(Server.handle_incoming_message) - Terminating "+str(self.process.name)+" process")
                 Server.lock.release()
                 self.proc = multiprocessing.Process(target=Stream().stream_main, name='stream_main', args=(queue,))
                 self.proc.daemon = True
@@ -405,7 +406,7 @@ class Server(MotionDetection):
                 queue.put('kill_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'stream_main':
-                    Logging.log("INFO", "Terminating "+str(self.process.name)+" process")
+                    Logging.log("INFO", "(Server.handle_incoming_message) - Terminating "+str(self.process.name)+" process")
                     self.process.terminate()
                 Server.lock.release()
                 self.process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
