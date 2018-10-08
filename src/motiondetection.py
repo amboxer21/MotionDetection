@@ -310,7 +310,7 @@ class MotionDetection(object):
             return
         (ret, frame) = camera.read()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-        time.sleep(0.5)
+        #time.sleep(0.5)
         picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
         cv2.imwrite(picture_name, frame)
         del(camera)
@@ -327,11 +327,11 @@ class MotionDetection(object):
 
         (ret, previous_frame) = self.camera_motion.read()
         previous_frame = cv2.cvtColor(previous_frame, cv2.COLOR_RGB2GRAY)
-        previous_frame = cv2.GaussianBlur(previous_frame, (15, 15), 0)
+        previous_frame = cv2.GaussianBlur(previous_frame, (21, 21), 0)
 
         (ret, current_frame) = self.camera_motion.read()
         current_frame = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
-        current_frame = cv2.GaussianBlur(current_frame, (15, 15), 0)
+        current_frame = cv2.GaussianBlur(current_frame, (21, 21), 0)
 
         while(True):
 
@@ -346,16 +346,19 @@ class MotionDetection(object):
             time.sleep(0.1)
 
             frame_delta = cv2.absdiff(previous_frame, current_frame)
-            #(ret, frame_delta) = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)
+            #(ret, frame_delta) = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY) # Original values
             (ret, frame_delta) = cv2.threshold(frame_delta, 127, 255, cv2.THRESH_BINARY)
             delta_count = cv2.countNonZero(frame_delta)
 
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
 
+            if delta_count != 0:
+                print('WITHOUT MOTION => Delta count: '+str(delta_count))
+
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
-                print('Delta count: '+str(delta_count))
                 self.tracker += 1
+                print('WITH MOTION => Delta count: '+str(delta_count))
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
@@ -365,7 +368,7 @@ class MotionDetection(object):
                     self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
                     Mail.send(self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')
-            elif delta_count < 100:
+            elif delta_count < 500:
                 self.count += 1
                 self.tracker = 0
 
@@ -373,7 +376,7 @@ class MotionDetection(object):
             previous_frame = current_frame
             (ret, current_frame)  = self.camera_motion.read()
             current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
-            current_frame  = cv2.GaussianBlur(current_frame, (15, 15), 0)
+            current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
 
 class Server(MotionDetection):
 
