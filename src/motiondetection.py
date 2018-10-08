@@ -15,6 +15,8 @@ import subprocess
 import multiprocessing
 import logging.handlers
 
+import numpy as np
+
 from PIL import Image
 from optparse import OptionParser
 
@@ -347,11 +349,10 @@ class MotionDetection(object):
 
             frame_delta = cv2.absdiff(previous_frame, current_frame)
             #(ret, frame_delta) = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY) # Original values
-            (ret, frame_delta) = cv2.threshold(frame_delta, 127, 255, cv2.THRESH_BINARY)
+            (ret, frame_delta) = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)
+            frame_delta = cv2.dilate(frame_delta,np.ones((5,5), np.uint8),iterations=1)
+            frame_delta = cv2.normalize(frame_delta, None, 0, 255, cv2.NORM_MINMAX)
             delta_count = cv2.countNonZero(frame_delta)
-
-            cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
-            frame_delta = cv2.flip(frame_delta, 1)
 
             if delta_count != 0:
                 print('WITHOUT MOTION => Delta count: '+str(delta_count))
