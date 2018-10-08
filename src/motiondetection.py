@@ -279,6 +279,7 @@ class MotionDetection(object):
         self.count         = 60
 
         self.ip            = options_dict['ip']
+        self.fps           = options_dict['fps']
         self.email         = options_dict['email']
         self.password      = options_dict['password']
         self.email_port    = options_dict['email_port']
@@ -322,23 +323,15 @@ class MotionDetection(object):
         Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!")
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
+        self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
 
-        frame_now = self.camera_motion.read()[1]
-        frame_now = self.camera_motion.read()[1]
+        (ret, previous_frame) = self.camera_motion.read()
+        previous_frame = cv2.cvtColor(previous_frame, cv2.COLOR_RGB2GRAY)
+        previous_frame = cv2.GaussianBlur(previous_frame, (15, 15), 0)
 
-        frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-        frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
-        frame_prior = frame_now
-
-        '''frame_prior = self.camera_motion.read()[1]
-        time.sleep(0.5)
-        frame_now   = self.camera_motion.read()[1]
-
-        frame_prior = cv2.cvtColor(frame_prior, cv2.COLOR_RGB2GRAY)
-        frame_prior = cv2.GaussianBlur(frame_prior, (15, 15), 0)
-
-        frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-        frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)'''
+        (ret, current_frame) = self.camera_motion.read()
+        current_frame = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
+        current_frame = cv2.GaussianBlur(current_frame, (15, 15), 0)
 
         while(True):
 
@@ -349,15 +342,19 @@ class MotionDetection(object):
                 queue.close()
                 MotionDetection.lock.release()
                 break
-      
-            frame_delta = cv2.absdiff(frame_prior, frame_now)
-            frame_delta = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)[1]
+
+            time.sleep(0.1)
+
+            frame_delta = cv2.absdiff(previous_frame, current_frame)
+            #(ret, frame_delta) = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY)
+            (ret, frame_delta) = cv2.threshold(frame_delta, 127, 255, cv2.THRESH_BINARY)
             delta_count = cv2.countNonZero(frame_delta)
-    
+
             cv2.normalize(frame_delta, frame_delta, 0, 255, cv2.NORM_MINMAX)
             frame_delta = cv2.flip(frame_delta, 1)
-             
+
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
+                print('Delta count: '+str(delta_count))
                 self.tracker += 1
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
@@ -365,18 +362,18 @@ class MotionDetection(object):
                     del(self.camera_motion)
                     self.take_picture()
                     self.camera_motion = cv2.VideoCapture(self.cam_location)
+                    self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
                     Mail.send(self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < 100:
                 self.count += 1
                 self.tracker = 0
-                time.sleep(0.1)
 
             # keep the frames moving.
-            frame_prior = frame_now
-            frame_now = self.camera_motion.read()[1]
-            frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-            frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
+            previous_frame = current_frame
+            (ret, current_frame)  = self.camera_motion.read()
+            current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
+            current_frame  = cv2.GaussianBlur(current_frame, (15, 15), 0)
 
 class Server(MotionDetection):
 
@@ -387,7 +384,9 @@ class Server(MotionDetection):
 
         self.queue = queue
 
-        self.process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
+        self.process = multiprocessing.Process(
+            target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
+        )
         self.process.daemon = True
         self.process.start()
 
@@ -402,25 +401,37 @@ class Server(MotionDetection):
     def handle_incoming_message(self,*messages):
         for(message,queue) in messages:
             if(message == 'start_monitor'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
+                Logging.log("INFO",
+                    "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 queue.put('start_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'capture':
                     self.process.terminate()
-                    Logging.log("INFO", "(Server.handle_incoming_message) - Terminating "+str(self.process.name)+" process")
+                    Logging.log("INFO",
+                        "(Server.handle_incoming_message) - Terminating "
+                        + str(self.process.name)
+                        + " process")
                 Server.lock.release()
-                self.proc = multiprocessing.Process(target=Stream().stream_main, name='stream_main', args=(queue,))
+                self.proc = multiprocessing.Process(
+                    target=Stream().stream_main,name='stream_main',args=(queue,)
+                )
                 self.proc.daemon = True
                 self.proc.start()
             elif(message == 'kill_monitor'):
-                Logging.log("INFO", "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
+                Logging.log("INFO",
+                    "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'stream_main':
-                    Logging.log("INFO", "(Server.handle_incoming_message) - Terminating "+str(self.process.name)+" process")
+                    Logging.log("INFO",
+                        "(Server.handle_incoming_message) - Terminating "
+                        + str(self.process.name)
+                        + " process")
                     self.process.terminate()
                 Server.lock.release()
-                self.process = multiprocessing.Process(target=MotionDetection(options_dict).capture, name='capture',args=(queue,))
+                self.process = multiprocessing.Process(
+                    target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
+                )
                 self.process.daemon = True
                 self.process.start()
             else:
@@ -436,7 +447,8 @@ class Server(MotionDetection):
             try:
                 self.sock.listen(5)
                 (con, addr) = self.sock.accept()
-                Logging.log("INFO", "(Server.server_main) - Received connection from " + str(addr))
+                Logging.log("INFO",
+                    "(Server.server_main) - Received connection from " + str(addr))
 
                 Server.handle_incoming_message(self,(con.recv(1024),self.queue))
 
@@ -476,11 +488,15 @@ if __name__ == '__main__':
     parser.add_option("-l", "--log-file",
         dest='logfile', default='/var/log/motiondetection.log',
         help="Tail log defaults to /var/log/motiondetection.log.")
+    parser.add_option("-f", "--fps",
+        dest='fps', type="int", default='30',
+        help='"This sets the frames per second for the motion '
+            + 'capture system. It defaults to 30 frames p/s."')
     parser.add_option("-m", "--motion-threshold-min",
-        dest='motion_thresh_min', type="int", default=1300,
+        dest='motion_thresh_min', type="int", default=1500,
         help='"Sets the minimum movement threshold '
             +'to trigger the programs image capturing routine.'
-            +' The default value is set at 1300."')
+            +' The default value is set at 1500."')
     parser.add_option("-M", "--motion-threshold-max",
         dest='motion_thresh_max', type="int", default=10000,
         help='"Sets the maximum movement threshold when the '
@@ -489,7 +505,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     options_dict = {
-        'logfile': options.logfile,
+        'logfile': options.logfile, 'fps': options.fps,
         'motion_thresh_min': options.motion_thresh_min, 'motion_thresh_max': options.motion_thresh_max,
         'ip': options.ip, 'server_port': options.server_port, 'email': options.email, 'password': options.password,
         'cam_location': options.cam_location, 'email_port': options.email_port, 'camview_port': options.camview_port
