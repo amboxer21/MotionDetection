@@ -323,14 +323,14 @@ class MotionDetection(object):
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
 
-        '''frame_now = self.camera_motion.read()[1]
+        frame_now = self.camera_motion.read()[1]
         frame_now = self.camera_motion.read()[1]
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
         frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
-        frame_prior = frame_now'''
+        frame_prior = frame_now
 
-        frame_prior = self.camera_motion.read()[1]
+        '''frame_prior = self.camera_motion.read()[1]
         time.sleep(0.5)
         frame_now   = self.camera_motion.read()[1]
 
@@ -338,7 +338,7 @@ class MotionDetection(object):
         frame_prior = cv2.GaussianBlur(frame_prior, (15, 15), 0)
 
         frame_now = cv2.cvtColor(frame_now, cv2.COLOR_RGB2GRAY)
-        frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)
+        frame_now = cv2.GaussianBlur(frame_now, (15, 15), 0)'''
 
         while(True):
 
