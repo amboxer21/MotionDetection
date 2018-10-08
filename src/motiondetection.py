@@ -26,66 +26,6 @@ from email.MIMEMultipart import MIMEMultipart
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
-class Accepts(object):
-
-    @classmethod
-    def boolean(cls,func):
-        arg_count = func.__code__.co_argcount
-        def wrapper(*args):
-            for arg in args:
-                if re.search(r'<__main__',str(arg)) is not None:
-                    pass
-                elif not isinstance(arg, bool):
-                    raise TypeError('"' + str(arg) + '" is not a bool type!')
-            if int(arg_count) > 1:
-                return func(cls,args)
-            return func(args)
-        return wrapper
-    
-    @classmethod
-    def integer(cls,func):
-        arg_count = func.__code__.co_argcount
-        def wrapper(*args):
-            for arg in args:
-                if re.search(r'<__main__',str(arg)) is not None:
-                    pass
-                elif not isinstance(arg, int):
-                    raise TypeError('"' + str(arg) + '" is not an integer!')
-            if int(arg_count) > 1:
-                return func(cls,args)
-            return func(args)
-        return wrapper
-    
-    @classmethod
-    def string(cls,func):
-        arg_count = func.__code__.co_argcount
-        def wrapper(*args):
-            for arg in args:
-                if re.search(r'<__main__',str(arg)) is not None:
-                    pass
-                elif not isinstance(arg, str):
-                    raise TypeError('"' + str(arg) + '" is not a string!')
-            if int(arg_count) > 1:
-                return func(cls,args)
-            return func(args)
-        return wrapper
-
-    # Needs to be fixed!
-    @classmethod
-    def tuple(cls,func):
-        arg_count = func.__code__.co_argcount
-        def wrapper(self,*args):
-            for arg in args:
-                if re.search(r'<__main__',str(arg)) is not None:
-                    pass
-                elif not isinstance(args, tuple):
-                    raise TypeError('"' + str(arg) + '" is not a tuple!')
-                else:
-                    if int(arg_count) > 1:
-                        return func(cls,arg)
-                    return func(arg)
-        return wrapper
-
 class Logging(object):
 
     @staticmethod
@@ -398,7 +338,6 @@ class Server(MotionDetection):
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
 
-    #@Accepts.tuple
     def handle_incoming_message(self,*messages):
         for(message,queue) in messages:
             if(message == 'start_monitor'):
