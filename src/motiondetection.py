@@ -246,16 +246,13 @@ class MotionDetection(object):
             img_list.append(int(num.group(2)))
         return max(img_list)
     
-    def take_picture(self):
-        camera = cv2.VideoCapture(self.cam_location)
-        if not camera.isOpened():
-            return
-        (ret, frame) = camera.read()
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2BGRA)
-        #time.sleep(0.5)
-        picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
-        cv2.imwrite(picture_name, frame)
-        del(camera)
+    def take_picture(self,frame):
+        picture_name = "/home/pi/.motiondetection/capture"
+            + str(MotionDetection.img_num() 
+            + 1) 
+            + ".png"
+        image = Image.fromarray(frame)
+        image.save(picture_name)
 
     def capture(self,queue=None):
 
@@ -268,6 +265,7 @@ class MotionDetection(object):
         self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
 
         (ret, previous_frame) = self.camera_motion.read()
+        colored_frame  = previous_frame 
         previous_frame = cv2.cvtColor(previous_frame, cv2.COLOR_RGB2GRAY)
         previous_frame = cv2.GaussianBlur(previous_frame, (21, 21), 0)
 
@@ -300,10 +298,7 @@ class MotionDetection(object):
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
-                    del(self.camera_motion)
-                    self.take_picture()
-                    self.camera_motion = cv2.VideoCapture(self.cam_location)
-                    self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
+                    self.take_picture(colored_frame)
                     Mail.send(self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < 500:
@@ -312,7 +307,8 @@ class MotionDetection(object):
 
             # keep the frames moving.
             previous_frame = current_frame
-            (ret, current_frame)  = self.camera_motion.read()
+            (ret, current_frame) = self.camera_motion.read()
+            colored_frame  = current_frame 
             current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
             current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
 
