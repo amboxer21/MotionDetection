@@ -354,12 +354,9 @@ class MotionDetection(object):
             frame_delta = cv2.normalize(frame_delta, None, 0, 255, cv2.NORM_MINMAX)
             delta_count = cv2.countNonZero(frame_delta)
 
-            if delta_count != 0:
-                print('WITHOUT MOTION => Delta count: '+str(delta_count))
-
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
                 self.tracker += 1
-                print('WITH MOTION => Delta count: '+str(delta_count))
+                print('(MotionDetection.capture) - Delta count crossed threshold! delta_count: '+str(delta_count))
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
