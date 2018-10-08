@@ -247,10 +247,7 @@ class MotionDetection(object):
         return max(img_list)
     
     def take_picture(self,frame):
-        picture_name = "/home/pi/.motiondetection/capture"
-            + str(MotionDetection.img_num() 
-            + 1) 
-            + ".png"
+        picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
         image = Image.fromarray(frame)
         image.save(picture_name)
 
