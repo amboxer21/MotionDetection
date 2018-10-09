@@ -11,6 +11,7 @@ import socket
 import smtplib
 import logging
 import StringIO
+import threading
 import subprocess
 import multiprocessing
 import logging.handlers
@@ -141,7 +142,8 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 self.end_headers()
             while True:
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
-                    Logging.log("INFO",'(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
+                    Logging.log("INFO",
+                        '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                     del(self.server.video_capture)
                     self.server.queue.put('close_camview')
                     self.server.sock.close()
@@ -205,7 +207,9 @@ class Stream(object):
             server.shutdown()
             server.server_close()
         except Exception as eThreadedHTTPServer:
-            Logging.log("ERROR", "(Stream.stream_main) - eThreadedHTTPServer => "+str(eThreadedHTTPServer))
+            Logging.log("ERROR",
+                "(Stream.stream_main) - eThreadedHTTPServer => "
+                + str(eThreadedHTTPServer))
             queue.close()
             server.shutdown()
             server.server_close()
@@ -246,10 +250,23 @@ class MotionDetection(object):
             img_list.append(int(num.group(2)))
         return max(img_list)
     
-    def take_picture(self,frame):
-        picture_name = "/home/pi/.motiondetection/capture" + str(MotionDetection.img_num() + 1) + ".png"
+    @staticmethod
+    def take_picture(frame):
+        picture_name = ('/home/pi/.motiondetection/capture'
+            + str(MotionDetection.img_num() + 1) + '.png'
+        )
         image = Image.fromarray(frame)
         image.save(picture_name)
+
+    @staticmethod
+    def start_thread(proc,*args):
+        try:
+            t = threading.Thread(target=proc,args=args)
+            t.daemon = True
+            t.start()
+        except Exception as eStartThread:
+            Logging.log("ERROR",
+                "Threading exception eStartThread => " + str(eStartThread))
 
     def capture(self,queue=None):
 
@@ -295,14 +312,13 @@ class MotionDetection(object):
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
-                    self.take_picture(colored_frame)
-                    Mail.send(self.email,self.email,self.password,self.email_port,
+                    MotionDetection.take_picture(colored_frame)
+                    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < 500:
                 self.count += 1
                 self.tracker = 0
 
-            # keep the frames moving.
             previous_frame = current_frame
             (ret, current_frame) = self.camera_motion.read()
             colored_frame  = current_frame 
