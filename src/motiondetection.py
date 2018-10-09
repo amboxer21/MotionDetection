@@ -252,8 +252,8 @@ class MotionDetection(object):
     
     @staticmethod
     def take_picture(frame):
-        picture_name = ('/home/pi/.motiondetection/capture'
-            + str(MotionDetection.img_num() + 1) + '.png'
+        picture_name = (
+            '/home/pi/.motiondetection/capture' + str(MotionDetection.img_num() + 1) + '.png'
         )
         image = Image.fromarray(frame)
         image.save(picture_name)
