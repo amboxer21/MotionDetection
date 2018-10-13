@@ -109,6 +109,30 @@ class Mail(object):
             Logging.log("ERROR", "(Mail.send) - Unexpected error in Mail.send() error e => " + str(e))
             pass
 
+class Accepts(object):
+    @classmethod
+    def string(cls,func):
+        arg_count = func.__code__.co_argcount
+        def wrapper(*args):
+            for arg in args:
+                if re.search(r'<__main__',str(arg)) is not None:
+                    pass
+                elif re.search(r"<class '__main",str(arg)) is not None:
+                    pass
+                elif not isinstance(arg, str):
+                    raise TypeError('"' + str(arg) + '" is not a string!')
+            if int(arg_count) > 1:
+                if len(list(args[1:])) == 1:
+                    return func(cls,str(list(args[1:])[0]))
+                elif len(list(args[1:])) > 1:
+                    pass # Handle mulitple args here
+            elif int(arg_count) == 1:
+                if len(list(args[1:])) == 1:
+                    return func(args)
+                elif len(list(args[1:])) > 1:
+                    pass
+        return wrapper
+
 # Metaclass for locking video camera
 class VideoFeed(type):
 
@@ -325,6 +349,22 @@ class MotionDetection(object):
             current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
             current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
 
+class FileOpts(object):
+  
+    @staticmethod
+    @Accepts.string
+    def file_exists(file_name):
+        return os.path.isfile(file_name)
+
+    @staticmethod
+    @Accepts.string
+    def create_file(file_name):
+        if FileOpts.file_exists(file_name):
+            Logging.log("INFO", "(FileOpts.compress_file) - File " + str(file_name) + " exists.")
+            return
+        Logging.log("INFO", "(FileOpts.compress_file) - Creating file " + str(file_name) + ".")
+        open(file_name, 'w')
+
 class Server(MotionDetection):
 
     __metaclass__ = VideoFeed
@@ -459,6 +499,9 @@ if __name__ == '__main__':
         'ip': options.ip, 'server_port': options.server_port, 'email': options.email, 'password': options.password,
         'cam_location': options.cam_location, 'email_port': options.email_port, 'camview_port': options.camview_port
     }
+
+    if not FileOpts.file_exists('/var/log/motiondetection.log'):
+        FileOpts.create_file('/var/log/motiondetection.log')
 
     motion_detection = MotionDetection(options_dict)
     Server(multiprocessing.Queue()).server_main()
