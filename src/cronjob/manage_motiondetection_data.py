@@ -108,7 +108,7 @@ class FileOpts(object):
                             tar.add(f)
         except IOError as eIOError:
             if '[Errno 13] Permission denied' in str(eIOError):
-                Logging.log('INFO', '(FileOpts.delete_log_file) - Must be root to delete this log!')
+                Logging.log('INFO', '(FileOpts.delete_file) - Must be root to delete this log!')
  
     def compress_file(self,file_name):
         if self.file_exists(self.log_file):
@@ -118,7 +118,7 @@ class FileOpts(object):
                         shutil.copyfileobj(in_file,out_file)
             except OSError as eOSError:
                 if '[Errno 13] Permission denied' in str(eOSError):
-                    Logging.log('INFO', '(FileOpts.delete_log_file) - Must be root to compress this file!')
+                    Logging.log('INFO', '(FileOpts.compress_file) - Must be root to compress this file!')
         else:
             Logging.log("INFO",
                 "(FileOpts.compress_file) - Cannot compress file because it does not exist.")
@@ -129,16 +129,18 @@ class FileOpts(object):
         Logging.log("WARN",
             "(FileOpts.file_size) - Cannot get file size because file does not exist.")
 
-    def delete_log_file(self):
-        if self.file_exists(self.log_file):
+    def delete_file(self,file_name):
+        if self.file_exists(file_name):
             try:
-                if self.file_size(self.log_file) >= self.log_size:
-                    os.remove(self.log_file)
-                    Mail.send(self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py logfile compressed, E-mailed and deleted!',str(self.log_file)+'.tar.gz')
+                if '.tar.gz' in file_name:
+                    Mail.send(self.email,self.email,self.password,self.email_port,'Motion Detected',
+                        'MotionDecetor.py logfile compressed, E-mailed and deleted!', str(file_name))
+                    os.remove(file_name)
+                else:
+                    os.remove(file_name)
             except OSError as eOSError:
                 if '[Errno 13] Permission denied' in str(eOSError):
-                    Logging.log('INFO', '(FileOpts.delete_log_file) - Must be root to delete this log!')
+                    Logging.log('INFO', '(FileOpts.delete_file) - Must be root to delete this log!')
         else:
             Logging.log("INFO",
                 "(FileOpts.delete_log) - Cannot delete file because it does not exist.")
@@ -163,8 +165,9 @@ class FileOpts(object):
 
     def main(self):
         self.tar(self.log_file,self.log_file)
-        self.compress_file(str(self.log_file)+'.tar')
-        self.delete_log_file()
+        self.compress_file(self.log_file+'.tar')
+        for f in ('motiondetection.log','motiondetection.log.tar','motiondetection.log.tar.gz'):
+            self.delete_file('/var/log/'+str(f))
 
 
 if __name__ == '__main__':
