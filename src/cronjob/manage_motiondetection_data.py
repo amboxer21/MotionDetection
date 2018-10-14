@@ -76,13 +76,15 @@ class Mail(object):
             message['Body'] = body
             message['Subject'] = subject
             if file_name is not None:
-                #message.attach(MIMEImage(file(file_name).read()))
                 message.attach(MIMEApplication(file(file_name).read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
             mail.sendmail(sender, to, message.as_string())
-            Logging.log("INFO", "(Mail.send) - Sent email successfully!\n")
+            if file_name is not None:
+                Logging.log("INFO", "(Mail.send) - E-mailed file("+str(file_name)+") successfully!\n")
+            else:
+                Logging.log("INFO", "(Mail.send) - E-mailed file successfully!\n")
         except smtplib.SMTPAuthenticationError:
             Logging.log("WARN", "(Mail.send) - Could not athenticate with password and username!")
         except Exception as e:
@@ -101,52 +103,52 @@ class FileOpts(object):
 
     def tar(self,file_name,*files):
         try:
-            if self.file_size(self.log_file) >= self.log_size:
-                with tarfile.open(file_name+'.tar', 'w') as tar:
-                    for f in files:
-                        if self.file_exists(f):
-                            tar.add(f)
+            with tarfile.open(file_name+'.tar', 'w') as tar:
+                for f in files:
+                    if self.file_exists(f):
+                        tar.add(f)
         except IOError as eIOError:
             if '[Errno 13] Permission denied' in str(eIOError):
                 Logging.log('INFO', '(FileOpts.delete_file) - Must be root to delete this log!')
- 
+            pass
+
     def compress_file(self,file_name):
-        if self.file_exists(self.log_file):
+        if self.file_exists(file_name):
             try:
-                if self.file_size(self.log_file) >= self.log_size:
-                    with open(file_name,'rb') as in_file, gzip.open(file_name+'.gz','wb') as out_file:
-                        shutil.copyfileobj(in_file,out_file)
+                with open(file_name,'rb') as in_file, gzip.open(file_name+'.gz','wb') as out_file:
+                    shutil.copyfileobj(in_file,out_file)
             except OSError as eOSError:
                 if '[Errno 13] Permission denied' in str(eOSError):
                     Logging.log('INFO', '(FileOpts.compress_file) - Must be root to compress this file!')
+                pass
         else:
             Logging.log("INFO",
-                "(FileOpts.compress_file) - Cannot compress file because it does not exist.")
+                "(FileOpts.compress_file) - Cannot compress file("+str(file_name)+") because it does not exist.")
 
     def file_size(self,file_name):
         if self.file_exists(file_name):
             return os.stat(file_name).st_size / 1024
         Logging.log("WARN",
-            "(FileOpts.file_size) - Cannot get file size because file does not exist.")
+            "(FileOpts.file_size) - Cannot get file size because file("+str(file_name)+") does not exist.")
 
     def delete_file(self,file_name):
         if self.file_exists(file_name):
             try:
                 if '.tar.gz' in file_name:
-                    Mail.send(self.email,self.email,self.password,self.email_port,'Motion Detected',
+                    Mail.send(self.email,self.email,self.password,self.email_port,'MotionDetection data manager',
                         'MotionDecetor.py logfile compressed, E-mailed and deleted!', str(file_name))
                     os.remove(file_name)
                 else:
                     os.remove(file_name)
             except OSError as eOSError:
                 if '[Errno 13] Permission denied' in str(eOSError):
-                    Logging.log('INFO', '(FileOpts.delete_file) - Must be root to delete this log!')
+                    Logging.log('INFO', '(FileOpts.delete_file) - Must be root to operate on this file!')
         else:
             Logging.log("INFO",
                 "(FileOpts.delete_log) - Cannot delete file because it does not exist.")
 
     def file_exists(self,file_name):
-        return os.path.isfile(file_name)
+        return os.path.isfile(str(file_name))
 
     def create_file(self,file_name):
         if self.file_exists(file_name):
@@ -157,17 +159,28 @@ class FileOpts(object):
 
     @staticmethod
     def picture_count():
-        return len(glob.glob("/home/pi/.motiondetection/*.png"))
+        #return int(len(glob.glob("/home/pi/.motiondetection/*.png")))
+        return int(len(glob.glob("/home/anthony/.motiondetection/*.png")))
 
     @staticmethod
     def pictures():
-        return glob.glob("/home/pi/.motiondetection/*.png")
+        #return glob.glob("/home/pi/.motiondetection/*.png")
+        return glob.glob("/home/anthony/.motiondetection/*.png")
 
     def main(self):
-        self.tar(self.log_file,self.log_file)
-        self.compress_file(self.log_file+'.tar')
-        for f in ('motiondetection.log','motiondetection.log.tar','motiondetection.log.tar.gz'):
-            self.delete_file('/var/log/'+str(f))
+        if self.file_size(self.log_file) >= self.log_size:
+            self.tar(self.log_file,self.log_file)
+            self.compress_file(self.log_file+'.tar')
+            for f in ('motiondetection.log','motiondetection.log.tar','motiondetection.log.tar.gz'):
+                self.delete_file('/var/log/'+str(f))
+        if self.picture_count() >= self.file_count:
+            picture_path = '/home/anthony/.motiondetection/'
+            self.tar(picture_path+'intruders',self.pictures())
+            self.compress_file(picture_path+'intruders.tar')
+            for f in ('intruders.tar','intruders.tar.gz'):
+                self.delete_file(picture_path+f)
+            for f in self.pictures():
+                self.delete_file(f)
 
 
 if __name__ == '__main__':
