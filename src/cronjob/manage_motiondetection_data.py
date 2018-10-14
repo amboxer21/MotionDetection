@@ -159,13 +159,11 @@ class FileOpts(object):
 
     @staticmethod
     def picture_count():
-        #return int(len(glob.glob("/home/pi/.motiondetection/*.png")))
-        return int(len(glob.glob("/home/anthony/.motiondetection/*.png")))
+        return int(len(glob.glob("/home/pi/.motiondetection/*.png")))
 
     @staticmethod
     def pictures():
-        #return glob.glob("/home/pi/.motiondetection/*.png")
-        return glob.glob("/home/anthony/.motiondetection/*.png")
+        return glob.glob("/home/pi/.motiondetection/*.png")
 
     def main(self):
         if self.file_size(self.log_file) >= self.log_size:
@@ -174,7 +172,7 @@ class FileOpts(object):
             for f in ('motiondetection.log','motiondetection.log.tar','motiondetection.log.tar.gz'):
                 self.delete_file('/var/log/'+str(f))
         if self.picture_count() >= self.file_count:
-            picture_path = '/home/anthony/.motiondetection/'
+            picture_path = '/home/pi/.motiondetection/'
             self.tar(picture_path+'intruders',self.pictures())
             self.compress_file(picture_path+'intruders.tar')
             for f in ('intruders.tar','intruders.tar.gz'):
