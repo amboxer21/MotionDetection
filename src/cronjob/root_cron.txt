@@ -14,11 +14,9 @@
 # email to the user the crontab file belongs to (unless redirected).
 # 
 # For example, you can run a backup of all your user accounts
-# at 5 a.m every week with:
-# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/ # at 5 a.m every week with:
 # 
 # For more information see the manual pages of crontab(5) and cron(8)
-# 
-# m h  dom mon dow   command
-* * * * * /bin/bash /var/www/LightState/scripts/is_rails_running.sh
-* * * * * /bin/bash /home/pi/Documents/Python/MotionDetection/is_motiondetection_running.sh
+
+* * * * * /bin/bash /home/pi/.motiondetection/scripts/is_motiondetection_running.sh
+* * * * * /usr/bin/python /home/pi/.motiondetection/scripts/manage_motiondetection_data.py

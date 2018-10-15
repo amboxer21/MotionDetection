@@ -19,6 +19,7 @@ import logging.handlers
 import numpy as np
 
 from PIL import Image
+from pynetgear import Netgear
 from optparse import OptionParser
 
 from email.MIMEImage import MIMEImage
@@ -224,13 +225,15 @@ class MotionDetection(object):
         self.tracker       = 0
         self.count         = 60
 
-        self.ip            = options_dict['ip']
-        self.fps           = options_dict['fps']
-        self.email         = options_dict['email']
-        self.password      = options_dict['password']
-        self.email_port    = options_dict['email_port']
-        self.server_port   = options_dict['server_port']
-        self.cam_location  = options_dict['cam_location']
+        self.ip              = options_dict['ip']
+        self.fps             = options_dict['fps']
+        self.email           = options_dict['email']
+        self.netgear         = options_dict['netgear']
+        self.password        = options_dict['password']
+        self.email_port      = options_dict['email_port']
+        self.access_list     = options_dict['access_list']
+        self.server_port     = options_dict['server_port']
+        self.cam_location    = options_dict['cam_location']
 
         self.motion_thresh_min = options_dict['motion_thresh_min']
         self.motion_thresh_max = options_dict['motion_thresh_max']
@@ -245,6 +248,8 @@ class MotionDetection(object):
     def img_num():
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
+	if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
+            FileOpts.create_file('/home/pi/.motiondetection/capture1.png')
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             img_list.append(int(num.group(2)))
@@ -267,6 +272,13 @@ class MotionDetection(object):
         except Exception as eStartThread:
             Logging.log("ERROR",
                 "Threading exception eStartThread => " + str(eStartThread))
+
+    def white_listed(self):
+        if isinstance(self.netgear, Netgear):
+            for device in self.netgear.get_attached_devices():
+                if device.mac in open(self.access_list,'r').read():
+                    return True
+        return False
 
     def capture(self,queue=None):
 
@@ -308,13 +320,21 @@ class MotionDetection(object):
 
             if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
                 self.tracker += 1
-                print('(MotionDetection.capture) - Delta count crossed threshold! delta_count: '+str(delta_count))
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
-                    MotionDetection.take_picture(colored_frame)
+                    Logging.log("INFO",
+                        "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                    MotionDetection.start_thread(self.take_picture,colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!')
+                            'Motion Detected','MotionDecetor.py detected movement!')
+                    # Access list feature
+                    '''if not self.white_listed(delta_count,colored_frame):
+                        Logging.log("INFO",
+                            "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                        MotionDetection.take_picture(colored_frame)
+                        MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                            'Motion Detected','MotionDecetor.py detected movement!')'''
             elif delta_count < 500:
                 self.count += 1
                 self.tracker = 0
@@ -324,6 +344,20 @@ class MotionDetection(object):
             colored_frame  = current_frame 
             current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
             current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
+
+class FileOpts(object):
+  
+    @staticmethod
+    def file_exists(file_name):
+        return os.path.isfile(file_name)
+
+    @staticmethod
+    def create_file(file_name):
+        if FileOpts.file_exists(file_name):
+            Logging.log("INFO", "(FileOpts.compress_file) - File " + str(file_name) + " exists.")
+            return
+        Logging.log("INFO", "(FileOpts.compress_file) - Creating file " + str(file_name) + ".")
+        open(file_name, 'w')
 
 class Server(MotionDetection):
 
@@ -426,7 +460,7 @@ if __name__ == '__main__':
         dest='email', type="str",
         help='"This argument is required!"')
     parser.add_option("-p", "--password",
-        dest='password', type="str",
+        dest='password',
         help='"This argument is required!"')
     parser.add_option("-c", "--camera-location",
         dest='cam_location', type="int", default=0,
@@ -441,6 +475,11 @@ if __name__ == '__main__':
         dest='fps', type="int", default='30',
         help='"This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s."')
+    parser.add_option("-w", "--white-list",
+        dest='access_list', default='/home/pi/.motiondetection/access_list',
+        help='"This ensures that the MotionDetection system does not run '
+            + 'if the mac is in the access_list. This defaults to '
+            + '/home/pi/.motiondetection/access_list"')
     parser.add_option("-m", "--motion-threshold-min",
         dest='motion_thresh_min', type="int", default=1500,
         help='"Sets the minimum movement threshold '
@@ -451,13 +490,27 @@ if __name__ == '__main__':
         help='"Sets the maximum movement threshold when the '
             +'programs image capturing routine stops working.'
             +' The default value is set at 10000."')
+    parser.add_option("-r", "--router-password",
+        dest='router_password', default='password',
+        help='"This option is your routers password. This is used to '
+            + 'circumvent the motiondetection system. If your phone is '
+            + 'connected to your router and in the access list. The '
+            + 'MotionDetection system will not run."')
     (options, args) = parser.parse_args()
 
+    netgear = Netgear(password=options.router_password)
+
+    if not FileOpts.file_exists('/var/log/motiondetection.log'):
+        FileOpts.create_file('/var/log/motiondetection.log')
+
     options_dict = {
+        'netgear': netgear,
         'logfile': options.logfile, 'fps': options.fps,
-        'motion_thresh_min': options.motion_thresh_min, 'motion_thresh_max': options.motion_thresh_max,
-        'ip': options.ip, 'server_port': options.server_port, 'email': options.email, 'password': options.password,
-        'cam_location': options.cam_location, 'email_port': options.email_port, 'camview_port': options.camview_port
+        'server_port': options.server_port, 'email': options.email,
+        'motion_thresh_max': options.motion_thresh_max, 'ip': options.ip, 
+        'password': options.password, 'cam_location': options.cam_location,
+        'email_port': options.email_port, 'camview_port': options.camview_port,
+        'access_list': options.access_list, 'motion_thresh_min': options.motion_thresh_min
     }
 
     motion_detection = MotionDetection(options_dict)
