@@ -323,12 +323,18 @@ class MotionDetection(object):
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
-                    if not self.white_listed():
+                    Logging.log("INFO",
+                        "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                    MotionDetection.start_thread(self.take_picture,colored_frame)
+                    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                            'Motion Detected','MotionDecetor.py detected movement!')
+                    # Access list feature
+                    '''if not self.white_listed(delta_count,colored_frame):
                         Logging.log("INFO",
                             "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
                         MotionDetection.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
+                            'Motion Detected','MotionDecetor.py detected movement!')'''
             elif delta_count < 500:
                 self.count += 1
                 self.tracker = 0
