@@ -7,6 +7,8 @@ import sys
 import cgi
 import time
 import glob
+import fcntl
+import errno
 import socket
 import smtplib
 import logging
@@ -377,6 +379,7 @@ class Server(MotionDetection):
         try:
             self.sock = socket.socket()
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            fcntl.fcntl(self.sock, fcntl.F_SETFL, os.O_NONBLOCK)
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
@@ -435,6 +438,9 @@ class Server(MotionDetection):
 
                 Server.handle_incoming_message(self,(con.recv(1024),self.queue))
 
+            except socket.error as e:
+                if 'errno.EAGAIN' or 'errno.EWOULDBLOCK' in e.args[0]:
+                    pass
             except KeyboardInterrupt:
                 print("\n")
                 Logging.log("INFO", "(Server.server_main) - Caught control + c, exiting now.")
