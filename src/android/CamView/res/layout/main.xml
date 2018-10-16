@@ -14,7 +14,7 @@
       android:layout_marginLeft="5dp"
       android:layout_marginRight="5dp"
       android:layout_width="fill_parent"
-      android:background="@drawable/scroll_view_bg"
+      android:background="@drawable/framelayout_border"
       android:layout_alignParentTop="true">
 
       <Button
@@ -53,7 +53,7 @@
     <EditText
       android:ems="10"
       android:id="@+id/editIPAddress"
-      android:textColorHint="#3F51B5"
+      android:textColorHint="#808080"
       android:layout_marginTop="5dp"
       android:layout_marginLeft="10dp"
       android:layout_marginRight="10dp"
@@ -68,7 +68,7 @@
       android:id="@+id/editCamPort"
       android:inputType="number"
       android:hint="Cam port"
-      android:textColorHint="#3F51B5"
+      android:textColorHint="#808080"
       android:layout_marginLeft="10dp"
       android:layout_marginRight="2dp"
       android:layout_width="wrap_content"
@@ -80,7 +80,7 @@
       android:id="@+id/editServerPort"
       android:inputType="number"
       android:hint="Server port"
-      android:textColorHint="#3F51B5"
+      android:textColorHint="#808080"
       android:layout_marginLeft="2dp"
       android:layout_marginRight="10dp"
       android:layout_width="wrap_content"

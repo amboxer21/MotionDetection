@@ -7,6 +7,8 @@ import sys
 import cgi
 import time
 import glob
+import fcntl
+import errno
 import socket
 import smtplib
 import logging
@@ -323,12 +325,18 @@ class MotionDetection(object):
                 if self.tracker >= 60 or self.count >= 60:
                     self.count = 0
                     self.tracker = 0
-                    if not self.white_listed():
+                    Logging.log("INFO",
+                        "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                    MotionDetection.start_thread(self.take_picture,colored_frame)
+                    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                            'Motion Detected','MotionDecetor.py detected movement!')
+                    # Access list feature
+                    '''if not self.white_listed(delta_count,colored_frame):
                         Logging.log("INFO",
                             "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
                         MotionDetection.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
+                            'Motion Detected','MotionDecetor.py detected movement!')'''
             elif delta_count < 500:
                 self.count += 1
                 self.tracker = 0
@@ -371,6 +379,7 @@ class Server(MotionDetection):
         try:
             self.sock = socket.socket()
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            fcntl.fcntl(self.sock, fcntl.F_SETFL, os.O_NONBLOCK)
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
@@ -429,6 +438,9 @@ class Server(MotionDetection):
 
                 Server.handle_incoming_message(self,(con.recv(1024),self.queue))
 
+            except socket.error as e:
+                if 'errno.EAGAIN' or 'errno.EWOULDBLOCK' in e.args[0]:
+                    pass
             except KeyboardInterrupt:
                 print("\n")
                 Logging.log("INFO", "(Server.server_main) - Caught control + c, exiting now.")
