@@ -8,6 +8,7 @@
     android:windowSoftInputMode="adjustNothing">
  
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:elevation="1dp"
       android:id="@+id/scrollView"
       android:layout_height="235dp"
       android:layout_marginTop="5dp"
@@ -45,6 +46,10 @@
       <WebView
         android:elevation="0dp"
         android:id="@+id/webView"
+        android:layout_marginTop="3dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        android:layout_marginBottom="3dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
