@@ -98,7 +98,8 @@ class Mail(object):
             message['Subject'] = subject
             message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
                 + str(MotionDetection.img_num())
-                + ".png","rb").read(), _subtype="png"))
+                + ".png","rb").read()))
+                #+ ".png","rb").read(), _subtype="png"))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
