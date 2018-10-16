@@ -94,12 +94,12 @@ class Mail(object):
 class FileOpts(object):
 
     def __init__(self,options_dict={}):
-        self.email      = options_dict['email'] #'sshmonitorapp@gmail.com'
-        self.password   = options_dict['password'] #'hkeyscwhgxjzafvj'
+        self.email      = options_dict['email']
+        self.password   = options_dict['password']
         self.log_file   = options_dict['log_file']
-        self.log_size   = options_dict['log_size'] # 11
-        self.file_count = options_dict['file_count'] # 50
-        self.email_port = options_dict['email_port'] # 587
+        self.log_size   = options_dict['log_size']
+        self.file_count = options_dict['file_count']
+        self.email_port = options_dict['email_port']
 
     def tar(self,file_name,*files):
         try:
