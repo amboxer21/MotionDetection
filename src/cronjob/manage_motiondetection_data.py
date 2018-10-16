@@ -76,7 +76,7 @@ class Mail(object):
             message['Body'] = body
             message['Subject'] = subject
             if file_name is not None:
-                message.attach(MIMEApplication(file(file_name).read()))
+                message.attach(MIMEApplication(file(file_name,'rb').read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
