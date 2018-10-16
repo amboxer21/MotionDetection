@@ -37,33 +37,33 @@ class Logging(object):
                 return
             elif comm.group() == 'ERROR':
                 logging.error(str(time.asctime(time.localtime(time.time()))
-                    + " - MotionDetection - "
+                    + " - MotionDetection Data Manager - "
                     + str(message)))
             elif comm.group() == 'INFO':
                 logging.info(str(time.asctime(time.localtime(time.time()))
-                    + " - MotionDetection - "
+                    + " - MotionDetection Data Manager - "
                     + str(message)))
             elif comm.group() == 'WARN':
                 logging.warn(str(time.asctime(time.localtime(time.time()))
-                    + " - MotionDetection - "
+                    + " - MotionDetection Data Manager - "
                     + str(message)))
             if verbose or str(level) == 'ERROR':
                 print("(" + str(level) + ") "
                     + str(time.asctime(time.localtime(time.time()))
-                    + " - ImageCapture - "
+                    + " - MotionDetection Data Manager - "
                     + str(message)))
         except IOError as eIOError:
             if re.search('\[Errno 13\] Permission denied:', str(eIOError), re.M | re.I):
-                print("(ERROR) MotionDetection - Must be sudo to run MotionDetection!")
+                print("(ERROR) MotionDetection Data Manager - Must be sudo to run MotionDetection!")
                 sys.exit(0)
-            print("(ERROR) MotionDetection - IOError in Logging class => " + str(eIOError))
+            print("(ERROR) MotionDetection Data Manager - IOError in Logging class => " + str(eIOError))
             logging.error(str(time.asctime(time.localtime(time.time()))
-                + " - MotionDetection - IOError => "
+                + " - MotionDetection Data Manager - IOError => "
                 + str(eIOError)))
         except Exception as eLogging:
             print("(ERROR) MotionDetection Data Manager - Exception in Logging class => " + str(eLogging))
             logging.error(str(time.asctime(time.localtime(time.time()))
-                + " - MotionDetection - Exception => "
+                + " - MotionDetection Data Manager - Exception => "
                 + str(eLogging)))
             pass
         return
@@ -82,13 +82,13 @@ class Mail(object):
             mail.login(sender,password)
             mail.sendmail(sender, to, message.as_string())
             if file_name is not None:
-                Logging.log("INFO", "(Mail.send) - E-mailed file("+str(file_name)+") successfully!\n")
+                Logging.log("INFO", "(Mail.send(DM)) - E-mailed file("+str(file_name)+") successfully!\n")
             else:
-                Logging.log("INFO", "(Mail.send) - E-mailed file successfully!\n")
+                Logging.log("INFO", "(Mail.send(DM)) - E-mailed file successfully!\n")
         except smtplib.SMTPAuthenticationError:
-            Logging.log("WARN", "(Mail.send) - Could not athenticate with password and username!")
+            Logging.log("WARN", "(Mail.send(DM)) - Could not athenticate with password and username!")
         except Exception as e:
-            Logging.log("ERROR", "(Mail.send) - Unexpected error in Mail.send() error e => " + str(e))
+            Logging.log("ERROR", "(Mail.send(DM)) - Unexpected error in Mail.send() error e => " + str(e))
             pass
 
 class FileOpts(object):
@@ -178,7 +178,8 @@ class FileOpts(object):
             for f in ('intruders.tar','intruders.tar.gz'):
                 self.delete_file(picture_path+f)
             for f in self.pictures():
-                self.delete_file(f)
+                if not 'capture1.png' in str(f):
+                    self.delete_file(f)
 
 
 if __name__ == '__main__':
