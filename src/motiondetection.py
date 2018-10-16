@@ -107,6 +107,8 @@ class Mail(object):
             Logging.log("INFO", "(Mail.send) - Sent email successfully!\n")
         except smtplib.SMTPAuthenticationError:
             Logging.log("WARN", "(Mail.send) - Could not athenticate with password and username!")
+        except TypeError as eTypeError:
+            pass
         except Exception as e:
             Logging.log("ERROR", "(Mail.send) - Unexpected error in Mail.send() error e => " + str(e))
             pass
