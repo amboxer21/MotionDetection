@@ -56,67 +56,47 @@
     </FrameLayout>
 
     <EditText
-      android:ems="10"
+      android:layout_below="@+id/scrollView"
       android:id="@+id/editIPAddress"
       android:textColorHint="#808080"
       android:layout_marginTop="5dp"
       android:layout_marginLeft="10dp"
       android:layout_marginRight="10dp"
       android:layout_width="fill_parent"
-      android:layout_below="@+id/scrollView"
       android:layout_height="wrap_content"
       android:inputType="textNoSuggestions"
       android:hint="Your public IP Address"/>
 
-    <EditText
-      android:ems="10"
-      android:id="@+id/editCamPort"
-      android:inputType="number"
-      android:hint="Cam port"
-      android:textColorHint="#808080"
-      android:layout_marginLeft="10dp"
-      android:layout_marginRight="2dp"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_below="@+id/editIPAddress"/>
-
-    <EditText
-      android:ems="10"
-      android:id="@+id/editServerPort"
-      android:inputType="number"
-      android:hint="Server port"
-      android:textColorHint="#808080"
-      android:layout_marginLeft="2dp"
-      android:layout_marginRight="10dp"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_toRightOf="@+id/editCamPort"
-      android:layout_below="@+id/editIPAddress"/>
-
-    <!--<Button
-      android:text="Go Live"
-      android:textColor="#009900"
-      android:id="@+id/button"
-      android:layout_marginBottom="20dp"
-      android:layout_width="50dp"
-      android:layout_height="50dp"
-      android:layout_centerHorizontal="true"
-      android:background="@drawable/circle"
-      android:windowSoftInputMode="adjustNothing"
-      android:layout_alignParentBottom="true"/>
- 
-    <Button
-      android:text="View Cam"
-      android:id="@+id/button"
-      android:layout_marginLeft="50dp"
-      android:layout_marginRight="50dp"
-      android:layout_marginBottom="20dp"
+    <LinearLayout
       android:layout_width="fill_parent"
-      android:layout_height="wrap_content"
-      android:layout_centerHorizontal="true"
-      android:background="@drawable/circle"
-      android:windowSoftInputMode="adjustNothing"
-      android:layout_alignParentBottom="true"/>-->
+      android:layout_height="fill_parent"
+      android:orientation="horizontal"
+      android:layout_below="@+id/editIPAddress">
 
+      <EditText
+        android:hint="Cam port"
+        android:inputType="number"
+        android:layout_width="0dp"
+        android:layout_weight=".50"
+        android:id="@+id/editCamPort"
+        android:textColorHint="#808080"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="2dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editIPAddress"/>
+
+      <EditText
+        android:inputType="number"
+        android:hint="Server port"
+        android:layout_width="0dp"
+        android:layout_weight=".50"
+        android:textColorHint="#808080"
+        android:layout_marginLeft="2dp"
+        android:id="@+id/editServerPort"
+        android:layout_marginRight="10dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editIPAddress"/>
+
+    </LinearLayout>
 </RelativeLayout>
 
