@@ -99,7 +99,6 @@ class Mail(object):
             message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
                 + str(MotionDetection.img_num())
                 + ".png","rb").read()))
-                #+ ".png","rb").read(), _subtype="png"))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)
@@ -108,6 +107,11 @@ class Mail(object):
         except smtplib.SMTPAuthenticationError:
             Logging.log("WARN", "(Mail.send) - Could not athenticate with password and username!")
         except TypeError as eTypeError:
+            Logging.log("INFO", "(Mail.send) - Picture("
+                + str(MotionDetection.img_num())
+                + ".png) "
+                + "TypeError => "
+                + str(eTypeError))
             pass
         except Exception as e:
             Logging.log("ERROR", "(Mail.send) - Unexpected error in Mail.send() error e => " + str(e))
@@ -252,6 +256,7 @@ class MotionDetection(object):
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
 	if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
+            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.")
             FileOpts.create_file('/home/pi/.motiondetection/capture1.png')
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
@@ -328,7 +333,7 @@ class MotionDetection(object):
                     self.tracker = 0
                     Logging.log("INFO",
                         "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
-                    MotionDetection.start_thread(self.take_picture,colored_frame)
+                    self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')
                     # Access list feature
