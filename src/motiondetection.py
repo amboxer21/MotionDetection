@@ -335,12 +335,12 @@ class MotionDetection(object):
                         "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
                     self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
+                        'Motion Detected','MotionDecetor.py detected movement!')
                     # Access list feature
                     '''if not self.white_listed(delta_count,colored_frame):
                         Logging.log("INFO",
                             "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
-                        MotionDetection.take_picture(colored_frame)
+                        self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')'''
             elif delta_count < 500:
