@@ -375,6 +375,7 @@ class Server(MotionDetection):
         super(Server, self).__init__(options_dict)
 
         self.queue = queue
+        self.con   = 'alive'
 
         self.process = multiprocessing.Process(
             target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
@@ -425,9 +426,10 @@ class Server(MotionDetection):
                 )
                 self.process.daemon = True
                 self.process.start()
+            elif(message == 'ping'):
+                self.con.send(str(os.getpid()))
             else:
                 pass
-                #con.send(message + " is not a known command!")
 
     def server_main(self):
 
@@ -437,11 +439,11 @@ class Server(MotionDetection):
             time.sleep(0.05)
             try:
                 self.sock.listen(5)
-                (con, addr) = self.sock.accept()
+                (self.con, addr) = self.sock.accept()
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
 
-                Server.handle_incoming_message(self,(con.recv(1024),self.queue))
+                Server.handle_incoming_message(self,(self.con.recv(1024),self.queue))
 
             except KeyboardInterrupt:
                 print("\n")
@@ -450,7 +452,7 @@ class Server(MotionDetection):
                 sys.exit(0)
             except Exception as eAccept:
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: " + str(eAccept))
-        con.close()
+        self.con.close()
 
 if __name__ == '__main__':
 
@@ -506,7 +508,8 @@ if __name__ == '__main__':
             + 'MotionDetection system will not run."')
     (options, args) = parser.parse_args()
 
-    netgear = Netgear(password=options.router_password)
+    #netgear = Netgear(password=options.router_password)
+    netgear = 'netgear'
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
