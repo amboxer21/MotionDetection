@@ -1,4 +1,4 @@
-package com.cam.view;
+package com.secure.view;
 
 import java.io.PrintWriter;
 import java.io.IOException;
@@ -40,10 +40,10 @@ public class Client {
 
       pWriter.flush();
       pWriter.close();
-      Log.d("CamView", "pWriter: " + pWriter);
+      Log.d("SecureView", "pWriter: " + pWriter);
     }
     catch(IOException e) {
-      Log.d("CamView", "sendDataWithString() " + e.toString());
+      Log.d("SecureView", "sendDataWithString() " + e.toString());
       e.printStackTrace();
     }
 

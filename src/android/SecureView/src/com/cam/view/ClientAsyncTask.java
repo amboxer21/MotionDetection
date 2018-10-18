@@ -1,4 +1,4 @@
-package com.cam.view;
+package com.secure.view;
 
 import android.os.AsyncTask;
 
