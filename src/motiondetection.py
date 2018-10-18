@@ -255,7 +255,7 @@ class MotionDetection(object):
     def img_num():
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
-	if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
+        if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
             Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.")
             FileOpts.create_file('/home/pi/.motiondetection/capture1.png')
         for file_name in glob.glob("*.png"):
