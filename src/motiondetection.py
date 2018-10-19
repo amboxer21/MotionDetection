@@ -374,8 +374,8 @@ class Server(MotionDetection):
     def __init__(self,queue):
         super(Server, self).__init__(options_dict)
 
+        self.con   = None
         self.queue = queue
-        self.con   = 'alive'
 
         self.process = multiprocessing.Process(
             target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
@@ -384,7 +384,7 @@ class Server(MotionDetection):
         self.process.start()
 
         try:
-            self.sock = socket.socket()
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
@@ -415,11 +415,11 @@ class Server(MotionDetection):
                 queue.put('kill_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'stream_main':
+                    self.process.terminate()
                     Logging.log("INFO",
                         "(Server.handle_incoming_message) - Terminating "
                         + str(self.process.name)
                         + " process")
-                    self.process.terminate()
                 Server.lock.release()
                 self.process = multiprocessing.Process(
                     target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
@@ -438,12 +438,13 @@ class Server(MotionDetection):
         while(True):
             time.sleep(0.05)
             try:
-                self.sock.listen(5)
+                self.sock.listen(10)
                 (self.con, addr) = self.sock.accept()
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
 
                 Server.handle_incoming_message(self,(self.con.recv(1024),self.queue))
+                self.con.close()
 
             except KeyboardInterrupt:
                 print("\n")
