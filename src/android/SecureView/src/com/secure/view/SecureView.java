@@ -1,4 +1,4 @@
-package com.cam.view;
+package com.secure.view;
 
 import  android.net.Uri;
 import android.util.Log;
@@ -29,7 +29,7 @@ import android.view.MotionEvent;
 import android.view.View.OnTouchListener;
 import android.view.View.OnClickListener;
 
-public class CamView extends Activity implements OnTouchListener {
+public class SecureView extends Activity implements OnTouchListener {
 
   private static String ip;
   private static String camPort;
@@ -109,7 +109,7 @@ public class CamView extends Activity implements OnTouchListener {
     camPortNumber    = (EditText) findViewById(R.id.editCamPort);
     serverPortNumber = (EditText) findViewById(R.id.editServerPort);
 
-    db = new DatabaseHandler(CamView.this);
+    db = new DatabaseHandler(SecureView.this);
 
     databaseGetter();
 
@@ -135,7 +135,7 @@ public class CamView extends Activity implements OnTouchListener {
 
         webView.setVerticalScrollBarEnabled(false);
         webView.setHorizontalScrollBarEnabled(false);
-        webView.setWebViewClient(new CamViewBrowser());
+        webView.setWebViewClient(new SecureViewBrowser());
         handler.postDelayed(new Runnable() {
           public void run() {
             webView.loadUrl(addr);
@@ -186,7 +186,7 @@ public class CamView extends Activity implements OnTouchListener {
     }
     catch(Exception e) {
       e.printStackTrace();
-      Log.e("CamView sanityCheck()", "getText() Error => " + e.getMessage(), e);
+      Log.e("SecureView sanityCheck()", "getText() Error => " + e.getMessage(), e);
     }
     try {
       if(String.valueOf(sIPAddress).isEmpty()) {
@@ -207,13 +207,13 @@ public class CamView extends Activity implements OnTouchListener {
     }
     catch(Exception e) {
       e.printStackTrace();
-      Log.e("CamView sanityCheck()", "isEmpty() Error => " + e.getMessage(), e);
+      Log.e("SecureView sanityCheck()", "isEmpty() Error => " + e.getMessage(), e);
     }
   }
 
   public void databaseGetter() {
 
-    Log.d("CamView","databaseGetter()");
+    Log.d("SecureView","databaseGetter()");
 
     List<Address> address = db.getAllAddresses();
 
@@ -259,7 +259,7 @@ public class CamView extends Activity implements OnTouchListener {
   }
 
 
-  private class CamViewBrowser extends WebViewClient {
+  private class SecureViewBrowser extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       view.loadUrl(url);

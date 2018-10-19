@@ -1,4 +1,4 @@
-package com.cam.view;
+package com.secure.view;
 
 import android.util.Log;
 
@@ -102,7 +102,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
   }
  
   public int updateAddress(Address address) {
-    Log.d("CamView","updateAddress(Address address) debug");
+    Log.d("SecureView","updateAddress(Address address) debug");
     SQLiteDatabase db    = this.getWritableDatabase();
     ContentValues values = new ContentValues();
     values.put(KEY_IP_ADDRESS, address.getIPAddress());
@@ -122,12 +122,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
   public int getAddressCount() {
     String countQuery = "SELECT  * FROM " + TABLE_ADDRESS;
-    Log.d("CamView","countQuery => " + countQuery);
+    Log.d("SecureView","countQuery => " + countQuery);
     SQLiteDatabase db = this.getReadableDatabase();
     Cursor cursor = db.rawQuery(countQuery, null);
     cursor.close();
  
-    Log.d("CamView","getAddressCount() => " + cursor.getCount());
+    Log.d("SecureView","getAddressCount() => " + cursor.getCount());
     return cursor.getCount();
   }
  
