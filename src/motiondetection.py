@@ -427,7 +427,8 @@ class Server(MotionDetection):
                 self.process.daemon = True
                 self.process.start()
             elif(message == 'ping'):
-                self.con.send(str(os.getpid()))
+                pass
+                #self.con.sendall(str(os.getpid()))
             else:
                 pass
 
@@ -439,12 +440,14 @@ class Server(MotionDetection):
             time.sleep(0.05)
             try:
                 self.sock.listen(10)
-                (self.con, addr) = self.sock.accept()
+                (con, addr) = self.sock.accept()
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
 
-                Server.handle_incoming_message(self,(self.con.recv(1024),self.queue))
-                self.con.close()
+                Server.handle_incoming_message(self,(con.recv(1024),self.queue))
+
+                Logging.log("INFO", "(Server.server_main) - Closing connection for " + str(addr))
+                con.close()
 
             except KeyboardInterrupt:
                 print("\n")
@@ -453,7 +456,7 @@ class Server(MotionDetection):
                 sys.exit(0)
             except Exception as eAccept:
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: " + str(eAccept))
-        self.con.close()
+        con.close()
 
 if __name__ == '__main__':
 
