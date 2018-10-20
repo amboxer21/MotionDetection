@@ -374,7 +374,6 @@ class Server(MotionDetection):
     def __init__(self,queue):
         super(Server, self).__init__(options_dict)
 
-        self.con   = None
         self.queue = queue
 
         self.process = multiprocessing.Process(
@@ -398,11 +397,11 @@ class Server(MotionDetection):
                 queue.put('start_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'capture':
-                    self.process.terminate()
                     Logging.log("INFO",
                         "(Server.handle_incoming_message) - Terminating "
                         + str(self.process.name)
                         + " process")
+                    self.process.terminate()
                 Server.lock.release()
                 self.proc = multiprocessing.Process(
                     target=Stream().stream_main,name='stream_main',args=(queue,)
@@ -415,22 +414,20 @@ class Server(MotionDetection):
                 queue.put('kill_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'stream_main':
-                    self.process.terminate()
                     Logging.log("INFO",
                         "(Server.handle_incoming_message) - Terminating "
                         + str(self.process.name)
                         + " process")
+                    self.process.terminate()
                 Server.lock.release()
                 self.process = multiprocessing.Process(
                     target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
                 )
                 self.process.daemon = True
                 self.process.start()
-            elif(message == 'ping'):
-                pass
-                #self.con.sendall(str(os.getpid()))
             else:
                 pass
+                #con.send(message + " is not a known command!")
 
     def server_main(self):
 
@@ -445,9 +442,6 @@ class Server(MotionDetection):
                     "(Server.server_main) - Received connection from " + str(addr))
 
                 Server.handle_incoming_message(self,(con.recv(1024),self.queue))
-
-                Logging.log("INFO", "(Server.server_main) - Closing connection for " + str(addr))
-                con.close()
 
             except KeyboardInterrupt:
                 print("\n")
@@ -512,8 +506,8 @@ if __name__ == '__main__':
             + 'MotionDetection system will not run."')
     (options, args) = parser.parse_args()
 
-    #netgear = Netgear(password=options.router_password)
     netgear = 'netgear'
+    #netgear = Netgear(password=options.router_password)
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
