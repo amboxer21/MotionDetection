@@ -20,10 +20,6 @@ public class Client {
   public static String serverAction;
 	public static String serverAddress;
 
-	public static Socket socket;
-  public static OutputStream out;
-	public static PrintWriter pWriter; 
- 
   public Client(String addr, int port, String action) {
     serverPort     = port;
     serverAddress  = addr;
@@ -33,13 +29,14 @@ public class Client {
   public void sendDataWithString() {
 
     try {
-      socket  = new Socket(serverAddress, serverPort);
+      Socket socket = new Socket(serverAddress, serverPort);
 
-      pWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+      PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
       pWriter.write(serverAction);
 
       pWriter.flush();
       pWriter.close();
+      socket.close();
       Log.d("SecureView", "pWriter: " + pWriter);
     }
     catch(IOException e) {

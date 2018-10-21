@@ -383,7 +383,7 @@ class Server(MotionDetection):
         self.process.start()
 
         try:
-            self.sock = socket.socket()
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
@@ -397,11 +397,11 @@ class Server(MotionDetection):
                 queue.put('start_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'capture':
-                    self.process.terminate()
                     Logging.log("INFO",
                         "(Server.handle_incoming_message) - Terminating "
                         + str(self.process.name)
                         + " process")
+                    self.process.terminate()
                 Server.lock.release()
                 self.proc = multiprocessing.Process(
                     target=Stream().stream_main,name='stream_main',args=(queue,)
@@ -436,7 +436,7 @@ class Server(MotionDetection):
         while(True):
             time.sleep(0.05)
             try:
-                self.sock.listen(5)
+                self.sock.listen(10)
                 (con, addr) = self.sock.accept()
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
@@ -506,7 +506,8 @@ if __name__ == '__main__':
             + 'MotionDetection system will not run."')
     (options, args) = parser.parse_args()
 
-    netgear = Netgear(password=options.router_password)
+    netgear = 'netgear'
+    #netgear = Netgear(password=options.router_password)
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
