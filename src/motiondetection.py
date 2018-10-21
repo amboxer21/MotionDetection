@@ -450,7 +450,6 @@ class Server(MotionDetection):
                 sys.exit(0)
             except Exception as eAccept:
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: " + str(eAccept))
-        con.close()
 
 if __name__ == '__main__':
 
