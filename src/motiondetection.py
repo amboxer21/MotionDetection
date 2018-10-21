@@ -389,9 +389,9 @@ class Server(MotionDetection):
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
 
-    def handle_incoming_message(self,*messages):
-        for(message,queue) in messages:
-            if(message == 'start_monitor'):
+    def handle_incoming_message(self,*data):
+        for(sock,queue) in data:
+            if(sock.recv(1024) == 'start_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 queue.put('start_monitor')
@@ -408,7 +408,7 @@ class Server(MotionDetection):
                 )
                 self.proc.daemon = True
                 self.proc.start()
-            elif(message == 'kill_monitor'):
+            elif(sock.recv(1024) == 'kill_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
@@ -427,7 +427,7 @@ class Server(MotionDetection):
                 self.process.start()
             else:
                 pass
-                #con.send(message + " is not a known command!")
+            sock.close()
 
     def server_main(self):
 
@@ -441,7 +441,7 @@ class Server(MotionDetection):
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
 
-                Server.handle_incoming_message(self,(con.recv(1024),self.queue))
+                Server.handle_incoming_message(self,(con,self.queue))
 
             except KeyboardInterrupt:
                 print("\n")
@@ -450,7 +450,6 @@ class Server(MotionDetection):
                 sys.exit(0)
             except Exception as eAccept:
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: " + str(eAccept))
-        con.close()
 
 if __name__ == '__main__':
 
