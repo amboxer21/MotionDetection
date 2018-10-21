@@ -389,26 +389,26 @@ class Server(MotionDetection):
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
 
-    def handle_incoming_message(self,*data):
-        for(sock,queue) in data:
-            if(sock.recv(1024) == 'start_monitor'):
+    def handle_incoming_message(self,*messages):
+        for(message,queue) in messages:
+            if(message == 'start_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 queue.put('start_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'capture':
+                    self.process.terminate()
                     Logging.log("INFO",
                         "(Server.handle_incoming_message) - Terminating "
                         + str(self.process.name)
                         + " process")
-                    self.process.terminate()
                 Server.lock.release()
                 self.proc = multiprocessing.Process(
                     target=Stream().stream_main,name='stream_main',args=(queue,)
                 )
                 self.proc.daemon = True
                 self.proc.start()
-            elif(sock.recv(1024) == 'kill_monitor'):
+            elif(message == 'kill_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
@@ -427,7 +427,7 @@ class Server(MotionDetection):
                 self.process.start()
             else:
                 pass
-            sock.close()
+                #con.send(message + " is not a known command!")
 
     def server_main(self):
 
@@ -441,7 +441,7 @@ class Server(MotionDetection):
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
 
-                Server.handle_incoming_message(self,(con,self.queue))
+                Server.handle_incoming_message(self,(con.recv(1024),self.queue))
 
             except KeyboardInterrupt:
                 print("\n")
