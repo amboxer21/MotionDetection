@@ -7,6 +7,7 @@ import sys
 import cgi
 import time
 import glob
+import signal
 import socket
 import smtplib
 import logging
@@ -383,25 +384,30 @@ class Server(MotionDetection):
         self.process.start()
 
         try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock = socket.socket()
+            #self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind(('0.0.0.0', self.server_port))
+        except socket.error as eSocketError:
+            if '[Errno 98] Address already in use' in str(eSocketError):
+                Logging.log("ERROR", "(Server.__init__) - Address already in use. Issuing SIGKILL!")
+                os.kill(os.getpid(),signal.SIGKILL)
         except Exception as eSock:
             Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
 
-    def handle_incoming_message(self,*messages):
-        for(message,queue) in messages:
+    def handle_incoming_message(self,*data):
+        for(sock,queue) in data:
+            message = sock.recv(1024)
             if(message == 'start_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 queue.put('start_monitor')
                 Server.lock.acquire()
                 if self.process.name == 'capture':
-                    self.process.terminate()
                     Logging.log("INFO",
                         "(Server.handle_incoming_message) - Terminating "
                         + str(self.process.name)
                         + " process")
+                    self.process.terminate()
                 Server.lock.release()
                 self.proc = multiprocessing.Process(
                     target=Stream().stream_main,name='stream_main',args=(queue,)
@@ -427,7 +433,7 @@ class Server(MotionDetection):
                 self.process.start()
             else:
                 pass
-                #con.send(message + " is not a known command!")
+            sock.close()
 
     def server_main(self):
 
@@ -441,7 +447,7 @@ class Server(MotionDetection):
                 Logging.log("INFO",
                     "(Server.server_main) - Received connection from " + str(addr))
 
-                Server.handle_incoming_message(self,(con.recv(1024),self.queue))
+                Server.handle_incoming_message(self,(con,self.queue))
 
             except KeyboardInterrupt:
                 print("\n")
