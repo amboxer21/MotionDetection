@@ -29,7 +29,7 @@ Download [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip
 
 ### **FFMpeg confiure options**
 
->sudo ./configure --enable-libv4l2 --enable-opengl
+>sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
 
 #### ** BUILT WITH:**
 
