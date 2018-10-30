@@ -482,7 +482,8 @@ class Server(MotionDetection):
                 Server.handle_incoming_message(self,(con,self.queue))
 
             except KeyboardInterrupt:
-                Logging.log("INFO", "\n(Server.server_main) - Caught control + c, exiting now.\n")
+                print('\n')
+                Logging.log("INFO", "(Server.server_main) - Caught control + c, exiting now.\n")
                 self.sock.close()
                 sys.exit(0)
             except Exception as eAccept:
@@ -570,8 +571,8 @@ if __name__ == '__main__':
             + 'streaming server and the motion detection system.')
     (options, args) = parser.parse_args()
 
-    netgear = 'netgear'
-    #netgear = Netgear(password=options.router_password)
+    Logging.log("INFO", "(MotionDetection.__main__)Initializing netgear object.")
+    netgear = Netgear(password=options.router_password)
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
