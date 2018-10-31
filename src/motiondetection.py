@@ -312,10 +312,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
                     continue
                 try:
                     self.server.video_output.write(image)
-                except Exception as eWrite:
-                    Logging.log("WARN",
-                        "(CamHandler.do_GET) - Exception eWrite => "
-                        + str(eWrite))
+                except:
                     pass
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
