@@ -132,10 +132,7 @@ class Mail(object):
 # Metaclass for locking video camera
 class VideoFeed(type):
 
-    __classes__ = []
-
     def __new__(meta,name,bases,dct):
-        VideoFeed.__classes__.append(name)
         if not hasattr(meta,'lock'):
             meta.lock = multiprocessing.Lock()
         return super(VideoFeed, meta).__new__(meta, name, bases, dct)
@@ -155,19 +152,19 @@ class MotionDetection(object):
     def __init__(self,options_dict={}):
         super(MotionDetection,self).__init__()
 
-        self.tracker         = 0
-        self.count           = 60
+        self.tracker           = 0
+        self.count             = 60
 
-        self.ip              = options_dict['ip']
-        self.fps             = options_dict['fps']
-        self.email           = options_dict['email']
-        self.netgear         = options_dict['netgear']
-        self.password        = options_dict['password']
-        self.email_port      = options_dict['email_port']
-        self.access_list     = options_dict['access_list']
-        self.server_port     = options_dict['server_port']
-        self.cam_location    = options_dict['cam_location']
-        self.disable_email   = options_dict['disable_email']
+        self.ip                = options_dict['ip']
+        self.fps               = options_dict['fps']
+        self.email             = options_dict['email']
+        self.netgear           = options_dict['netgear']
+        self.password          = options_dict['password']
+        self.email_port        = options_dict['email_port']
+        self.access_list       = options_dict['access_list']
+        self.server_port       = options_dict['server_port']
+        self.cam_location      = options_dict['cam_location']
+        self.disable_email     = options_dict['disable_email']
 
         self.delta_thresh_min  = options_dict['delta_thresh_min']
         self.delta_thresh_max  = options_dict['delta_thresh_max']
@@ -313,6 +310,13 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 (read_cam, image) = self.server.video_capture.read()
                 if not read_cam:
                     continue
+                try:
+                    self.server.video_output.write(image)
+                except Exception as eWrite:
+                    Logging.log("WARN",
+                        "(CamHandler.do_GET) - Exception eWrite => "
+                        + str(eWrite))
+                    pass
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -331,10 +335,11 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
         return CamHandler
 
-class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-    def __init__(self, server_address, RequestHandlerClass, queue, video_capture, bind_and_activate=True):
+class ThreadedHTTPServer(ThreadingMixIn,HTTPServer):
+    def __init__(self, server_address,RequestHandlerClass,queue,video_capture,video_output,bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
         self.queue = queue
+        self.video_ouput = video_output
         self.video_capture = video_capture
         HTTPServer.allow_reuse_address = True
 
@@ -354,11 +359,19 @@ class Stream(MotionDetection):
             video_capture = cv2.VideoCapture(self.cam_location)
             video_capture.set(3,320)
             video_capture.set(4,320)
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            video_output = cv2.VideoWriter(
+                '/home/pi/.motiondetection/capture.avi',
+                fourcc, 30, (int(video_capture.get(3)),int(video_capture.get(4)))
+            )
             Stream.lock.release()
             Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
-            server = ThreadedHTTPServer(('0.0.0.0', self.camview_port), CamHandler, queue, video_capture)
+            server = ThreadedHTTPServer(
+                ('0.0.0.0', self.camview_port), CamHandler, queue, video_capture, video_output
+            )
             server.timeout = 1
             server.queue = queue
+            server.video_output  = video_output
             server.video_capture = video_capture
             del(video_capture)
             while(True):
@@ -371,15 +384,11 @@ class Stream(MotionDetection):
             CamHandler.lock.release()
             Stream.lock.release()
             queue.close()
-            server.shutdown()
-            server.server_close()
         except Exception as eThreadedHTTPServer:
             Logging.log("ERROR",
                 "(Stream.stream_main) - eThreadedHTTPServer => "
                 + str(eThreadedHTTPServer))
             queue.close()
-            server.shutdown()
-            server.server_close()
 
 class FileOpts(object):
   
@@ -571,7 +580,7 @@ if __name__ == '__main__':
             + 'streaming server and the motion detection system.')
     (options, args) = parser.parse_args()
 
-    Logging.log("INFO", "(MotionDetection.__main__)Initializing netgear object.")
+    Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.")
     netgear = Netgear(password=options.router_password)
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
