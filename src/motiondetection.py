@@ -310,10 +310,16 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 (read_cam, image) = self.server.video_capture.read()
                 if not read_cam:
                     continue
-                try:
-                    self.server.video_output.write(image)
-                except:
-                    pass
+                if not self.server.queue.empty() and self.server.queue.get() == 'start_recording':
+                    try:
+                        self.server.video_output.write(image)
+                    except:
+                        pass
+                elif not self.server.queue.empty() and self.server.queue.get() == 'stop_recording':
+                    try:
+                        self.server.video_output.release()
+                    except:
+                        pass
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -367,7 +373,7 @@ class Stream(MotionDetection):
                 ('0.0.0.0', self.camview_port), CamHandler, queue, video_capture, video_output
             )
             server.timeout = 1
-            server.queue = queue
+            server.queue   = queue
             server.video_output  = video_output
             server.video_capture = video_capture
             del(video_capture)
@@ -468,6 +474,10 @@ class Server(MotionDetection):
                 )
                 self.process.daemon = True
                 self.process.start()
+            elif(message == 'start_recording'):
+                queue.put('start_recording')
+            elif(message == 'stop_recording'):
+                queue.put('stop_recording')
             else:
                 pass
             sock.close()
