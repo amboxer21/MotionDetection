@@ -16,6 +16,7 @@ import android.content.Context;
 import android.widget.Toast;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ToggleButton;
 import android.widget.RelativeLayout.LayoutParams;
 
 import android.webkit.WebView;
@@ -38,8 +39,8 @@ public class SecureView extends Activity implements OnTouchListener {
   private static Client client;
   private static ClientAsyncTask clientAsyncTask;
 
-  private static Button buttonCam;
   private static Button buttonState;
+  private static ToggleButton buttonCam;
 
   private static EditText ipAddress;
   private static EditText camPortNumber;
@@ -103,8 +104,8 @@ public class SecureView extends Activity implements OnTouchListener {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    buttonCam   = (Button) findViewById(R.id.buttonCam);
     buttonState = (Button) findViewById(R.id.buttonState);
+    buttonCam   = (ToggleButton) findViewById(R.id.buttonCam);
     ipAddress   = (EditText) findViewById(R.id.editIPAddress);
     camPortNumber    = (EditText) findViewById(R.id.editCamPort);
     serverPortNumber = (EditText) findViewById(R.id.editServerPort);

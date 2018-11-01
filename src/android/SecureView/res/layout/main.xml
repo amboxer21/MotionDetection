@@ -18,17 +18,26 @@
       android:background="@drawable/framelayout_border"
       android:layout_alignParentTop="true">
 
-      <Button
-        android:elevation="10dp"
-        android:text="Go Live"
-        android:id="@+id/buttonCam"
+      <TextView
+        android:text="Live"
         android:textColor="#009900"
+        android:elevation="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"/>
+
+      <ToggleButton
+        android:textOn=""
+        android:textOff=""
+        android:elevation="10dp"
+        android:id="@+id/buttonCam"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_gravity="right"
         android:layout_marginTop="10dp"
         android:layout_marginRight="5dp"
-        android:background="@drawable/circle"/>
+        android:background="@drawable/check"/>
 
       <Button
         android:elevation="10dp"
