@@ -352,6 +352,7 @@ class Stream(MotionDetection):
 
     def __init__(self):
         super(Stream, self).__init__(options_dict)
+        self.fps          = options_dict['fps']
         self.camview_port = options_dict['camview_port']
         self.cam_location = options_dict['cam_location']
 
@@ -360,12 +361,15 @@ class Stream(MotionDetection):
         Logging.log("INFO", "(Stream.stream_main) - Lock acquired!")
         try:
             video_capture = cv2.VideoCapture(self.cam_location)
-            video_capture.set(3,320)
-            video_capture.set(4,320)
+            video_capture.set(cv2.CAP_PROP_FRAME_WIDTH,320)
+            video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT,240)
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
             video_output = cv2.VideoWriter(
                 '/home/pi/.motiondetection/capture.avi',
-                fourcc, 30, (int(video_capture.get(3)),int(video_capture.get(4)))
+                fourcc, self.fps, (
+                    int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                    int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                )
             )
             Stream.lock.release()
             Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
