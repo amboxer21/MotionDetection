@@ -317,7 +317,6 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       buttonState.setVisibility(View.VISIBLE);
       camPortNumber.setVisibility(View.VISIBLE);
       serverPortNumber.setVisibility(View.VISIBLE);
-      Toast.makeText(getApplicationContext(),String.valueOf(mCounter)+"(m1)", Toast.LENGTH_LONG).show();
     }
     else {
       ipAddress.setVisibility(View.INVISIBLE);
@@ -325,7 +324,6 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       buttonState.setVisibility(View.INVISIBLE);
       camPortNumber.setVisibility(View.INVISIBLE);
       serverPortNumber.setVisibility(View.INVISIBLE);
-      Toast.makeText(getApplicationContext(),String.valueOf(mCounter)+"(m2)", Toast.LENGTH_LONG).show();
     }
 
     return false;
