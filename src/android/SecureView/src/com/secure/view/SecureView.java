@@ -68,6 +68,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
   private static String sServerPortNumber = "";
 
   private static int mCounter = 0;
+  private static int wCounter = 0;
   private static long backPressedTime = 0;
   private static boolean Kill_monitor_string_sent = false;
 
@@ -128,6 +129,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
 
     databaseGetter();
 
+    wCounter = 1;
     mCounter = 1;
 
     RelativeLayout mRelativeLayoutMain = (RelativeLayout) findViewById(R.id.secureView);
@@ -153,10 +155,10 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
         sanityCheck();
 
         if(textView.getText().toString() == "Dead Feed") {
-          String ipAddress = String.valueOf(sIPAddress); 
+          String sIPAddress2 = String.valueOf(sIPAddress); 
           String camPort = String.valueOf(sCamPortNumber);
           String serverPort = String.valueOf(sServerPortNumber);
-          final String addr = "http://" + ipAddress + ":" + camPort + "/cam.mjpg";
+          final String addr = "http://" + sIPAddress2 + ":" + camPort + "/cam.mjpg";
 
           clientAsyncTask = new ClientAsyncTask();
           clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_monitor");
@@ -190,6 +192,30 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       public void onClick(View v) {
         if(buttonCam.isChecked()) { }
         else { }
+      }
+    });
+
+    webView.setOnTouchListener(new OnTouchListener() {
+      @Override
+      public boolean onTouch(View v, MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+          wCounter++;
+        }
+        if((wCounter % 2) == 0) {
+          ipAddress.setVisibility(View.VISIBLE);
+          buttonCam.setVisibility(View.VISIBLE);
+          buttonState.setVisibility(View.VISIBLE);
+          camPortNumber.setVisibility(View.VISIBLE);
+          serverPortNumber.setVisibility(View.VISIBLE);
+        }
+        else {
+          ipAddress.setVisibility(View.INVISIBLE);
+          buttonCam.setVisibility(View.INVISIBLE);
+          buttonState.setVisibility(View.INVISIBLE);
+          camPortNumber.setVisibility(View.INVISIBLE);
+          serverPortNumber.setVisibility(View.INVISIBLE);
+        }
+        return false;
       }
     });
 
@@ -291,6 +317,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       buttonState.setVisibility(View.VISIBLE);
       camPortNumber.setVisibility(View.VISIBLE);
       serverPortNumber.setVisibility(View.VISIBLE);
+      Toast.makeText(getApplicationContext(),String.valueOf(mCounter)+"(m1)", Toast.LENGTH_LONG).show();
     }
     else {
       ipAddress.setVisibility(View.INVISIBLE);
@@ -298,6 +325,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       buttonState.setVisibility(View.INVISIBLE);
       camPortNumber.setVisibility(View.INVISIBLE);
       serverPortNumber.setVisibility(View.INVISIBLE);
+      Toast.makeText(getApplicationContext(),String.valueOf(mCounter)+"(m2)", Toast.LENGTH_LONG).show();
     }
 
     return false;
