@@ -503,6 +503,8 @@ class Server(MotionDetection):
                 queue.put('start_recording')
             elif(message == 'stop_recording'):
                 queue.put('stop_recording')
+            elif(message == 'ping'):
+                sock.send(str([Server.main_pid,MotionDetection.pid,CamHandler.pid]))
             else:
                 pass
             sock.close()
