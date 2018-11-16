@@ -139,10 +139,20 @@ class VideoFeed(type):
 
     def __init__(cls,name,bases,dct):
         if not hasattr(cls,'lock'):
-            Logging.log("INFO", 'Passing "Lock" object to class "'
+            Logging.log("INFO", '(VideoFeed.__init__) - Passing "Lock" object to class "'
             + cls.__name__
             + '"')
             cls.lock = multiprocessing.Lock()
+        if not hasattr(cls,'pid'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "pid" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.pid = os.getpid()
+        if not hasattr(cls,'main_pid'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "main_pid" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.main_pid = os.getpid()
         super(VideoFeed,cls).__init__(name,bases,dct)
 
 class MotionDetection(object):
@@ -305,7 +315,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
                         '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                     del(self.server.video_capture)
                     self.server.queue.put('close_camview')
-                    self.server.sock.close()
+                    #self.server.sock.close()
                     break
                 (read_cam, image) = self.server.video_capture.read()
                 if not read_cam:
@@ -336,6 +346,7 @@ class CamHandler(BaseHTTPRequestHandler,object):
         except Exception as e:
             if re.search('[Errno 32] Broken pipe',str(e), re.M | re.I):
                 Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
+            print("(CamHandler.do_GET) - Exception e => "+str(e))
         return CamHandler
 
 class ThreadedHTTPServer(ThreadingMixIn,HTTPServer):
@@ -433,6 +444,12 @@ class Server(MotionDetection):
         self.process.daemon = True
         self.process.start()
 
+        Server.main_pid = os.getpid()
+        Logging.log("INFO","(Server.__init__) - Server.main_pid: "+str(Server.main_pid))
+
+        MotionDetection.pid = self.process.pid
+        Logging.log("INFO","(Server.__init__) - MotionDetection.pid: "+str(MotionDetection.pid))
+
         try:
             self.sock = socket.socket()
             self.sock.bind(('0.0.0.0', self.server_port))
@@ -461,6 +478,8 @@ class Server(MotionDetection):
                 )
                 self.proc.daemon = True
                 self.proc.start()
+                CamHandler.pid = self.proc.pid
+                Logging.log("INFO","(Server.handle_incoming_message) - CamHandler.pid: "+str(CamHandler.pid))
             elif(message == 'kill_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
@@ -478,6 +497,8 @@ class Server(MotionDetection):
                 )
                 self.process.daemon = True
                 self.process.start()
+                MotionDetection.pid = self.process.pid
+                Logging.log("INFO","(Server.handle_incoming_message) - MotionDetection.pid: "+str(MotionDetection.pid))
             elif(message == 'start_recording'):
                 queue.put('start_recording')
             elif(message == 'stop_recording'):
@@ -495,9 +516,10 @@ class Server(MotionDetection):
             try:
                 self.sock.listen(10)
                 (con, addr) = self.sock.accept()
-                Logging.log("INFO",
-                    "(Server.server_main) - Received connection from "
-                    + str(addr))
+                if not '127.0.0.1' in str(addr):
+                    Logging.log("INFO",
+                        "(Server.server_main) - Received connection from "
+                        + str(addr))
 
                 Server.handle_incoming_message(self,(con,self.queue))
 
