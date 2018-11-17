@@ -104,6 +104,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       clientAsyncTask = new ClientAsyncTask();
       clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
       textView.setText("Dead Feed");
+      buttonRecord.setText("Record");
       textView.setTextColor(Color.parseColor("#ff0000"));
     }
   }
@@ -191,7 +192,10 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     buttonRecord.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(buttonCam.getText().toString() == "Record") { 
+        if(textView.getText().toString() == "Dead Feed") {
+          Toast.makeText(getApplicationContext(), "Feed is not live.", Toast.LENGTH_LONG).show();
+        }
+        else if(buttonCam.getText().toString() == "Record") { 
           clientAsyncTask = new ClientAsyncTask();
           clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_recording");
           buttonRecord.setText("Recording");
