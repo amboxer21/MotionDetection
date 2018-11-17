@@ -49,8 +49,8 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
   private SurfaceHolder surfaceHolder;
 
   private static TextView textView;
-  private static Button buttonState;
   private static ToggleButton buttonCam;
+  private static ToggleButton buttonRecord;
 
   private static EditText ipAddress;
   private static EditText camPortNumber;
@@ -59,7 +59,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
 
   private static String ipAddressDb;
   private static String buttonCamDb;
-  private static String buttonStateDb;
+  private static String buttonRecordDb;
   private static String camPortNumberDb;
   private static String serverPortNumberDb;
 
@@ -118,10 +118,10 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    textView    = (TextView) findViewById(R.id.textView);
-    buttonState = (Button) findViewById(R.id.buttonState);
-    buttonCam   = (ToggleButton) findViewById(R.id.buttonCam);
-    ipAddress   = (EditText) findViewById(R.id.editIPAddress);
+    textView     = (TextView) findViewById(R.id.textView);
+    buttonCam    = (ToggleButton) findViewById(R.id.buttonCam);
+    ipAddress    = (EditText) findViewById(R.id.editIPAddress);
+    buttonRecord = (ToggleButton) findViewById(R.id.buttonRecord);
     camPortNumber    = (EditText) findViewById(R.id.editCamPort);
     serverPortNumber = (EditText) findViewById(R.id.editServerPort);
 
@@ -141,7 +141,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
     buttonCam.setChecked(false);
-    buttonState.setText("Record");
+    buttonRecord.setText("Record");
     textView.setText("Dead Feed");
     textView.setTextColor(Color.parseColor("#ff0000"));
 
@@ -180,6 +180,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
         }
         else if(textView.getText().toString() == "Live Feed") {
           textView.setText("Dead Feed");
+          buttonRecord.setText("Record");
           textView.setTextColor(Color.parseColor("#ff0000"));
           clientAsyncTask = new ClientAsyncTask();
           clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
@@ -187,11 +188,17 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       }
     });
 
-    buttonState.setOnClickListener(new OnClickListener() {
+    buttonRecord.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
-        if(buttonCam.isChecked()) { }
-        else { }
+        if(buttonCam.getText().toString() == "Record") { 
+          clientAsyncTask = new ClientAsyncTask();
+          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_recording");
+          buttonRecord.setText("Recording");
+        }
+        else {
+          buttonRecord.setText("Recording");
+        }
       }
     });
 
@@ -204,14 +211,14 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
         if((wCounter % 2) == 0) {
           ipAddress.setVisibility(View.VISIBLE);
           buttonCam.setVisibility(View.VISIBLE);
-          buttonState.setVisibility(View.VISIBLE);
+          buttonRecord.setVisibility(View.VISIBLE);
           camPortNumber.setVisibility(View.VISIBLE);
           serverPortNumber.setVisibility(View.VISIBLE);
         }
         else {
           ipAddress.setVisibility(View.INVISIBLE);
           buttonCam.setVisibility(View.INVISIBLE);
-          buttonState.setVisibility(View.INVISIBLE);
+          buttonRecord.setVisibility(View.INVISIBLE);
           camPortNumber.setVisibility(View.INVISIBLE);
           serverPortNumber.setVisibility(View.INVISIBLE);
         }
@@ -314,14 +321,14 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     if((mCounter % 2) == 0) {
       ipAddress.setVisibility(View.VISIBLE);
       buttonCam.setVisibility(View.VISIBLE);
-      buttonState.setVisibility(View.VISIBLE);
+      buttonRecord.setVisibility(View.VISIBLE);
       camPortNumber.setVisibility(View.VISIBLE);
       serverPortNumber.setVisibility(View.VISIBLE);
     }
     else {
       ipAddress.setVisibility(View.INVISIBLE);
       buttonCam.setVisibility(View.INVISIBLE);
-      buttonState.setVisibility(View.INVISIBLE);
+      buttonRecord.setVisibility(View.INVISIBLE);
       camPortNumber.setVisibility(View.INVISIBLE);
       serverPortNumber.setVisibility(View.INVISIBLE);
     }
