@@ -313,6 +313,10 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
                     Logging.log("INFO",
                         '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
+                    try:
+                        self.server.video_output.release()
+                    except:
+                        pass
                     del(self.server.video_capture)
                     self.server.queue.put('close_camview')
                     #self.server.sock.close()
@@ -323,11 +327,6 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 if not self.server.queue.empty() and self.server.queue.get() == 'start_recording':
                     try:
                         self.server.video_output.write(image)
-                    except:
-                        pass
-                elif not self.server.queue.empty() and self.server.queue.get() == 'stop_recording':
-                    try:
-                        self.server.video_output.release()
                     except:
                         pass
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
@@ -372,14 +371,14 @@ class Stream(MotionDetection):
         Logging.log("INFO", "(Stream.stream_main) - Lock acquired!")
         try:
             video_capture = cv2.VideoCapture(self.cam_location)
-            video_capture.set(cv2.CAP_PROP_FRAME_WIDTH,320)
-            video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT,240)
+            video_capture.set(3,320)
+            video_capture.set(4,320)
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
             video_output = cv2.VideoWriter(
                 '/home/pi/.motiondetection/capture.avi',
                 fourcc, self.fps, (
-                    int(video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                    int(video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                    int(video_capture.get(3)),
+                    int(video_capture.get(4))
                 )
             )
             Stream.lock.release()
