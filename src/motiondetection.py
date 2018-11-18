@@ -313,10 +313,6 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
                     Logging.log("INFO",
                         '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
-                    try:
-                        self.server.video_output.release()
-                    except:
-                        pass
                     del(self.server.video_capture)
                     self.server.queue.put('close_camview')
                     #self.server.sock.close()
@@ -327,6 +323,10 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 if not self.server.queue.empty() and self.server.queue.get() == 'start_recording':
                     try:
                         self.server.video_output.write(image)
+                    except:
+                        pass
+                    try:
+                        self.server.video_output.release()
                     except:
                         pass
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
