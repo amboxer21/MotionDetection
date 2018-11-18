@@ -33,7 +33,7 @@ Download [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip
 
 #### ** BUILT WITH:**
 
->ffmpeg-3.3.6
+>ffmpeg-3.4.5
 
 >cmake version 3.5.1
 
