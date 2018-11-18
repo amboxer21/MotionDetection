@@ -153,6 +153,16 @@ class VideoFeed(type):
             + cls.__name__
             + '"')
             cls.main_pid = os.getpid()
+        if not hasattr(cls,'allowed'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "allowed" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.allowed = False
+        if not hasattr(cls,'locked'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "locked" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.locked = False
         super(VideoFeed,cls).__init__(name,bases,dct)
 
 class MotionDetection(object):
@@ -180,7 +190,9 @@ class MotionDetection(object):
         self.delta_thresh_max  = options_dict['delta_thresh_max']
         self.motion_thresh_min = options_dict['motion_thresh_min']
 
-        Mail.__disabled__ = self.disable_email
+        Mail.__disabled__   = self.disable_email
+
+        self.whitelist_semaphore = threading.Semaphore(1)
 
         if not self.disable_email and (self.email is None or self.password is None):
             Logging.log("ERROR",
@@ -221,13 +233,6 @@ class MotionDetection(object):
                 "Threading exception eStartThread => "
                 + str(eStartThread))
 
-    def white_listed(self):
-        if isinstance(self.netgear, Netgear):
-            for device in self.netgear.get_attached_devices():
-                if device.mac in open(self.access_list,'r').read():
-                    return True
-        return False
-
     def capture(self,queue=None):
 
         MotionDetection.lock.acquire()
@@ -257,6 +262,14 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
+            whitelist_thread = threading.Thread(
+                target=WhiteList.present,
+                args=(self.whitelist_semaphore,self.netgear,self.access_list)
+            )
+            if not MotionDetection.locked:
+                MotionDetection.locked = True
+                whitelist_thread.start()
+
             time.sleep(0.1)
 
             frame_delta = cv2.absdiff(previous_frame, current_frame)
@@ -275,16 +288,13 @@ class MotionDetection(object):
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
                         + str(delta_count)
                         + "!")
-                    self.take_picture(colored_frame)
-                    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!')
                     # Access list feature
-                    '''if not self.white_listed(delta_count,colored_frame):
+                    if not MotionDetection.allowed:
                         Logging.log("INFO",
                             "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')'''
+                            'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -320,15 +330,23 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 (read_cam, image) = self.server.video_capture.read()
                 if not read_cam:
                     continue
-                if not self.server.queue.empty() and self.server.queue.get() == 'start_recording':
+                try:
+                    self.server.video_output.write(image)
+                except Exception as eWrite:
+                    print("Exception eWrite => "+str(eWrite))
+                    pass
+                '''if not self.server.queue.empty() and self.server.queue.get() == 'start_recording':
                     try:
+                        print("start_recording")
                         self.server.video_output.write(image)
                     except:
                         pass
+                elif not self.server.queue.empty() and self.server.queue.get() == 'stop_recording':
                     try:
+                        print("stop_recording")
                         self.server.video_output.release()
                     except:
-                        pass
+                        pass'''
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
@@ -375,7 +393,7 @@ class Stream(MotionDetection):
             video_capture.set(4,320)
             fourcc = cv2.VideoWriter_fourcc(*'MJPG')
             video_output = cv2.VideoWriter(
-                '/home/pi/.motiondetection/capture.avi',
+                '/home/pi/.motiondetection/stream.avi',
                 fourcc, self.fps, (
                     int(video_capture.get(3)),
                     int(video_capture.get(4))
@@ -426,6 +444,19 @@ class FileOpts(object):
             + str(file_name)
             + ".")
         open(file_name, 'w')
+
+class WhiteList(object):
+    @staticmethod
+    def present(semaphore,netgear,access_list):
+        semaphore.acquire(blocking=True)
+        if isinstance(netgear, Netgear):
+            for device in netgear.get_attached_devices():
+                if device.mac in open(access_list,'r').read():
+                    MotionDetection.allowed = True
+                    break
+                MotionDetection.allowed = False
+        semaphore.release()
+        MotionDetection.locked = False
 
 class Server(MotionDetection):
 
