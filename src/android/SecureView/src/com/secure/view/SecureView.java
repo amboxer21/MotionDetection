@@ -101,8 +101,8 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     super.onStop();
     buttonCam.setChecked(false);
     if(textView.getText().toString().equals("Live Feed")) {
-      clientAsyncTask = new ClientAsyncTask();
-      clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "stop_recording");
+      /*clientAsyncTask = new ClientAsyncTask();
+      clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "stop_recording");*/
       clientAsyncTask = new ClientAsyncTask();
       clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
       textView.setText("Dead Feed");
@@ -185,8 +185,8 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
           textView.setText("Dead Feed");
           buttonRecord.setText("Record");
           textView.setTextColor(Color.parseColor("#ff0000"));
-          clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "stop_recording");
+          /*clientAsyncTask = new ClientAsyncTask();
+          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "stop_recording");*/
           clientAsyncTask = new ClientAsyncTask();
           clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
         }
@@ -200,8 +200,8 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
           Toast.makeText(getApplicationContext(), "Feed is not live.", Toast.LENGTH_LONG).show();
         }
         else if(buttonCam.getText().toString() == "Record") { 
-          clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_recording");
+          /*clientAsyncTask = new ClientAsyncTask();
+          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_recording");*/
           buttonRecord.setText("Recording");
         }
         else {
