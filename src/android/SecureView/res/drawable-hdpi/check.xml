@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+  <!-- When selected, use power on button -->
+  <item android:drawable="@drawable/stop"
+    android:state_checked="true" />
+  <!-- When not selected, use power off button -->
+  <item android:drawable="@drawable/play"
+    android:state_checked="false"/>
+</selector>

@@ -36,7 +36,8 @@ class Logging(object):
         comm = re.search("(WARN|INFO|ERROR)", str(level), re.M)
         try:
             handler = logging.handlers.WatchedFileHandler(
-                os.environ.get("LOGFILE","/var/log/motiondetection.log"))
+                os.environ.get("LOGFILE","/var/log/motiondetection.log")
+            )
             formatter = logging.Formatter(logging.BASIC_FORMAT)
             handler.setFormatter(formatter)
             root = logging.getLogger()
@@ -67,12 +68,14 @@ class Logging(object):
             if re.search('\[Errno 13\] Permission denied:', str(eIOError), re.M | re.I):
                 print("(ERROR) MotionDetection - Must be sudo to run MotionDetection!")
                 sys.exit(0)
-            print("(ERROR) MotionDetection - IOError in Logging class => " + str(eIOError))
+            print("(ERROR) MotionDetection - IOError in Logging class => "
+                + str(eIOError))
             logging.error(str(time.asctime(time.localtime(time.time()))
                 + " - MotionDetection - IOError => "
                 + str(eIOError)))
         except Exception as eLogging:
-            print("(ERROR) MotionDetection - Exception in Logging class => " + str(eLogging))
+            print("(ERROR) MotionDetection - Exception in Logging class => "
+                + str(eLogging))
             logging.error(str(time.asctime(time.localtime(time.time()))
                 + " - MotionDetection - Exception => " 
                 + str(eLogging)))
@@ -91,20 +94,26 @@ class Time(object):
         return time.asctime(time.localtime(time.time()))
 
 class Mail(object):
+
+    __disabled__ = False
+
     @staticmethod
     def send(sender,to,password,port,subject,body):
         try:
-            message = MIMEMultipart()
-            message['Body'] = body
-            message['Subject'] = subject
-            message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
-                + str(MotionDetection.img_num())
-                + ".png","rb").read()))
-            mail = smtplib.SMTP('smtp.gmail.com',port)
-            mail.starttls()
-            mail.login(sender,password)
-            mail.sendmail(sender, to, message.as_string())
-            Logging.log("INFO", "(Mail.send) - Sent email successfully!\n")
+            if not Mail.__disabled__:
+                message = MIMEMultipart()
+                message['Body'] = body
+                message['Subject'] = subject
+                message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
+                    + str(MotionDetection.img_num())
+                    + ".png","rb").read()))
+                mail = smtplib.SMTP('smtp.gmail.com',port)
+                mail.starttls()
+                mail.login(sender,password)
+                mail.sendmail(sender, to, message.as_string())
+                Logging.log("INFO", "(Mail.send) - Sent email successfully!")
+            else:
+                Logging.log("WARN", "(Mail.send) - Sending mail has been disabled!")
         except smtplib.SMTPAuthenticationError:
             Logging.log("WARN", "(Mail.send) - Could not athenticate with password and username!")
         except TypeError as eTypeError:
@@ -115,113 +124,46 @@ class Mail(object):
                 + str(eTypeError))
             pass
         except Exception as e:
-            Logging.log("ERROR", "(Mail.send) - Unexpected error in Mail.send() error e => " + str(e))
+            Logging.log("ERROR",
+                "(Mail.send) - Unexpected error in Mail.send() error e => "
+                + str(e))
             pass
 
 # Metaclass for locking video camera
 class VideoFeed(type):
 
-    __classes__ = []
-
     def __new__(meta,name,bases,dct):
-        VideoFeed.__classes__.append(name)
         if not hasattr(meta,'lock'):
             meta.lock = multiprocessing.Lock()
         return super(VideoFeed, meta).__new__(meta, name, bases, dct)
 
     def __init__(cls,name,bases,dct):
         if not hasattr(cls,'lock'):
-            Logging.log("INFO", 'Passing "Lock" object to class "'+cls.__name__+'"')
+            Logging.log("INFO", '(VideoFeed.__init__) - Passing "Lock" object to class "'
+            + cls.__name__
+            + '"')
             cls.lock = multiprocessing.Lock()
+        if not hasattr(cls,'pid'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "pid" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.pid = os.getpid()
+        if not hasattr(cls,'main_pid'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "main_pid" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.main_pid = os.getpid()
+        if not hasattr(cls,'allowed'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "allowed" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.allowed = False
+        if not hasattr(cls,'locked'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "locked" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.locked = False
         super(VideoFeed,cls).__init__(name,bases,dct)
-
-class CamHandler(BaseHTTPRequestHandler,object):
-
-    __metaclass__ = VideoFeed
-
-    def do_GET(self):
-        try:
-            CamHandler.lock.acquire()
-            Logging.log("INFO", "(CamHandler.do_GET) - Lock acquired!")
-            if self.path.endswith('.mjpg'):
-                self.rfile._sock.settimeout(1)
-                self.send_response(200)
-                self.send_header('Content-type',
-                    'multipart/x-mixed-replace; boundary=--jpgboundary')
-                self.end_headers()
-            while True:
-                if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
-                    Logging.log("INFO",
-                        '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
-                    del(self.server.video_capture)
-                    self.server.queue.put('close_camview')
-                    self.server.sock.close()
-                    break
-                (read_cam, image) = self.server.video_capture.read()
-                if not read_cam:
-                    continue
-                rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
-                jpg = Image.fromarray(rgb)
-                jpg_file = StringIO.StringIO()
-                jpg.save(jpg_file,'JPEG')
-                self.wfile.write("--jpgboundary")
-                self.send_header('Content-type','image/jpeg')
-                self.send_header('Content-length',str(jpg_file.len))
-                self.end_headers()
-                jpg.save(self.wfile,'JPEG')
-                time.sleep(0.05)
-        except KeyboardInterrupt:
-            del(self.server.video_capture)
-            CamHandler.lock.release()
-        except Exception as e:
-            if re.search('[Errno 32] Broken pipe',str(e), re.M | re.I):
-                Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
-        return CamHandler
-
-class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
-    def __init__(self, server_address, RequestHandlerClass, queue, video_capture, bind_and_activate=True):
-        HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
-        self.queue = queue
-        self.video_capture = video_capture
-        HTTPServer.allow_reuse_address = True
-
-class Stream(object):
-
-    __metaclass__ = VideoFeed
-
-    def stream_main(self,queue=None):
-        Stream.lock.acquire()
-        Logging.log("INFO", "(Stream.stream_main) - Lock acquired!")
-        try:
-            video_capture = cv2.VideoCapture(0)
-            video_capture.set(3,320)
-            video_capture.set(4,320)
-            Stream.lock.release()
-            Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
-            server = ThreadedHTTPServer(('0.0.0.0', 5000), CamHandler,queue,video_capture)
-            server.timeout = 1
-            server.queue = queue
-            server.video_capture = video_capture
-            del(video_capture)
-            while(True):
-                if not queue.empty() and queue.get() == 'close_camview':
-                    CamHandler.lock.release()
-                    queue.close()
-                    break
-                server.handle_request()
-        except KeyboardInterrupt:
-            CamHandler.lock.release()
-            Stream.lock.release()
-            queue.close()
-            server.shutdown()
-            server.server_close()
-        except Exception as eThreadedHTTPServer:
-            Logging.log("ERROR",
-                "(Stream.stream_main) - eThreadedHTTPServer => "
-                + str(eThreadedHTTPServer))
-            queue.close()
-            server.shutdown()
-            server.server_close()
 
 class MotionDetection(object):
 
@@ -230,23 +172,29 @@ class MotionDetection(object):
     def __init__(self,options_dict={}):
         super(MotionDetection,self).__init__()
 
-        self.tracker       = 0
-        self.count         = 60
+        self.tracker           = 0
+        self.count             = 60
 
-        self.ip              = options_dict['ip']
-        self.fps             = options_dict['fps']
-        self.email           = options_dict['email']
-        self.netgear         = options_dict['netgear']
-        self.password        = options_dict['password']
-        self.email_port      = options_dict['email_port']
-        self.access_list     = options_dict['access_list']
-        self.server_port     = options_dict['server_port']
-        self.cam_location    = options_dict['cam_location']
+        self.ip                = options_dict['ip']
+        self.fps               = options_dict['fps']
+        self.email             = options_dict['email']
+        self.netgear           = options_dict['netgear']
+        self.password          = options_dict['password']
+        self.email_port        = options_dict['email_port']
+        self.access_list       = options_dict['access_list']
+        self.server_port       = options_dict['server_port']
+        self.cam_location      = options_dict['cam_location']
+        self.disable_email     = options_dict['disable_email']
 
+        self.delta_thresh_min  = options_dict['delta_thresh_min']
+        self.delta_thresh_max  = options_dict['delta_thresh_max']
         self.motion_thresh_min = options_dict['motion_thresh_min']
-        self.motion_thresh_max = options_dict['motion_thresh_max']
 
-        if self.email is None or self.password is None:
+        Mail.__disabled__   = self.disable_email
+
+        self.whitelist_semaphore = threading.Semaphore(1)
+
+        if not self.disable_email and (self.email is None or self.password is None):
             Logging.log("ERROR",
                 "(MotionDetection.__init__) - Both E-mail and password are required!")
             parser.print_help()
@@ -267,7 +215,9 @@ class MotionDetection(object):
     @staticmethod
     def take_picture(frame):
         picture_name = (
-            '/home/pi/.motiondetection/capture' + str(MotionDetection.img_num() + 1) + '.png'
+            '/home/pi/.motiondetection/capture'
+            + str(MotionDetection.img_num() + 1)
+            + '.png'
         )
         image = Image.fromarray(frame)
         image.save(picture_name)
@@ -280,14 +230,8 @@ class MotionDetection(object):
             t.start()
         except Exception as eStartThread:
             Logging.log("ERROR",
-                "Threading exception eStartThread => " + str(eStartThread))
-
-    def white_listed(self):
-        if isinstance(self.netgear, Netgear):
-            for device in self.netgear.get_attached_devices():
-                if device.mac in open(self.access_list,'r').read():
-                    return True
-        return False
+                "Threading exception eStartThread => "
+                + str(eStartThread))
 
     def capture(self,queue=None):
 
@@ -318,6 +262,14 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
+            '''whitelist_thread = threading.Thread(
+                target=WhiteList.present,
+                args=(self.whitelist_semaphore,self.netgear,self.access_list)
+            )
+            if not MotionDetection.locked:
+                MotionDetection.locked = True
+                whitelist_thread.start()'''
+
             time.sleep(0.1)
 
             frame_delta = cv2.absdiff(previous_frame, current_frame)
@@ -327,25 +279,25 @@ class MotionDetection(object):
             frame_delta = cv2.normalize(frame_delta, None, 0, 255, cv2.NORM_MINMAX)
             delta_count = cv2.countNonZero(frame_delta)
 
-            if delta_count > self.motion_thresh_min and delta_count < self.motion_thresh_max:
+            if delta_count > self.delta_thresh_min and delta_count < self.delta_thresh_max:
                 self.tracker += 1
                 if self.tracker >= 60 or self.count >= 60:
-                    self.count = 0
+                    self.count   = 0
                     self.tracker = 0
                     Logging.log("INFO",
-                        "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                        "(MotionDetection.capture) - Motion detected with threshold levels at "
+                        + str(delta_count)
+                        + "!")
                     self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')
                     # Access list feature
-                    '''if not self.white_listed(delta_count,colored_frame):
-                        Logging.log("INFO",
-                            "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                    '''if not MotionDetection.allowed:
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')'''
-            elif delta_count < 500:
-                self.count += 1
+            elif delta_count < self.motion_thresh_min:
+                self.count  += 1
                 self.tracker = 0
 
             previous_frame = current_frame
@@ -353,6 +305,127 @@ class MotionDetection(object):
             colored_frame  = current_frame 
             current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
             current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
+
+class CamHandler(BaseHTTPRequestHandler,object):
+
+    __record__    = False
+
+    __metaclass__ = VideoFeed
+
+    def do_GET(self):
+        try:
+            CamHandler.lock.acquire()
+            Logging.log("INFO", "(CamHandler.do_GET) - Lock acquired!")
+            if self.path.endswith('.mjpg'):
+                self.rfile._sock.settimeout(1)
+                self.send_response(200)
+                self.send_header('Content-type',
+                    'multipart/x-mixed-replace; boundary=--jpgboundary')
+                self.end_headers()
+            while True:
+                if not self.server.queue.empty():
+                    if self.server.queue.get() == 'kill_monitor':
+                        Logging.log("INFO",
+                            '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
+                        del(self.server.video_capture)
+                        self.server.queue.put('close_camview')
+                        #self.server.sock.close()
+                        break
+                    elif self.server.queue.get() == 'start_recording':
+                        CamHandler.__record__ = True
+                        Logging.log("INFO",
+                            "(CamHandler.do_GET) - queue.get() == 'start_recording'")
+                    elif self.server.queue.get() == 'stop_recording':
+                        CamHandler.__record__ = False
+                        Logging.log("INFO",
+                            "(CamHandler.do_GET) - queue.get() == 'stop_recording'")
+                (read_cam, image) = self.server.video_capture.read()
+                if not read_cam:
+                    continue
+                try:
+                    self.server.video_output.write(image)
+                    '''if CamHandler.__record__:
+                        self.server.video_output.write(image)'''
+                except Exception as eWrite:
+                    print("Exception eWrite => "+str(eWrite))
+                    pass
+                rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+                jpg = Image.fromarray(rgb)
+                jpg_file = StringIO.StringIO()
+                jpg.save(jpg_file,'JPEG')
+                self.wfile.write("--jpgboundary")
+                self.send_header('Content-type','image/jpeg')
+                self.send_header('Content-length',str(jpg_file.len))
+                self.end_headers()
+                jpg.save(self.wfile,'JPEG')
+                time.sleep(0.05)
+        except KeyboardInterrupt:
+            del(self.server.video_capture)
+            CamHandler.lock.release()
+        except Exception as e:
+            if re.search('[Errno 32] Broken pipe',str(e), re.M | re.I):
+                Logging.log("WARN", "(CamHandler.do_GET) - [Errno 32] Broken pipe.")
+            print("(CamHandler.do_GET) - Exception e => "+str(e))
+        return CamHandler
+
+class ThreadedHTTPServer(ThreadingMixIn,HTTPServer):
+    def __init__(self, server_address,RequestHandlerClass,queue,video_capture,video_output,bind_and_activate=True):
+        HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
+        self.queue = queue
+        self.video_ouput = video_output
+        self.video_capture = video_capture
+        HTTPServer.allow_reuse_address = True
+
+class Stream(MotionDetection):
+
+    __metaclass__ = VideoFeed
+
+    def __init__(self):
+        super(Stream, self).__init__(options_dict)
+        self.fps          = options_dict['fps']
+        self.camview_port = options_dict['camview_port']
+        self.cam_location = options_dict['cam_location']
+
+    def stream_main(self,queue=None):
+        Stream.lock.acquire()
+        Logging.log("INFO", "(Stream.stream_main) - Lock acquired!")
+        try:
+            video_capture = cv2.VideoCapture(self.cam_location)
+            video_capture.set(3,320)
+            video_capture.set(4,320)
+            fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+            video_output = cv2.VideoWriter(
+                '/home/pi/.motiondetection/stream.avi',
+                fourcc, self.fps, (
+                    int(video_capture.get(3)),
+                    int(video_capture.get(4))
+                )
+            )
+            Stream.lock.release()
+            Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
+            server = ThreadedHTTPServer(
+                ('0.0.0.0', self.camview_port), CamHandler, queue, video_capture, video_output
+            )
+            server.timeout = 1
+            server.queue   = queue
+            server.video_output  = video_output
+            server.video_capture = video_capture
+            del(video_capture)
+            while(True):
+                if not queue.empty() and queue.get() == 'close_camview':
+                    CamHandler.lock.release()
+                    queue.close()
+                    break
+                server.handle_request()
+        except KeyboardInterrupt:
+            CamHandler.lock.release()
+            Stream.lock.release()
+            queue.close()
+        except Exception as eThreadedHTTPServer:
+            Logging.log("ERROR",
+                "(Stream.stream_main) - eThreadedHTTPServer => "
+                + str(eThreadedHTTPServer))
+            queue.close()
 
 class FileOpts(object):
   
@@ -363,10 +436,29 @@ class FileOpts(object):
     @staticmethod
     def create_file(file_name):
         if FileOpts.file_exists(file_name):
-            Logging.log("INFO", "(FileOpts.compress_file) - File " + str(file_name) + " exists.")
+            Logging.log("INFO",
+                "(FileOpts.compress_file) - File "
+                + str(file_name)
+                + " exists.")
             return
-        Logging.log("INFO", "(FileOpts.compress_file) - Creating file " + str(file_name) + ".")
+        Logging.log("INFO",
+            "(FileOpts.compress_file) - Creating file "
+            + str(file_name)
+            + ".")
         open(file_name, 'w')
+
+class WhiteList(object):
+    @staticmethod
+    def present(semaphore,netgear,access_list):
+        semaphore.acquire(blocking=True)
+        if isinstance(netgear, Netgear):
+            for device in netgear.get_attached_devices():
+                if device.mac in open(access_list,'r').read():
+                    MotionDetection.allowed = True
+                    break
+                MotionDetection.allowed = False
+        semaphore.release()
+        MotionDetection.locked = False
 
 class Server(MotionDetection):
 
@@ -376,6 +468,7 @@ class Server(MotionDetection):
         super(Server, self).__init__(options_dict)
 
         self.queue = queue
+        self.camview_port = options_dict['camview_port']
 
         self.process = multiprocessing.Process(
             target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
@@ -383,16 +476,19 @@ class Server(MotionDetection):
         self.process.daemon = True
         self.process.start()
 
+        Server.main_pid = os.getpid()
+        Logging.log("INFO","(Server.__init__) - Server.main_pid: "+str(Server.main_pid))
+
+        MotionDetection.pid = self.process.pid
+        Logging.log("INFO","(Server.__init__) - MotionDetection.pid: "+str(MotionDetection.pid))
+
         try:
             self.sock = socket.socket()
-            #self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.sock.bind(('0.0.0.0', self.server_port))
-        except socket.error as eSocketError:
-            if '[Errno 98] Address already in use' in str(eSocketError):
-                Logging.log("ERROR", "(Server.__init__) - Address already in use. Issuing SIGKILL!")
-                os.kill(os.getpid(),signal.SIGKILL)
         except Exception as eSock:
-            Logging.log("ERROR", "(Server.__init__) - eSock error e => " + str(eSock))
+            Logging.log("ERROR",
+                "(Server.__init__) - eSock error e => "
+                + str(eSock))
 
     def handle_incoming_message(self,*data):
         for(sock,queue) in data:
@@ -414,6 +510,8 @@ class Server(MotionDetection):
                 )
                 self.proc.daemon = True
                 self.proc.start()
+                CamHandler.pid = self.proc.pid
+                Logging.log("INFO","(Server.handle_incoming_message) - CamHandler.pid: "+str(CamHandler.pid))
             elif(message == 'kill_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
@@ -431,6 +529,14 @@ class Server(MotionDetection):
                 )
                 self.process.daemon = True
                 self.process.start()
+                MotionDetection.pid = self.process.pid
+                Logging.log("INFO","(Server.handle_incoming_message) - MotionDetection.pid: "+str(MotionDetection.pid))
+            elif(message == 'start_recording'):
+                queue.put('start_recording')
+            elif(message == 'stop_recording'):
+                queue.put('stop_recording')
+            elif(message == 'ping'):
+                sock.send(str([Server.main_pid,MotionDetection.pid,CamHandler.pid]))
             else:
                 pass
             sock.close()
@@ -444,87 +550,118 @@ class Server(MotionDetection):
             try:
                 self.sock.listen(10)
                 (con, addr) = self.sock.accept()
-                Logging.log("INFO",
-                    "(Server.server_main) - Received connection from " + str(addr))
+                if not '127.0.0.1' in str(addr):
+                    Logging.log("INFO",
+                        "(Server.server_main) - Received connection from "
+                        + str(addr))
 
                 Server.handle_incoming_message(self,(con,self.queue))
 
             except KeyboardInterrupt:
-                print("\n")
-                Logging.log("INFO", "(Server.server_main) - Caught control + c, exiting now.")
-                print("\n")
+                print('\n')
+                Logging.log("INFO", "(Server.server_main) - Caught control + c, exiting now.\n")
+                self.sock.close()
                 sys.exit(0)
             except Exception as eAccept:
-                Logging.log("ERROR", "(Server.server_main) - Socket accept error: " + str(eAccept))
+                Logging.log("ERROR", "(Server.server_main) - Socket accept error: "
+                    + str(eAccept))
 
 if __name__ == '__main__':
 
     parser = OptionParser()
-    parser.add_option("-i", "--ip",
+    parser.add_option('-i', '--ip',
         dest='ip', default='0.0.0.0',
-        help='"This is the IP address of the server."')
-    parser.add_option("-S", "--server-port",
-        dest='server_port', type="int", default=50050,
-        help='"Server port defaults to port 50050"')
-    parser.add_option("-C", "--camview-port",
-        dest='camview_port', type="int", default=5000,
-        help='"CamView port defaults to port 5000"')
-    parser.add_option("-e", "--email",
-        dest='email', type="str",
-        help='"This argument is required!"')
-    parser.add_option("-p", "--password",
-        dest='password',
-        help='"This argument is required!"')
-    parser.add_option("-c", "--camera-location",
-        dest='cam_location', type="int", default=0,
-        help='"Camera index number."')
-    parser.add_option("-E", "--email-port",
-        dest='email_port', type="int", default=587,
-        help='"E-mail port defaults to port 587"')
-    parser.add_option("-l", "--log-file",
+        help='This is the IP address of the server.')
+    parser.add_option('-E', '--email-port',
+        dest='email_port', type='int', default=587,
+        help='E-mail port defaults to port 587')
+    parser.add_option('-l', '--log-file',
         dest='logfile', default='/var/log/motiondetection.log',
-        help="Tail log defaults to /var/log/motiondetection.log.")
-    parser.add_option("-f", "--fps",
-        dest='fps', type="int", default='30',
-        help='"This sets the frames per second for the motion '
-            + 'capture system. It defaults to 30 frames p/s."')
-    parser.add_option("-w", "--white-list",
+        help='Log file defaults to /var/log/motiondetection.log.')
+    parser.add_option('-D', '--disable-email',
+        dest='disable_email', action='store_true', default=False,
+        help='This option allows you to disable the sending of E-mails.')
+    parser.add_option('-c', '--camera-location',
+        dest='cam_location', type='int', default=0,
+        help='Camera index number that defaults to 0. This is the '
+            + 'location of the camera - Which is usually /dev/video0.')
+    parser.add_option('-f', '--fps',
+        dest='fps', type='int', default='30',
+        help='This sets the frames per second for the motion '
+            + 'capture system. It defaults to 30 frames p/s.')
+    parser.add_option('-w', '--white-list',
         dest='access_list', default='/home/pi/.motiondetection/access_list',
-        help='"This ensures that the MotionDetection system does not run '
+        help='This ensures that the MotionDetection system does not run '
             + 'if the mac is in the access_list. This defaults to '
-            + '/home/pi/.motiondetection/access_list"')
-    parser.add_option("-m", "--motion-threshold-min",
-        dest='motion_thresh_min', type="int", default=1500,
-        help='"Sets the minimum movement threshold '
-            +'to trigger the programs image capturing routine.'
-            +' The default value is set at 1500."')
-    parser.add_option("-M", "--motion-threshold-max",
-        dest='motion_thresh_max', type="int", default=10000,
-        help='"Sets the maximum movement threshold when the '
-            +'programs image capturing routine stops working.'
-            +' The default value is set at 10000."')
-    parser.add_option("-r", "--router-password",
+            + '/home/pi/.motiondetection/access_list.')
+    parser.add_option('-e', '--email',
+        dest='email',
+        help='This argument is required unless you pass the '
+            + 'pass the --disable-email flag on the command line. '
+            + 'Your E-mail address is used to send the pictures taken as '
+            + 'well as notify you of motion detected.')
+    parser.add_option('-p', '--password',
+        dest='password',
+        help='This argument is required unless you pass the '
+            + 'pass the --disable-email flag on the command line. '
+            + 'Your E-mail password is used to send the pictures taken '
+            + 'as well as notify you of motion detected.')
+    parser.add_option('-r', '--router-password',
         dest='router_password', default='password',
-        help='"This option is your routers password. This is used to '
+        help='This option is your routers password. This is used to '
             + 'circumvent the motiondetection system. If your phone is '
             + 'connected to your router and in the access list. The '
-            + 'MotionDetection system will not run."')
+            + 'MotionDetection system will not run.')
+    parser.add_option('-C', '--camview-port',
+        dest='camview_port', type='int', default=5000,
+        help='CamView port defaults to port 5000'
+            + 'This is the port the streaming feature runs on. '
+            + 'The streaming feature is the ability to view the '
+            + 'live feed from the camera via ANdroid app.')
+    parser.add_option('-t', '--delta-threshold-min',
+        dest='delta_thresh_min', type='int', default=1500,
+        help='Sets the minimum movement threshold '
+            + 'to trigger the programs image capturing/motion routines. If movement '
+            + 'above this level is detected then this is when MotiondDetection '
+            + 'goes to work. The default value is set at 1500.')
+    parser.add_option('-T', '--delta-threshold-max',
+        dest='delta_thresh_max', type='int', default=10000,
+        help='Sets the maximum movement threshold when the '
+            + 'programs image capturingi/motion routines stops working. '
+            + 'If movement above this level is detected then this program '
+            + ' will not perform any tasks and sit idle. The default value is set at 10000.')
+    parser.add_option('-m', '--motion-threshold-min',
+        dest='motion_thresh_min', type='int', default=500,
+        help='Sets the minimum movement threshold to start the framework '
+            + 'and trigger the programs main motion detection routine. '
+            + 'This is used because even if there is no movement as all '
+            + 'the program still receives false hits and the values can '
+            + 'range from 1 to around 500 and is what the default is set to - 500.')
+    parser.add_option('-S', '--server-port',
+        dest='server_port', type='int', default=50050,
+        help='Server port defaults to port 50050.'
+            + 'This is the port the command server runs on. '
+            + 'This server listens for specific commands from '
+            + 'the Android app and controls the handling of the '
+            + 'camera lock thats passed abck and forth between the '
+            + 'streaming server and the motion detection system.')
     (options, args) = parser.parse_args()
 
-    netgear = 'netgear'
-    #netgear = Netgear(password=options.router_password)
+    Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.")
+    netgear = Netgear(password=options.router_password)
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
 
     options_dict = {
-        'netgear': netgear,
         'logfile': options.logfile, 'fps': options.fps,
+        'netgear': netgear, 'disable_email': options.disable_email,
         'server_port': options.server_port, 'email': options.email,
-        'motion_thresh_max': options.motion_thresh_max, 'ip': options.ip, 
+        'delta_thresh_max': options.delta_thresh_max, 'ip': options.ip, 
         'password': options.password, 'cam_location': options.cam_location,
         'email_port': options.email_port, 'camview_port': options.camview_port,
-        'access_list': options.access_list, 'motion_thresh_min': options.motion_thresh_min
+        'access_list': options.access_list, 'delta_thresh_min': options.delta_thresh_min,
+        'router_password': options.router_password, 'motion_thresh_min': options.motion_thresh_min,
     }
 
     motion_detection = MotionDetection(options_dict)
