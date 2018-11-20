@@ -262,13 +262,13 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
-            whitelist_thread = threading.Thread(
+            '''whitelist_thread = threading.Thread(
                 target=WhiteList.present,
                 args=(self.whitelist_semaphore,self.netgear,self.access_list)
             )
             if not MotionDetection.locked:
                 MotionDetection.locked = True
-                whitelist_thread.start()
+                whitelist_thread.start()'''
 
             time.sleep(0.1)
 
@@ -288,13 +288,14 @@ class MotionDetection(object):
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
                         + str(delta_count)
                         + "!")
+                    self.take_picture(colored_frame)
+                    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                        'Motion Detected','MotionDecetor.py detected movement!')
                     # Access list feature
-                    if not MotionDetection.allowed:
-                        Logging.log("INFO",
-                            "(MotionDetection.capture) - Motion detected with threshold levels at "+str(delta_count)+"!")
+                    '''if not MotionDetection.allowed:
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
+                            'Motion Detected','MotionDecetor.py detected movement!')'''
             elif delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -306,6 +307,8 @@ class MotionDetection(object):
             current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
 
 class CamHandler(BaseHTTPRequestHandler,object):
+
+    __record__    = False
 
     __metaclass__ = VideoFeed
 
@@ -320,33 +323,31 @@ class CamHandler(BaseHTTPRequestHandler,object):
                     'multipart/x-mixed-replace; boundary=--jpgboundary')
                 self.end_headers()
             while True:
-                if not self.server.queue.empty() and self.server.queue.get() == 'kill_monitor':
-                    Logging.log("INFO",
-                        '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
-                    del(self.server.video_capture)
-                    self.server.queue.put('close_camview')
-                    #self.server.sock.close()
-                    break
+                if not self.server.queue.empty():
+                    if self.server.queue.get() == 'kill_monitor':
+                        Logging.log("INFO",
+                            '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
+                        del(self.server.video_capture)
+                        self.server.queue.put('close_camview')
+                        #self.server.sock.close()
+                        break
+                    elif self.server.queue.get() == 'start_recording':
+                        CamHandler.__record__ = True
+                        Logging.log("INFO",
+                            "(CamHandler.do_GET) - queue.get() == 'start_recording'")
+                    elif self.server.queue.get() == 'stop_recording':
+                        CamHandler.__record__ = False
+                        Logging.log("INFO",
+                            "(CamHandler.do_GET) - queue.get() == 'stop_recording'")
                 (read_cam, image) = self.server.video_capture.read()
                 if not read_cam:
                     continue
                 try:
-                    self.server.video_output.write(image)
+                    if CamHandler.__record__:
+                        self.server.video_output.write(image)
                 except Exception as eWrite:
                     print("Exception eWrite => "+str(eWrite))
                     pass
-                '''if not self.server.queue.empty() and self.server.queue.get() == 'start_recording':
-                    try:
-                        print("start_recording")
-                        self.server.video_output.write(image)
-                    except:
-                        pass
-                elif not self.server.queue.empty() and self.server.queue.get() == 'stop_recording':
-                    try:
-                        print("stop_recording")
-                        self.server.video_output.release()
-                    except:
-                        pass'''
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
                 jpg_file = StringIO.StringIO()
