@@ -65,7 +65,7 @@
         android:textSize="10dp"
         android:textOff="Record"
         android:elevation="10dp"
-        android:textOn="!Record"
+        android:textOn="Record"
         android:textColor="#009900"
         android:layout_width="50dp"
         android:layout_height="50dp"
