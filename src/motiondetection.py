@@ -343,8 +343,9 @@ class CamHandler(BaseHTTPRequestHandler,object):
                 if not read_cam:
                     continue
                 try:
-                    if CamHandler.__record__:
-                        self.server.video_output.write(image)
+                    self.server.video_output.write(image)
+                    '''if CamHandler.__record__:
+                        self.server.video_output.write(image)'''
                 except Exception as eWrite:
                     print("Exception eWrite => "+str(eWrite))
                     pass
