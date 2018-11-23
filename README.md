@@ -25,6 +25,8 @@ sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
 
 ### [System Component Versions]
 
+#### **SYSTEM OS VERSION**
+
 ```python
 pi@raspberrypi:~/Documents/Python/MotionDetection $ readarray -t a < <(lsb_release -irs); echo "${a[@]}"
 ```
