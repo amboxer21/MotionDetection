@@ -17,8 +17,9 @@ sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.
 
 #### **FFMpeg configure options**
 
->sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
-
+```python
+sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
+```
 
 > **NOTE** ^^ Above build depends on opencv_contrib being on build3.4 not master!!
 
