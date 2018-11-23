@@ -48,11 +48,24 @@ aguevara@anthony ~ $ opencv_version
 
 >2.4.13.6
 
-### [Download Links]
+#### **FFMPEG VERSION**
 
-[OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
+```python
+pi@raspberrypi:~/Documents/Python/MotionDetection $ ffmpeg -version
+```
 
-[OpenCV open_contrib](https://github.com/opencv/opencv_contrib/tree/3.4)
+```python
+ffmpeg version 3.4.5 Copyright (c) 2000-2018 the FFmpeg developers
+built with gcc 4.9.2 (Raspbian 4.9.2-10+deb8u1)
+configuration: --enable-libmp3lame --enable-libv4l2 --enable-opengl
+libavutil      55. 78.100 / 55. 78.100
+libavcodec     57.107.100 / 57.107.100
+libavformat    57. 83.100 / 57. 83.100
+libavdevice    57. 10.100 / 57. 10.100
+libavfilter     6.107.100 /  6.107.100
+libswscale      4.  8.100 /  4.  8.100
+libswresample   2.  9.100 /  2.  9.100
+```
 
 #### ** BUILT WITH:**
 
@@ -65,6 +78,12 @@ aguevara@anthony ~ $ opencv_version
 >opencv-3.1.0
 
 >opencv_contrib-3.1.0
+
+### [Download Links]
+
+[OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
+
+[OpenCV open_contrib](https://github.com/opencv/opencv_contrib/tree/3.4)
 
 #### **DEPS:**
 
