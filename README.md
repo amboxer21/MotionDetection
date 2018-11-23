@@ -23,6 +23,14 @@ pi@raspberrypi:~/Documents/Python/MotionDetection $ dpkg -s gcc | grep ^Version
 
 >Version: 4:4.9.2-2
 
+#### **CMAKE VERSION**
+
+```python
+pi@raspberrypi:~/Documents/Python/MotionDetection $ cmake --version
+```
+
+>cmake version 3.5.1
+
 
 #### **OpenCV VERSION**
 
