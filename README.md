@@ -92,12 +92,16 @@ libswresample   2.  9.100 /  2.  9.100
 
 [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
 
-[OpenCV open_contrib](https://github.com/opencv/opencv_contrib/tree/3.4)
+[OpenCV open_contrib 3.4](https://github.com/opencv/opencv_contrib/tree/3.4)
 
 #### **DEPS:**
 
 ```python
-sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
+Debian:
 ```
 
-here is a video demonstrating the program https://youtu.be/ZDyZsqIcBnk
+>sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
+
+#### **DEMO**
+
+Here is an older(but still relevant) video demonstrating the program https://youtu.be/ZDyZsqIcBnk
