@@ -96,11 +96,11 @@ libswresample   2.  9.100 /  2.  9.100
 
 #### **DEPS:**
 
-```python
-Debian:
-```
+**Debian:**
 
->sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
+```python
+sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
+```
 
 #### **DEMO**
 
