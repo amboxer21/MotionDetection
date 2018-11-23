@@ -104,6 +104,10 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 
 **RHEL:**
 
+```python
+...
+```
+
 ### [DEMO]
 
 Here is an older(but still relevant) video demonstrating the program https://youtu.be/ZDyZsqIcBnk
