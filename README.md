@@ -24,6 +24,12 @@ sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.
 
 ### [System Component Versions]
 
+```python
+pi@raspberrypi:~/Documents/Python/MotionDetection $ readarray -t a < <(lsb_release -irs); echo "${a[@]}"
+```
+
+>Raspbian 8.0
+
 #### **GCC VERSION**
 
 ```python
@@ -77,7 +83,7 @@ libswresample   2.  9.100 /  2.  9.100
 
 >opencv-3.1.0
 
->opencv_contrib-3.1.0
+>opencv_contrib-3.4
 
 ### [Download Links]
 
