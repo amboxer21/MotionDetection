@@ -111,3 +111,9 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 ### [DEMO]
 
 Here is an older(but still relevant) video demonstrating the program https://youtu.be/ZDyZsqIcBnk
+
+### [SCREEN SHOTS]
+
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-300x600.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-300x600.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-300x600.png)
