@@ -15,6 +15,15 @@ sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.
 
 > **NOTE** ^^ Above build depends on opencv_contrib being on build3.4 not master!!
 
+#### **GCC VERSION**
+
+```python
+pi@raspberrypi:~/Documents/Python/MotionDetection $ dpkg -s gcc | grep ^Version
+```
+
+>Version: 4:4.9.2-2
+
+
 #### **OpenCV VERSION**
 
 ```python
