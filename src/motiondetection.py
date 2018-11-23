@@ -111,6 +111,7 @@ class Mail(object):
                 mail.starttls()
                 mail.login(sender,password)
                 mail.sendmail(sender, to, message.as_string())
+                mail.quit()
                 Logging.log("INFO", "(Mail.send) - Sent email successfully!")
             else:
                 Logging.log("WARN", "(Mail.send) - Sending mail has been disabled!")
