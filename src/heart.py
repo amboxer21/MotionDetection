@@ -7,6 +7,7 @@ import time
 import socket
 import signal
 import logging
+import threading
 import logging.handlers
 
 from optparse import OptionParser
@@ -92,7 +93,8 @@ class Mail(object):
 
 class Heart(object):
 
-    __pids__ = []
+    __pids__    = []
+    __timeout__ = 10
 
     def __init__(self,options_dict={}):
         self.ip            = options_dict['ip']
@@ -107,6 +109,17 @@ class Heart(object):
             sys.exit(0)
 
     @staticmethod
+    def start_thread(proc,*args):
+        try:
+            t = threading.Thread(target=proc,args=args)
+            t.daemon = True
+            t.start()
+        except Exception as eStartThread:
+            Logging.log("ERROR",
+                "Threading exception eStartThread => "
+                + str(eStartThread))
+
+    @staticmethod
     def format_data(data):
         data = re.match('(\[)(.*)(, )(.*)(, )(.*)(\])', data, re.M | re.I)
         if data is not None:
@@ -115,7 +128,7 @@ class Heart(object):
     def beat(self):
         while(True):
             try:
-                time.sleep(10)
+                time.sleep(Heart.__timeout__)
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.settimeout(1)
                 sock.connect((self.ip,self.port))
@@ -124,13 +137,15 @@ class Heart(object):
                 if data is not None:
                     Heart.__pids__ = Heart.format_data(data)
                 sock.close()
+                Heart.__timeout__ = 10
             except Exception as e:
                 if Heart.__pids__:
-                    [os.kill(int(pid), signal.SIGTERM) for pid in Heart.__pids__]
                     Logging.log('INFO',
                         'Lost connection to the MotionDetection framework. Killing system now!')
-                    Mail.send(self.email,self.email,self.password,self.email_port,
+                    [os.kill(int(pid), signal.SIGTERM) for pid in Heart.__pids__]
+                    Heart.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'HeartBeat','HeartBeat reset program!')
+                    Heart.__timeout__ = 120
             except OSError:
                 pass
 
