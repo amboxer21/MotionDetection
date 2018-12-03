@@ -490,6 +490,13 @@ class Server(MotionDetection):
             Logging.log("ERROR",
                 "(Server.__init__) - eSock error e => "
                 + str(eSock))
+            if '[Errno 98] Address already in use' in str(eSock):
+                Mail.send(
+                    options_dict['email'],options_dict['email'],
+                    options_dict['password'],options_dict['email_port'],
+                    'Restarting MotionDetection','MotionDecetor.py has been restarted!'
+                )
+                [os.kill(int(pid), signal.SIGTERM) for pid in [Server.main_pid,MotionDetection.pid,CamHandler.pid]]
 
     def handle_incoming_message(self,*data):
         for(sock,queue) in data:
