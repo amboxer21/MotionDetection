@@ -22,6 +22,7 @@ import numpy as np
 from PIL import Image
 from pynetgear import Netgear
 from optparse import OptionParser
+from multiprocessing import queue
 
 from email.MIMEImage import MIMEImage
 from email.MIMEMultipart import MIMEMultipart
@@ -234,7 +235,7 @@ class MotionDetection(object):
                 "Threading exception eStartThread => "
                 + str(eStartThread))
 
-    def capture(self,queue=None):
+    def capture(self,queue=Queue()):
 
         MotionDetection.lock.acquire()
 
