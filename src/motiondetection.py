@@ -22,7 +22,7 @@ import numpy as np
 from PIL import Image
 from pynetgear import Netgear
 from optparse import OptionParser
-from multiprocessing import queue
+from multiprocessing import Queue
 
 from email.MIMEImage import MIMEImage
 from email.MIMEMultipart import MIMEMultipart
@@ -99,15 +99,16 @@ class Mail(object):
     __disabled__ = False
 
     @staticmethod
-    def send(sender,to,password,port,subject,body):
+    def send(sender,to,password,port,subject,body,attach=True):
         try:
             if not Mail.__disabled__:
                 message = MIMEMultipart()
                 message['Body'] = body
                 message['Subject'] = subject
-                message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
-                    + str(MotionDetection.img_num())
-                    + ".png","rb").read()))
+                if attach:
+                    message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
+                        + str(MotionDetection.img_num())
+                        + ".png","rb").read()))
                 mail = smtplib.SMTP('smtp.gmail.com',port)
                 mail.starttls()
                 mail.login(sender,password)
@@ -495,7 +496,7 @@ class Server(MotionDetection):
                 Mail.send(
                     options_dict['email'],options_dict['email'],
                     options_dict['password'],options_dict['email_port'],
-                    'Restarting MotionDetection','MotionDecetor.py has been restarted!'
+                    'Restarting MotionDetection','MotionDecetor.py has been restarted!',False
                 )
                 [os.kill(int(pid), signal.SIGTERM) for pid in [Server.main_pid,MotionDetection.pid,CamHandler.pid]]
 
