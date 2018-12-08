@@ -22,7 +22,6 @@ import numpy as np
 from PIL import Image
 from pynetgear import Netgear
 from optparse import OptionParser
-from multiprocessing import Queue
 
 from email.MIMEImage import MIMEImage
 from email.MIMEMultipart import MIMEMultipart
@@ -99,21 +98,19 @@ class Mail(object):
     __disabled__ = False
 
     @staticmethod
-    def send(sender,to,password,port,subject,body,attach=True):
+    def send(sender,to,password,port,subject,body):
         try:
             if not Mail.__disabled__:
                 message = MIMEMultipart()
                 message['Body'] = body
                 message['Subject'] = subject
-                if attach:
-                    message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
-                        + str(MotionDetection.img_num())
-                        + ".png","rb").read()))
+                message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
+                    + str(MotionDetection.img_num())
+                    + ".png","rb").read()))
                 mail = smtplib.SMTP('smtp.gmail.com',port)
                 mail.starttls()
                 mail.login(sender,password)
                 mail.sendmail(sender, to, message.as_string())
-                mail.quit()
                 Logging.log("INFO", "(Mail.send) - Sent email successfully!")
             else:
                 Logging.log("WARN", "(Mail.send) - Sending mail has been disabled!")
@@ -236,7 +233,7 @@ class MotionDetection(object):
                 "Threading exception eStartThread => "
                 + str(eStartThread))
 
-    def capture(self,queue=Queue()):
+    def capture(self,queue=None):
 
         MotionDetection.lock.acquire()
 
@@ -265,13 +262,13 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
-            '''whitelist_thread = threading.Thread(
+            whitelist_thread = threading.Thread(
                 target=WhiteList.present,
                 args=(self.whitelist_semaphore,self.netgear,self.access_list)
             )
             if not MotionDetection.locked:
                 MotionDetection.locked = True
-                whitelist_thread.start()'''
+                whitelist_thread.start()
 
             time.sleep(0.1)
 
@@ -291,14 +288,14 @@ class MotionDetection(object):
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
                         + str(delta_count)
                         + "!")
-                    self.take_picture(colored_frame)
+                    '''self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!')
+                        'Motion Detected','MotionDecetor.py detected movement!')'''
                     # Access list feature
-                    '''if not MotionDetection.allowed:
+                    if not MotionDetection.allowed:
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')'''
+                            'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -332,7 +329,6 @@ class CamHandler(BaseHTTPRequestHandler,object):
                             '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                         del(self.server.video_capture)
                         self.server.queue.put('close_camview')
-                        #self.server.sock.close()
                         break
                     elif self.server.queue.get() == 'start_recording':
                         CamHandler.__record__ = True
@@ -492,13 +488,6 @@ class Server(MotionDetection):
             Logging.log("ERROR",
                 "(Server.__init__) - eSock error e => "
                 + str(eSock))
-            if '[Errno 98] Address already in use' in str(eSock):
-                Mail.send(
-                    options_dict['email'],options_dict['email'],
-                    options_dict['password'],options_dict['email_port'],
-                    'Restarting MotionDetection','MotionDecetor.py has been restarted!',False
-                )
-                [os.kill(int(pid), signal.SIGTERM) for pid in [Server.main_pid,MotionDetection.pid,CamHandler.pid]]
 
     def handle_incoming_message(self,*data):
         for(sock,queue) in data:
