@@ -4,10 +4,8 @@ import re
 import os
 import cv2
 import sys
-import cgi
 import time
 import glob
-import signal
 import socket
 import smtplib
 import logging
