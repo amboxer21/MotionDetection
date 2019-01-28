@@ -289,9 +289,9 @@ class MotionDetection(object):
                     '''self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')'''
-                    self.take_picture(colored_frame)
                     # Access list feature
                     if not MotionDetection.allowed:
+                        self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < self.motion_thresh_min:
@@ -448,14 +448,20 @@ class WhiteList(object):
     @staticmethod
     def present(semaphore,netgear,access_list):
         semaphore.acquire(blocking=True)
-        if isinstance(netgear, Netgear):
-            for device in netgear.get_attached_devices():
-                if device.mac in open(access_list,'r').read():
-                    MotionDetection.allowed = True
-                    break
-                MotionDetection.allowed = False
-        semaphore.release()
-        MotionDetection.locked = False
+        try:
+            if isinstance(netgear, Netgear):
+                for device in netgear.get_attached_devices():
+                    if device.mac in open(access_list,'r').read():
+                        MotionDetection.allowed = True
+                        break
+                    MotionDetection.allowed = False
+            semaphore.release()
+            MotionDetection.locked = False
+        except:
+            MotionDetection.allowed = False
+            semaphore.release()
+            MotionDetection.locked = False
+            pass
 
 class Server(MotionDetection):
 
