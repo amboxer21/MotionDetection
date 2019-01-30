@@ -447,6 +447,13 @@ class FileOpts(object):
 class WhiteList(object):
 
     _timeout_ = 0
+    _ip_address_ = '0.0.0.0'
+
+    @staticmethod
+    def set_default_values(semaphore,allowed=False,locked=False):
+        MotionDetection.allowed = allowed
+        semaphore.release()
+        MotionDetection.locked = locked
 
     @classmethod
     def timeout(cls):
@@ -465,16 +472,15 @@ class WhiteList(object):
             if isinstance(netgear, Netgear):
                 for device in netgear.get_attached_devices():
                     if device.mac in open(access_list,'r').read():
+                        Logging.log("INFO","(WhiteList.present) - Device name: "+str(device.name))
+                        Logging.log("INFO","(WhiteList.present) - Device IP address: "+str(device.ip))
+                        Logging.log("INFO","(WhiteList.present) - Device MAC address: "+str(device.mac))
                         MotionDetection.allowed = True
                         break
                     MotionDetection.allowed = False
-            MotionDetection.allowed = False
-            semaphore.release()
-            MotionDetection.locked = False
+            WhiteList.set_default_values(semaphore,False,False)
         except:
-            MotionDetection.allowed = False
-            semaphore.release()
-            MotionDetection.locked = False
+            WhiteList.set_default_values(semaphore,False,False)
             pass
 
 class Server(MotionDetection):
