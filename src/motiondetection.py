@@ -478,7 +478,8 @@ class WhiteList(object):
                         MotionDetection.allowed = True
                         break
                     MotionDetection.allowed = False
-            WhiteList.set_default_values(semaphore,False,False)
+            else:
+                WhiteList.set_default_values(semaphore,False,False)
         except:
             WhiteList.set_default_values(semaphore,False,False)
             pass
