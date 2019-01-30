@@ -161,11 +161,6 @@ class VideoFeed(type):
             + cls.__name__
             + '"')
             cls.locked = False
-        if not hasattr(cls,'timeout'):
-            Logging.log("INFO", '(VideoFeed.__init__) - Adding "timeout" attribute to class "'
-            + cls.__name__
-            + '"')
-            cls.timeout = 0
         super(VideoFeed,cls).__init__(name,bases,dct)
 
 class MotionDetection(object):
@@ -269,7 +264,7 @@ class MotionDetection(object):
                 target=WhiteList.present,
                 args=(self.whitelist_semaphore,self.netgear,self.access_list)
             )
-            if not MotionDetection.locked:
+            if not MotionDetection.locked and WhiteList.timeout():
                 MotionDetection.locked = True
                 whitelist_thread.start()
 
@@ -451,26 +446,29 @@ class FileOpts(object):
 
 class WhiteList(object):
 
+    _timeout_ = 0
+
     @classmethod
     def timeout(cls):
-        if WhiteList.timeout == 0:
-            WhiteList.timeout += 1
-        elif WhiteList.timeout >= 600:
-            WhiteList.timeout = 0
+        if WhiteList._timeout_ == 0:
+            WhiteList._timeout_ += 1
+        elif WhiteList._timeout_ >= 600:
+            WhiteList._timeout_ = 0
             return True
         else:
-            WhiteList.timeout += 1
+            WhiteList._timeout_ += 1
 
     @classmethod
     def present(cls,semaphore,netgear,access_list):
         semaphore.acquire(blocking=True)
         try:
-            if isinstance(netgear, Netgear) and WhiteList.timeout():
+            if isinstance(netgear, Netgear):
                 for device in netgear.get_attached_devices():
                     if device.mac in open(access_list,'r').read():
                         MotionDetection.allowed = True
                         break
                     MotionDetection.allowed = False
+            MotionDetection.allowed = False
             semaphore.release()
             MotionDetection.locked = False
         except:
