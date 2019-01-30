@@ -260,13 +260,13 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
-            '''whitelist_thread = threading.Thread(
+            whitelist_thread = threading.Thread(
                 target=WhiteList.present,
                 args=(self.whitelist_semaphore,self.netgear,self.access_list)
             )
             if not MotionDetection.locked:
                 MotionDetection.locked = True
-                whitelist_thread.start()'''
+                whitelist_thread.start()
 
             time.sleep(0.1)
 
@@ -286,14 +286,14 @@ class MotionDetection(object):
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
                         + str(delta_count)
                         + "!")
-                    self.take_picture(colored_frame)
+                    '''self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!')
+                        'Motion Detected','MotionDecetor.py detected movement!')'''
                     # Access list feature
-                    '''if not MotionDetection.allowed:
+                    if not MotionDetection.allowed:
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')'''
+                            'Motion Detected','MotionDecetor.py detected movement!')
             elif delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -445,11 +445,24 @@ class FileOpts(object):
         open(file_name, 'w')
 
 class WhiteList(object):
-    @staticmethod
-    def present(semaphore,netgear,access_list):
+
+    _timeout_ = 0
+
+    @classmethod
+    def timeout(cls):
+        if WhiteList._timeout_ == 0:
+            WhiteList._timeout_ += 1
+        elif WhiteList._timeout_ >= 600:
+            WhiteList._timeout_ = 0
+            return True
+        else:
+            WhiteList._timeout_ += 1
+
+    @classmethod
+    def present(cls,semaphore,netgear,access_list):
         semaphore.acquire(blocking=True)
         try:
-            if isinstance(netgear, Netgear):
+            if isinstance(netgear, Netgear) and WhiteList.timeout():
                 for device in netgear.get_attached_devices():
                     if device.mac in open(access_list,'r').read():
                         MotionDetection.allowed = True
@@ -651,8 +664,7 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.")
-    netgear = 'Netgear'
-    #netgear = Netgear(password=options.router_password)
+    netgear = Netgear(password=options.router_password)
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
