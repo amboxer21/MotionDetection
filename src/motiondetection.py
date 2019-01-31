@@ -264,7 +264,7 @@ class MotionDetection(object):
                 target=WhiteList.present,
                 args=(self.whitelist_semaphore,self.netgear,self.access_list)
             )
-            if not MotionDetection.locked and WhiteList.timeout():
+            if not MotionDetection.locked and WhiteList.timeout(60):
                 MotionDetection.locked = True
                 whitelist_thread.start()
 
@@ -456,10 +456,10 @@ class WhiteList(object):
         MotionDetection.locked = locked
 
     @classmethod
-    def timeout(cls):
+    def timeout(cls,seconds=60):
         if WhiteList._timeout_ == 0:
             WhiteList._timeout_ += 1
-        elif WhiteList._timeout_ >= 600:
+        elif WhiteList._timeout_ >= 10 * seconds:
             WhiteList._timeout_ = 0
             return True
         else:
@@ -477,7 +477,7 @@ class WhiteList(object):
                         Logging.log("INFO","(WhiteList.present) - Device MAC address: "+str(device.mac))
                         MotionDetection.allowed = True
                         break
-                    MotionDetection.allowed = False
+                MotionDetection.allowed = False
             else:
                 WhiteList.set_default_values(semaphore,False,False)
         except:
