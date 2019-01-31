@@ -471,13 +471,14 @@ class WhiteList(object):
         try:
             if isinstance(netgear, Netgear):
                 for device in netgear.get_attached_devices():
-                    if device.mac in open(access_list,'r').read():
+                    if not device.mac in open(access_list,'r').read():
+                        WhiteList.set_default_values(semaphore,False,False)
+                    else:
                         Logging.log("INFO","(WhiteList.present) - Device name: "+str(device.name))
                         Logging.log("INFO","(WhiteList.present) - Device IP address: "+str(device.ip))
                         Logging.log("INFO","(WhiteList.present) - Device MAC address: "+str(device.mac))
-                        MotionDetection.allowed = True
+                        WhiteList.set_default_values(semaphore,True,False)
                         break
-                MotionDetection.allowed = False
             else:
                 WhiteList.set_default_values(semaphore,False,False)
         except:
