@@ -264,7 +264,7 @@ class MotionDetection(object):
                 target=WhiteList.present,
                 args=(self.whitelist_semaphore,self.netgear,self.access_list)
             )
-            if not MotionDetection.locked and WhiteList.timeout(60):
+            if not MotionDetection.locked and WhiteList.timeout(30):
                 MotionDetection.locked = True
                 whitelist_thread.start()
 
