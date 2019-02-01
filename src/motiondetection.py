@@ -151,16 +151,21 @@ class VideoFeed(type):
             + cls.__name__
             + '"')
             cls.main_pid = os.getpid()
-        if not hasattr(cls,'allowed'):
-            Logging.log("INFO", '(VideoFeed.__init__) - Adding "allowed" attribute to class "'
+        if not hasattr(cls,'mac_addr_listed'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "mac_addr_listed" attribute to class "'
             + cls.__name__
             + '"')
-            cls.allowed = False
-        if not hasattr(cls,'locked'):
-            Logging.log("INFO", '(VideoFeed.__init__) - Adding "locked" attribute to class "'
+            cls.mac_addr_listed = False
+        if not hasattr(cls,'thread_locked'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "thread_locked" attribute to class "'
             + cls.__name__
             + '"')
-            cls.locked = False
+            cls.thread_locked = False
+        if not hasattr(cls,'timeout'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "timeout" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.timeout = 0
         super(VideoFeed,cls).__init__(name,bases,dct)
 
 class MotionDetection(object):
@@ -179,7 +184,7 @@ class MotionDetection(object):
         self.netgear           = options_dict['netgear']
         self.password          = options_dict['password']
         self.email_port        = options_dict['email_port']
-        self.access_list       = options_dict['access_list']
+        self.accesslist       = options_dict['accesslist']
         self.server_port       = options_dict['server_port']
         self.cam_location      = options_dict['cam_location']
         self.disable_email     = options_dict['disable_email']
@@ -190,7 +195,7 @@ class MotionDetection(object):
 
         Mail.__disabled__   = self.disable_email
 
-        self.whitelist_semaphore = threading.Semaphore(1)
+        self.accesslist_semaphore = threading.Semaphore(1)
 
         if not self.disable_email and (self.email is None or self.password is None):
             Logging.log("ERROR",
@@ -260,13 +265,13 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
-            whitelist_thread = threading.Thread(
-                target=WhiteList.present,
-                args=(self.whitelist_semaphore,self.netgear,self.access_list)
+            accesslist_thread = threading.Thread(
+                target=AccessList.mac_addr_presence,
+                args=(self.accesslist_semaphore,self.netgear,self.accesslist)
             )
-            if not MotionDetection.locked and WhiteList.timeout(30):
-                MotionDetection.locked = True
-                whitelist_thread.start()
+            if not AccessList.thread_locked and AccessList.timedout(30):
+                AccessList.thread_locked = True
+                accesslist_thread.start()
 
             time.sleep(0.1)
 
@@ -290,7 +295,7 @@ class MotionDetection(object):
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')'''
                     # Access list feature
-                    if not MotionDetection.allowed:
+                    if not AccessList.mac_addr_listed:
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')
@@ -444,45 +449,44 @@ class FileOpts(object):
             + ".")
         open(file_name, 'w')
 
-class WhiteList(object):
+class AccessList(object):
 
-    _timeout_ = 0
-    _ip_address_ = '0.0.0.0'
+    __metaclass__ = VideoFeed 
 
     @staticmethod
-    def set_default_values(semaphore,allowed=False,locked=False):
-        MotionDetection.allowed = allowed
+    def set_default_values(semaphore,listed=False,locked=False):
+        AccessList.mac_addr_listed = listed
         semaphore.release()
-        MotionDetection.locked = locked
+        AccessList.thread_locked = locked
 
     @classmethod
-    def timeout(cls,seconds=60):
-        if WhiteList._timeout_ == 0:
-            WhiteList._timeout_ += 1
-        elif WhiteList._timeout_ >= 10 * seconds:
-            WhiteList._timeout_ = 0
+    def timedout(cls,seconds=60):
+        if AccessList.timeout == 0:
+            AccessList.timeout += 1
+        elif AccessList.timeout >= 10 * seconds:
+            AccessList.timeout = 0
             return True
         else:
-            WhiteList._timeout_ += 1
+            AccessList.timeout += 1
 
     @classmethod
-    def present(cls,semaphore,netgear,access_list):
+    def mac_addr_presence(cls,semaphore,netgear,accesslist):
         semaphore.acquire(blocking=True)
         try:
             if isinstance(netgear, Netgear):
                 for device in netgear.get_attached_devices():
-                    if not device.mac in open(access_list,'r').read():
-                        WhiteList.set_default_values(semaphore,False,False)
+                    if not device.mac in open(accesslist,'r').read():
+                        AccessList.set_default_values(semaphore,False,False)
                     else:
-                        Logging.log("INFO","(WhiteList.present) - Device name: "+str(device.name))
-                        Logging.log("INFO","(WhiteList.present) - Device IP address: "+str(device.ip))
-                        Logging.log("INFO","(WhiteList.present) - Device MAC address: "+str(device.mac))
-                        WhiteList.set_default_values(semaphore,True,False)
+                        Logging.log("INFO","(AccessList.mac_addr_presence) - Device name: "+str(device.name))
+                        Logging.log("INFO","(AccessList.mac_addr_presence) - Device IP address: "+str(device.ip))
+                        Logging.log("INFO","(AccessList.mac_addr_presence) - Device MAC address: "+str(device.mac))
+                        AccessList.set_default_values(semaphore,True,False)
                         break
             else:
-                WhiteList.set_default_values(semaphore,False,False)
+                AccessList.set_default_values(semaphore,False,False)
         except:
-            WhiteList.set_default_values(semaphore,False,False)
+            AccessList.set_default_values(semaphore,False,False)
             pass
 
 class Server(MotionDetection):
@@ -615,10 +619,10 @@ if __name__ == '__main__':
         help='This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s.')
     parser.add_option('-w', '--white-list',
-        dest='access_list', default='/home/pi/.motiondetection/access_list',
+        dest='accesslist', default='/home/pi/.motiondetection/accesslist',
         help='This ensures that the MotionDetection system does not run '
-            + 'if the mac is in the access_list. This defaults to '
-            + '/home/pi/.motiondetection/access_list.')
+            + 'if the mac is in the accesslist. This defaults to '
+            + '/home/pi/.motiondetection/accesslist.')
     parser.add_option('-e', '--email',
         dest='email',
         help='This argument is required unless you pass the '
@@ -685,7 +689,7 @@ if __name__ == '__main__':
         'delta_thresh_max': options.delta_thresh_max, 'ip': options.ip, 
         'password': options.password, 'cam_location': options.cam_location,
         'email_port': options.email_port, 'camview_port': options.camview_port,
-        'access_list': options.access_list, 'delta_thresh_min': options.delta_thresh_min,
+        'accesslist': options.accesslist, 'delta_thresh_min': options.delta_thresh_min,
         'router_password': options.router_password, 'motion_thresh_min': options.motion_thresh_min,
     }
 
