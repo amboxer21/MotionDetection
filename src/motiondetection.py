@@ -447,7 +447,6 @@ class FileOpts(object):
 class WhiteList(object):
 
     _timeout_ = 0
-    _ip_address_ = '0.0.0.0'
 
     @staticmethod
     def set_default_values(semaphore,allowed=False,locked=False):
