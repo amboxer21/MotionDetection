@@ -67,14 +67,12 @@ class Logging(object):
 
 class Mail(object):
 
-    @classmethod
-    def disabled(cls,disabled=False):
-        cls.disabled = disabled
+    __disabled__ = False
 
     @staticmethod
     def send(sender,to,password,port,subject,body):
         try:
-            if not Mail.disabled:
+            if not Mail.__disabled__:
                 message = MIMEMultipart()
                 message['Body'] = body
                 message['Subject'] = subject
@@ -95,19 +93,15 @@ class Mail(object):
 
 class Heart(object):
 
-    @classmethod
-    def pids(cls,pids=[]):
-        cls.pids = pids
-
-    @classmethod
-    def timeout(cls,timeout=10):
-        cls.timeout = timeout
+    __pids__ = []
+    __timeout__ = 10
 
     def __init__(self,options_dict={}):
         self.ip            = options_dict['ip']
         self.port          = options_dict['port']
         self.email         = options_dict['email']
         self.password      = options_dict['password']
+        self.email_port    = options_dict['email_port']
         self.disable_email = options_dict['disable_email']
 
         if not self.disable_email and (self.email is None or self.password is None):
@@ -135,24 +129,26 @@ class Heart(object):
     def beat(self):
         while(True):
             try:
-                time.sleep(Heart.timeout)
+                time.sleep(Heart.__timeout__)
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 sock.settimeout(1)
                 sock.connect((self.ip,self.port))
                 sock.send('ping')
                 data = sock.recv(1024)
                 if data is not None:
-                    Heart.pids = Heart.format_data(data)
+                    print('PIDS: '+str(Heart.format_data(data)))
+                    Heart.__pids__ = Heart.format_data(data)
                 sock.close()
-                Heart.timeout = 10
+                Heart.__timeout__ = 10
             except Exception as e:
-                if Heart.pids:
+                if Heart.__pids__:
                     Logging.log('INFO',
                         'Lost connection to the MotionDetection framework. Killing system now!')
-                    [os.kill(int(pid), signal.SIGTERM) for pid in Heart.pids]
+                    [os.kill(int(pid), signal.SIGTERM) for pid in Heart.__pids__]
                     Heart.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'HeartBeat','HeartBeat reset program!')
-                    Heart.timeout = 120
+                    Heart.__timeout__ = 120
+                pass
             except OSError:
                 pass
 
@@ -196,6 +192,7 @@ if __name__ == '__main__':
     Mail.disabled = options.disable_email
 
     options_dict = {
+        'email_port': options.email_port,
         'disable_email': options.disable_email,
         'ip': options.ip, 'port': options.port, 
         'email': options.email,'password':options.password
