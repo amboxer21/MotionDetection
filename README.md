@@ -2,7 +2,7 @@
 >
 **Description:** A system that monitors motion from a webcam and allows remote viewing of the webcam from an android app. The system takes pictures when it detects motion then emails those pictures. The android app allows you to remotely view the cam anytime. The motion detection system can be controlled with a white list so you're not spammed while your home. 
 
-**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail me at amboxer21@gmail.com, Anthony Guevara.
+**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
 
 ### [Build Options]
 
