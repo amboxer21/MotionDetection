@@ -198,4 +198,5 @@ if __name__ == '__main__':
         'email': options.email,'password':options.password
     }
 
+    time.sleep(120)
     heart = Heart(options_dict).beat() 
