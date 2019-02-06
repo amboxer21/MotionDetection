@@ -522,9 +522,10 @@ class Server(MotionDetection):
             self.sock = socket.socket()
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
-            Logging.log("ERROR",
-                "(Server.__init__) - eSock error e => "
-                + str(eSock))
+            if 'Address already in use' in eSock:
+                Logging.log("ERROR",
+                    "(Server.__init__) - eSock error e => "+str(eSock))
+                os.system('/usr/bin/sudo /sbin/reboot')
 
     def handle_incoming_message(self,*data):
         for(sock,queue) in data:
