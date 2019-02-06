@@ -151,6 +151,11 @@ class VideoFeed(type):
             + cls.__name__
             + '"')
             cls.main_pid = os.getpid()
+        if not hasattr(cls,'parent_pid'):
+            Logging.log("INFO", '(VideoFeed.__init__) - Adding "parent_pid" attribute to class "'
+            + cls.__name__
+            + '"')
+            cls.parent_pid = os.getppid()
         if not hasattr(cls,'mac_addr_listed'):
             Logging.log("INFO", '(VideoFeed.__init__) - Adding "mac_addr_listed" attribute to class "'
             + cls.__name__
@@ -505,8 +510,10 @@ class Server(MotionDetection):
         self.process.daemon = True
         self.process.start()
 
-        Server.main_pid = os.getpid()
+        Server.main_pid   = os.getpid()
+        Server.parent_pid = os.getppid()
         Logging.log("INFO","(Server.__init__) - Server.main_pid: "+str(Server.main_pid))
+        Logging.log("INFO","(Server.__init__) - Server.parent_pid: "+str(Server.parent_pid))
 
         MotionDetection.pid = self.process.pid
         Logging.log("INFO","(Server.__init__) - MotionDetection.pid: "+str(MotionDetection.pid))
@@ -515,9 +522,10 @@ class Server(MotionDetection):
             self.sock = socket.socket()
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
-            Logging.log("ERROR",
-                "(Server.__init__) - eSock error e => "
-                + str(eSock))
+            if 'Address already in use' in eSock:
+                Logging.log("ERROR",
+                    "(Server.__init__) - eSock error e => "+str(eSock))
+                os.system('/usr/bin/sudo /sbin/reboot')
 
     def handle_incoming_message(self,*data):
         for(sock,queue) in data:
@@ -539,8 +547,8 @@ class Server(MotionDetection):
                 )
                 self.proc.daemon = True
                 self.proc.start()
-                CamHandler.pid = self.proc.pid
-                Logging.log("INFO","(Server.handle_incoming_message) - CamHandler.pid: "+str(CamHandler.pid))
+                MotionDetection.pid = self.proc.pid
+                Logging.log("INFO","(Server.handle_incoming_message) - MotionDetection.pid: "+str(Stream.pid))
             elif(message == 'kill_monitor'):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
@@ -565,7 +573,7 @@ class Server(MotionDetection):
             elif(message == 'stop_recording'):
                 queue.put('stop_recording')
             elif(message == 'ping'):
-                sock.send(str([Server.main_pid,MotionDetection.pid,CamHandler.pid]))
+                sock.send(str([Server.main_pid,MotionDetection.pid,Server.parent_pid]))
             else:
                 pass
             sock.close()
