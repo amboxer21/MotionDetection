@@ -96,6 +96,7 @@
           android:layout_marginLeft="10dp"
           android:layout_marginRight="1dp"
           android:layout_marginBottom="3dp"
+          android:background="@+id/edit_text"
           android:layout_height="wrap_content"
           android:inputType="textNoSuggestions"/>
 
@@ -111,6 +112,7 @@
           android:layout_marginLeft="1dp"
           android:layout_marginRight="1dp"
           android:layout_marginBottom="3dp"
+          android:background="@+id/edit_text"
           android:layout_height="wrap_content"/>
 
 
@@ -126,6 +128,7 @@
           android:id="@+id/editServerPort"
           android:layout_marginRight="10dp"
           android:layout_marginBottom="3dp"
+          android:background="@+id/edit_text"
           android:layout_height="wrap_content"/>
 
       </LinearLayout>
