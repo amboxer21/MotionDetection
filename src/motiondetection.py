@@ -6,6 +6,7 @@ import cv2
 import sys
 import time
 import glob
+import email
 import socket
 import smtplib
 import logging
