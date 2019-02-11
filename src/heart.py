@@ -6,11 +6,15 @@ import sys
 import time
 import socket
 import signal
+import smtplib
 import logging
 import threading
 import logging.handlers
 
 from optparse import OptionParser
+
+from email.MIMEImage import MIMEImage
+from email.MIMEMultipart import MIMEMultipart
 
 class Logging(object):
 
@@ -104,6 +108,9 @@ class Heart(object):
         self.email_port    = options_dict['email_port']
         self.disable_email = options_dict['disable_email']
 
+        self.min_thresh_interval = options_dict['min_thresh_interval']
+        self.max_thresh_interval = options_dict['max_thresh_interval']
+
         if not self.disable_email and (self.email is None or self.password is None):
             Logging.log("ERROR",
                 "(MotionDetection.__init__) - Both E-mail and password are required!")
@@ -139,7 +146,7 @@ class Heart(object):
                     print('PIDS: '+str(Heart.format_data(data)))
                     Heart.__pids__ = Heart.format_data(data)
                 sock.close()
-                Heart.__timeout__ = 10
+                Heart.__timeout__ = self.min_thresh_interval
             except Exception as e:
                 if Heart.__pids__:
                     Logging.log('INFO',
@@ -147,7 +154,7 @@ class Heart(object):
                     [os.kill(int(pid), signal.SIGTERM) for pid in Heart.__pids__]
                     Heart.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'HeartBeat','HeartBeat reset program!')
-                    Heart.__timeout__ = 120
+                    Heart.__timeout__ = self.max_thresh_interval
                 pass
             except OSError:
                 pass
@@ -167,6 +174,18 @@ if __name__ == '__main__':
     parser.add_option('-D', '--disable-email',
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
+    parser.add_option('-m', '--min-thresh-interval',
+        dest='min_thresh_interval', type='int', default=10,
+        help='This option sets the interval at which this heartbeat monitor '
+            + 'checks the state of the motiondetection servers. This option '
+            + 'defaults to 10 seconds. This variable is used if heartbeat is '
+            + ' still has a connection to the motiondetection servers.')
+    parser.add_option('-M', '--max-thresh-interval',
+        dest='max_thresh_interval', type='int', default=120,
+        help='This option sets the interval at which this heartbeat monitor '
+            + 'checks the state of the motiondetection servers. This option '
+            + 'defaults to 120 seconds. This variable is used if one of both '
+            + ' of the servers are down and prevents a boot loop.')
     parser.add_option('-p', '--password',
         dest='password',
         help='This argument is required unless you pass the '
@@ -195,6 +214,8 @@ if __name__ == '__main__':
         'email_port': options.email_port,
         'disable_email': options.disable_email,
         'ip': options.ip, 'port': options.port, 
+        'max_thresh_interval': options.max_thresh_interval,
+        'min_thresh_interval': options.min_thresh_interval,
         'email': options.email,'password':options.password
     }
 
