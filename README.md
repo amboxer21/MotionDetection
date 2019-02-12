@@ -4,7 +4,7 @@
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk)
 
-**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
+**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but so far all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
 
 ### [Build Options]
 
