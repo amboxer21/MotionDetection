@@ -120,8 +120,6 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 
 Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=ZDyZsqIcBnk" target="_blank"><img src="https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/video_demo_screen_shot_revised.png" width="240" height="180" border="0" /></a>
-
 ### [SCREEN SHOTS]
 
 > **MotionDetection System**
