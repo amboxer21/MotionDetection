@@ -94,11 +94,13 @@ libswresample   2.  9.100 /  2.  9.100
 
 ### [Download Links]
 
+[FFMPEG 3.4.5](https://www.ffmpeg.org/releases/ffmpeg-3.4.5.tar.gz)
+
+[CMake 3.5.1](https://github.com/Kitware/CMake/releases/download/v3.5.1/cmake-3.5.1.tar.gz)
+
 [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
 
 [OpenCV open_contrib 3.4](https://github.com/opencv/opencv_contrib/tree/3.4)
-
-[Cmake 3.5.1](https://github.com/Kitware/CMake/releases/download/v3.5.1/cmake-3.5.1.tar.gz)
 
 ### [DEPS]
 
