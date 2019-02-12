@@ -53,13 +53,20 @@ pi@raspberrypi:~/Documents/Python/MotionDetection $ cmake --version
 
 >cmake version 3.5.1
 
-#### **OpenCV VERSION**
+#### **OpenCV System VERSION**
 
 ```python
 aguevara@anthony ~ $ opencv_version 
 ```
 
 >2.4.13.6
+
+#### **OpenCV Python VERSION**
+
+```javascript
+pi@raspberrypi:~ $ python -c 'import cv2; print(str(cv2.__version__))'
+```
+>3.1.0
 
 #### **FFMPEG VERSION**
 
@@ -88,7 +95,7 @@ libswresample   2.  9.100 /  2.  9.100
 
 >opencv-2.4.13.6
 
->~~opencv-3.1.0~~
+>opencv-3.1.0
 
 >opencv_contrib-3.4
 
