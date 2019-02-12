@@ -25,7 +25,7 @@ sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.
 sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
 ```
 
-> **NOTE** ^^ The above build depends on the build3.4(NOT MASTER) branch of the opencv_contrib repo being checked out before you build OpenCV!! Download links can be found further down.
+> **NOTE** ^^ The above build depends on OpenCV being built with the build3.4(NOT MASTER) branch of the opencv_contrib repo before OpenCV is built!! Download links can be found further down.
 
 ### [System Component Versions]
 
