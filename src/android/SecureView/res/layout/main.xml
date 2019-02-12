@@ -89,6 +89,7 @@
           android:textSize="10dp"
           android:hint="Public IP Address"
           android:layout_width="0dp"
+          android:layout_height="40dp"
           android:layout_weight=".40"
           android:visibility="invisible"
           android:id="@+id/editIPAddress"
@@ -96,8 +97,7 @@
           android:layout_marginLeft="10dp"
           android:layout_marginRight="1dp"
           android:layout_marginBottom="3dp"
-          android:background="@+id/edit_text"
-          android:layout_height="wrap_content"
+          android:background="@drawable/edit_text"
           android:inputType="textNoSuggestions"/>
 
         <EditText
@@ -105,6 +105,7 @@
           android:hint="Cam port"
           android:inputType="number"
           android:layout_width="0dp"
+          android:layout_height="40dp"
           android:layout_weight=".25"
           android:id="@+id/editCamPort"
           android:visibility="invisible"
@@ -112,8 +113,7 @@
           android:layout_marginLeft="1dp"
           android:layout_marginRight="1dp"
           android:layout_marginBottom="3dp"
-          android:background="@+id/edit_text"
-          android:layout_height="wrap_content"/>
+          android:background="@drawable/edit_text"/>
 
 
         <EditText
@@ -121,6 +121,7 @@
           android:inputType="number"
           android:hint="Server port"
           android:layout_width="0dp"
+          android:layout_height="40dp"
           android:layout_weight=".25"
           android:visibility="invisible"
           android:textColorHint="#808080"
@@ -128,8 +129,7 @@
           android:id="@+id/editServerPort"
           android:layout_marginRight="10dp"
           android:layout_marginBottom="3dp"
-          android:background="@+id/edit_text"
-          android:layout_height="wrap_content"/>
+          android:background="@drawable/edit_text"/>
 
       </LinearLayout>
 
