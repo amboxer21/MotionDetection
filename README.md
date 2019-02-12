@@ -4,7 +4,7 @@
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk)
 
-**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
+**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but so far all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
 
 ### [Build Options]
 
@@ -88,11 +88,15 @@ libswresample   2.  9.100 /  2.  9.100
 
 >opencv-2.4.13.6
 
->opencv-3.1.0
+>~~opencv-3.1.0~~
 
 >opencv_contrib-3.4
 
 ### [Download Links]
+
+[FFMPEG 3.4.5](https://www.ffmpeg.org/releases/ffmpeg-3.4.5.tar.gz)
+
+[CMake 3.5.1](https://github.com/Kitware/CMake/releases/download/v3.5.1/cmake-3.5.1.tar.gz)
 
 [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
 
@@ -114,7 +118,11 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 
 ### [DEMO]
 
-Here is an older(but still relevant) video demonstrating the program https://youtu.be/ZDyZsqIcBnk
+Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
+
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=ZDyZsqIcBnk
+" target="_blank"><img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 ### [SCREEN SHOTS]
 
