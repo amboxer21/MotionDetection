@@ -1,6 +1,6 @@
 # MotionDetection
 >
-**Description:** A system that monitors motion from a webcam and allows remote viewing of the webcam from an android app. The system takes pictures when it detects motion then emails those pictures. The android app allows you to remotely view the cam anytime. The motion detection system can be controlled with a white list so you're not spammed while your home. 
+**Description:** This system monitors motion from a USB webcam and Raspberry Pi 3. It also allows remote viewing of that webcam from an android app from anywhere in the world at anytime. The motion detection system uses the OpenCV API to take pictures when it detects motion above a user specified threshold, then emails those pictures to you. The motion detection system is highly configurable and can be controlled with a white list so you're not spammed while your home. If your phone’s MAC address is in the white list then you will not receive emails.  
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk)
 
