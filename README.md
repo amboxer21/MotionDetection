@@ -98,6 +98,8 @@ libswresample   2.  9.100 /  2.  9.100
 
 [OpenCV open_contrib 3.4](https://github.com/opencv/opencv_contrib/tree/3.4)
 
+[Cmake 3.5.1](https://github.com/Kitware/CMake/releases/download/v3.5.1/cmake-3.5.1.tar.gz)
+
 ### [DEPS]
 
 **Debian:**
