@@ -88,7 +88,7 @@ libswresample   2.  9.100 /  2.  9.100
 
 >opencv-2.4.13.6
 
->opencv-3.1.0
+>~~opencv-3.1.0~~
 
 >opencv_contrib-3.4
 
