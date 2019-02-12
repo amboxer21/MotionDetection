@@ -120,6 +120,10 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 
 Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=ZDyZsqIcBnk
+" target="_blank"><img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg" 
+alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
+
 ### [SCREEN SHOTS]
 
 > **MotionDetection System**
