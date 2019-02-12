@@ -118,7 +118,7 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 
 ### [DEMO]
 
-Here is an older(but still relevant) video demonstrating the program https://youtu.be/ZDyZsqIcBnk
+Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
 
 ### [SCREEN SHOTS]
 
