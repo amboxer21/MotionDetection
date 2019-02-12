@@ -107,6 +107,8 @@ libswresample   2.  9.100 /  2.  9.100
 
 [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
 
+[OpenCV 3.1.0](https://github.com/opencv/opencv/archive/3.1.0.zip)
+
 [OpenCV open_contrib 3.4](https://github.com/opencv/opencv_contrib/tree/3.4)
 
 ### [DEPS]
