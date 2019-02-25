@@ -18,5 +18,3 @@ sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 1199,5000,50
 sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 1199,5000,50050 -j DROP
 sudo /sbin/iptables -A OUTPUT -p tcp --dport 993 -d localhost -m owner ! --uid-owner root -j REJECT
 sudo /sbin/iptables -t filter -I INPUT -p tcp --syn --dport 1199 -m connlimit --connlimit-above 3 --connlimit-mask 32 -j DROP
-sudo /sbin/iptables -t filter -I INPUT -p tcp --syn --dport 5000 -m connlimit --connlimit-above 1 --connlimit-mask 32 -j DROP
-sudo /sbin/iptables -t filter -I INPUT -p tcp --syn --dport 50050 -m connlimit --connlimit-above 1 --connlimit-mask 32 -j DROP
