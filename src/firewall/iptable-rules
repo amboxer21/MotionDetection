@@ -13,8 +13,7 @@
 
 sudo /sbin/iptables --flush 
 
-sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 25,587 -j DROP
-sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 1199,5000,50050 -s phone_public_ip,Phone_private_ip,127.0.0.1 -j ACCEPT
-sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 5000,50050 -j DROP
 sudo /sbin/iptables -A OUTPUT -p tcp --dport 993 -d localhost -m owner ! --uid-owner root -j REJECT
 sudo /sbin/iptables -t filter -I INPUT -p tcp --syn --dport 1199 -m connlimit --connlimit-above 3 --connlimit-mask 32 -j DROP
+sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 1199,5000,50050 -s phone_public_ip,Phone_private_ip,127.0.0.1 -j ACCEPT
+sudo /sbin/iptables -A INPUT -p tcp -m multiport --destination-port 50050,5000,25,587 -j DROP
