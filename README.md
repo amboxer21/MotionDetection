@@ -1,10 +1,10 @@
 # MotionDetection
 >
-**Description:** A system that monitors motion from a webcam and allows remote viewing of the webcam from an android app. The system takes pictures when it detects motion then emails those pictures. The android app allows you to remotely view the cam anytime. The motion detection system can be controlled with a white list so you're not spammed while your home. 
+**Description:**  This system is called MotionDetection and it monitors motion from a USB webcam and Raspberry Pi 3 using the OpenCV API. Once motion is detected by the system, it takes a picture of what set the motion detection software off and E-mails that picture to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable!
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk)
 
-**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
+**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but so far all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
 
 ### [Build Options]
 
@@ -25,7 +25,7 @@ sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.
 sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
 ```
 
-> **NOTE** ^^ Above build depends on opencv_contrib being on build3.4 not master!!
+> **NOTE** ^^ The above build depends on OpenCV being built with the build3.4(NOT MASTER) branch of the opencv_contrib repo before OpenCV is built!! Download links can be found further down.
 
 ### [System Component Versions]
 
@@ -53,13 +53,20 @@ pi@raspberrypi:~/Documents/Python/MotionDetection $ cmake --version
 
 >cmake version 3.5.1
 
-#### **OpenCV VERSION**
+#### **OpenCV System VERSION**
 
 ```python
 aguevara@anthony ~ $ opencv_version 
 ```
 
 >2.4.13.6
+
+#### **OpenCV Python VERSION**
+
+```javascript
+pi@raspberrypi:~ $ python -c 'import cv2; print(str(cv2.__version__))'
+```
+>3.1.0
 
 #### **FFMPEG VERSION**
 
@@ -94,7 +101,13 @@ libswresample   2.  9.100 /  2.  9.100
 
 ### [Download Links]
 
+[FFMPEG 3.4.5](https://www.ffmpeg.org/releases/ffmpeg-3.4.5.tar.gz)
+
+[CMake 3.5.1](https://github.com/Kitware/CMake/releases/download/v3.5.1/cmake-3.5.1.tar.gz)
+
 [OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
+
+[OpenCV 3.1.0](https://github.com/opencv/opencv/archive/3.1.0.zip)
 
 [OpenCV open_contrib 3.4](https://github.com/opencv/opencv_contrib/tree/3.4)
 
@@ -114,7 +127,7 @@ sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasp
 
 ### [DEMO]
 
-Here is an older(but still relevant) video demonstrating the program https://youtu.be/ZDyZsqIcBnk
+Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
 
 ### [SCREEN SHOTS]
 
