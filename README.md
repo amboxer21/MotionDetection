@@ -4,7 +4,9 @@
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 
-A gzipped tar file of the OS can be found [HERE](https://drive.google.com/file/d/1K1rEQ5VouIO-wwgYDc9vil5Xvp35oVRU/view?usp=sharing). This file is not in an ISO or image format. I am working on that.
+A 3.9GB gzipped tar file of the OS can be found [HERE](https://drive.google.com/file/d/1K1rEQ5VouIO-wwgYDc9vil5Xvp35oVRU/view?usp=sharing). This is not an ISO.
+
+A 10GB ISO can be found [HERE](https://drive.google.com/file/d/1HuJUMEZfFtOfI70rfdgkzA9b5IxVyFmp/view?usp=sharing).
 
 **DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but so far all have failed. I am willing to provide an image of my RPI3 on an SD card. E-mail Anthony Guevara at amboxer21@gmail.com.
 
