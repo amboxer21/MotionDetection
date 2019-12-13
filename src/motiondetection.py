@@ -190,7 +190,7 @@ class MotionDetection(object):
         self.netgear           = options_dict['netgear']
         self.password          = options_dict['password']
         self.email_port        = options_dict['email_port']
-        self.accesslist       = options_dict['accesslist']
+        self.accesslist        = options_dict['accesslist']
         self.server_port       = options_dict['server_port']
         self.cam_location      = options_dict['cam_location']
         self.disable_email     = options_dict['disable_email']
@@ -271,13 +271,14 @@ class MotionDetection(object):
                 MotionDetection.lock.release()
                 break
 
-            accesslist_thread = threading.Thread(
-                target=AccessList.mac_addr_presence,
-                args=(self.accesslist_semaphore,self.netgear,self.accesslist)
-            )
-            if not AccessList.thread_locked and AccessList.timedout(30):
-                AccessList.thread_locked = True
-                accesslist_thread.start()
+            if not self.netgear is None:
+                accesslist_thread = threading.Thread(
+                    target=AccessList.mac_addr_presence,
+                    args=(self.accesslist_semaphore,self.netgear,self.accesslist)
+                )
+                if not AccessList.thread_locked and AccessList.timedout(30):
+                    AccessList.thread_locked = True
+                    accesslist_thread.start()
 
             time.sleep(0.1)
 
@@ -454,6 +455,23 @@ class FileOpts(object):
             + str(file_name)
             + ".")
         open(file_name, 'w')
+
+    @staticmethod
+    def dir_exists(dir_path):
+        return os.path.isdir(dir_path)
+
+    @staticmethod
+    def mkdir_p(dir_path):
+        try:
+            Logging.log("INFO", "Creating directory " + str(dir_path))
+            os.makedirs(dir_path)
+        except OSError as e:
+            if e.errno == errno.EEXIST and FileOpts.dir_exists(dir_path):
+                pass
+            else:
+                Logging.log("ERROR", "mkdir error: " + str(e))
+                raise
+
 
 class AccessList(object):
 
@@ -632,6 +650,10 @@ if __name__ == '__main__':
         help='This ensures that the MotionDetection system does not run '
             + 'if the mac is in the accesslist. This defaults to '
             + '/home/pi/.motiondetection/accesslist.')
+    parser.add_option('-P', '--passive',
+        dest='passive', action='store_true', default=False,
+        help='This option allows you to circumvent the motiondetection system. '
+            + 'This option must be used in conjunction with -r/--router-password.')
     parser.add_option('-e', '--email',
         dest='email',
         help='This argument is required unless you pass the '
@@ -686,10 +708,16 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.")
-    netgear = Netgear(password=options.router_password)
+    if options.passive:
+        netgear = Netgear(password=options.router_password)
+    else:
+        netgear = None
 
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
+
+    if not FileOpts.dir_exists('/home/pi/.motiondetection'):
+        FileOpts.mkdir_p('/home/pi/.motiondetection')
 
     options_dict = {
         'logfile': options.logfile, 'fps': options.fps,
