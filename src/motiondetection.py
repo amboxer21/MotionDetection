@@ -28,6 +28,10 @@ from email.MIMEMultipart import MIMEMultipart
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 
+import requests
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
 class Logging(object):
 
     @staticmethod
@@ -86,6 +90,15 @@ class User(object):
     def name():
         comm = subprocess.Popen(["users"], shell=True, stdout=subprocess.PIPE)
         return re.search("(\w+)", str(comm.stdout.read())).group()
+
+class PS(object):
+    @classmethod
+    def aux(self,process,user=User.name()):
+        _aux_ = os.system("/bin/ps aux | /usr/bin/awk '/^"
+            +str(user)+".*"+str(process)
+            +"/{if($11 !~ /awk|ps/) print}'")
+        print _aux_
+        return _aux_
 
 class Time(object):
     @staticmethod
@@ -188,12 +201,16 @@ class MotionDetection(object):
         self.fps               = options_dict['fps']
         self.email             = options_dict['email']
         self.netgear           = options_dict['netgear']
+        self.verbose           = options_dict['verbose']  
         self.password          = options_dict['password']
         self.email_port        = options_dict['email_port']
         self.accesslist        = options_dict['accesslist']
         self.server_port       = options_dict['server_port']
+        self.standby_mode      = options_dict['standby_mode']
         self.cam_location      = options_dict['cam_location']
         self.disable_email     = options_dict['disable_email']
+        self.burst_mode_opts   = options_dict['burst_mode_opts']
+        self.camera_delay_time = options_dict['camera_delay_time']
 
         self.delta_thresh_min  = options_dict['delta_thresh_min']
         self.delta_thresh_max  = options_dict['delta_thresh_max']
@@ -214,7 +231,7 @@ class MotionDetection(object):
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
         if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
-            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.")
+            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.",self.verbose)
             FileOpts.create_file('/home/pi/.motiondetection/capture1.png')
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
@@ -246,8 +263,8 @@ class MotionDetection(object):
 
         MotionDetection.lock.acquire()
 
-        Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!")
-        Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!")
+        Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!",self.verbose)
+        Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!", self.verbose)
     
         self.camera_motion = cv2.VideoCapture(self.cam_location)
         self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
@@ -265,13 +282,13 @@ class MotionDetection(object):
 
             if not queue.empty() and queue.get() == 'start_monitor':
                 Logging.log("INFO",
-                    "(MotionDetection.capture) - (Queue message) -> Killing camera.")
+                    "(MotionDetection.capture) - (Queue message) -> Killing camera.",self.verbose)
                 del(self.camera_motion)
                 queue.close()
                 MotionDetection.lock.release()
                 break
 
-            if not self.netgear is None:
+            if self.standby_mode:
                 accesslist_thread = threading.Thread(
                     target=AccessList.mac_addr_presence,
                     args=(self.accesslist_semaphore,self.netgear,self.accesslist)
@@ -297,15 +314,21 @@ class MotionDetection(object):
                     Logging.log("INFO",
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
                         + str(delta_count)
-                        + "!")
+                        + "!", self.verbose)
                     '''self.take_picture(colored_frame)
                     MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'Motion Detected','MotionDecetor.py detected movement!')'''
                     # Access list feature
                     if not AccessList.mac_addr_listed:
+                        time.sleep(float(self.camera_delay_time))
                         self.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')
+                        #for placeholder in range(0,int(self.burst_mode_opts[0])):
+                        #    self.take_picture(colored_frame)
+                        #    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                        #        'Motion Detected','MotionDecetor.py detected movement!')
+                        #    time.sleep(int(self.burst_mode_opts[1]))
             elif delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -378,9 +401,10 @@ class CamHandler(BaseHTTPRequestHandler,object):
         return CamHandler
 
 class ThreadedHTTPServer(ThreadingMixIn,HTTPServer):
-    def __init__(self, server_address,RequestHandlerClass,queue,video_capture,video_output,bind_and_activate=True):
+    def __init__(self, server_address,RequestHandlerClass,queue,verbose,video_capture,video_output,bind_and_activate=True):
         HTTPServer.__init__(self, server_address, RequestHandlerClass, bind_and_activate)
-        self.queue = queue
+        self.queue   = queue
+        self.verbose = verbose
         self.video_ouput = video_output
         self.video_capture = video_capture
         HTTPServer.allow_reuse_address = True
@@ -392,6 +416,7 @@ class Stream(MotionDetection):
     def __init__(self):
         super(Stream, self).__init__(options_dict)
         self.fps          = options_dict['fps']
+        self.verbose      = options_dict['verbose']
         self.camview_port = options_dict['camview_port']
         self.cam_location = options_dict['cam_location']
 
@@ -417,6 +442,7 @@ class Stream(MotionDetection):
             )
             server.timeout = 1
             server.queue   = queue
+            server.verbose = self.verbose
             server.video_output  = video_output
             server.video_capture = video_capture
             del(video_capture)
@@ -455,23 +481,6 @@ class FileOpts(object):
             + str(file_name)
             + ".")
         open(file_name, 'w')
-
-    @staticmethod
-    def dir_exists(dir_path):
-        return os.path.isdir(dir_path)
-
-    @staticmethod
-    def mkdir_p(dir_path):
-        try:
-            Logging.log("INFO", "Creating directory " + str(dir_path))
-            os.makedirs(dir_path)
-        except OSError as e:
-            if e.errno == errno.EEXIST and FileOpts.dir_exists(dir_path):
-                pass
-            else:
-                Logging.log("ERROR", "mkdir error: " + str(e))
-                raise
-
 
 class AccessList(object):
 
@@ -541,6 +550,7 @@ class Server(MotionDetection):
             self.sock = socket.socket()
             self.sock.bind(('0.0.0.0', self.server_port))
         except Exception as eSock:
+            #if 'Address already in use' in eSock and PS.aux('motiondetection') is not None:
             if 'Address already in use' in eSock:
                 Logging.log("ERROR",
                     "(Server.__init__) - eSock error e => "+str(eSock))
@@ -622,21 +632,57 @@ class Server(MotionDetection):
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: "
                     + str(eAccept))
 
+class BurstMode(object):
+
+    @staticmethod
+    def args_are_integers(args):
+        try:
+            all([int(arg) for arg in args])
+        except ValueError:
+            print("Arguments must be of type 'int'")
+            sys.exit(1)
+        return args
+
+    @staticmethod
+    def format_opts(opts):
+        """ opts[0] = number of photos to take
+            opts[1] = pause(seconds) in between taking photos """
+        if len(opts) == 0:
+            return [1,0]
+        else:
+            if not re.search(',', str(opts), re.M) is None:
+                o = re.search('(\w+),(\w+)', str([opt for opt in opts]), re.M)
+                if o is None:
+                    return BurstMode.args_are_integers(opts[:2])
+                return BurstMode.args_are_integers([o.group(n) for n in range(1,3)])
+            return opts
+        return opts
+
 if __name__ == '__main__':
 
     parser = OptionParser()
     parser.add_option('-i', '--ip',
         dest='ip', default='0.0.0.0',
         help='This is the IP address of the server.')
+    parser.add_option('-v', '--verbose',
+        dest='verbose', action='store_true', default=False,
+        help="Turns on verbose logging. This is turned off by default.")
     parser.add_option('-E', '--email-port',
         dest='email_port', type='int', default=587,
         help='E-mail port defaults to port 587')
     parser.add_option('-l', '--log-file',
         dest='logfile', default='/var/log/motiondetection.log',
         help='Log file defaults to /var/log/motiondetection.log.')
+    parser.add_option('-d', '--camera-delay-time',
+        dest='camera_delay_time', type='float', default='0.0',
+        help='The amount of time in seconds before taking a picture.')
     parser.add_option('-D', '--disable-email',
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
+    parser.add_option('-P', '--standby-mode',
+        dest='standby_mode', action='store_true', default=False,
+        help='This option allows you to disable the system if your phone '
+            + 'is connected to Wi-Fi.')
     parser.add_option('-c', '--camera-location',
         dest='cam_location', type='int', default=0,
         help='Camera index number that defaults to 0. This is the '
@@ -645,15 +691,15 @@ if __name__ == '__main__':
         dest='fps', type='int', default='30',
         help='This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s.')
+    parser.add_option('-b', '--burst-mode',
+        dest='burst_mode_opts', default=[], action='append',
+        help='This allows the motiondetection framework to take '
+            + 'multiple pictures instead of one once it detects motion.')
     parser.add_option('-w', '--white-list',
         dest='accesslist', default='/home/pi/.motiondetection/accesslist',
         help='This ensures that the MotionDetection system does not run '
             + 'if the mac is in the accesslist. This defaults to '
             + '/home/pi/.motiondetection/accesslist.')
-    parser.add_option('-P', '--passive',
-        dest='passive', action='store_true', default=False,
-        help='This option allows you to circumvent the motiondetection system. '
-            + 'This option must be used in conjunction with -r/--router-password.')
     parser.add_option('-e', '--email',
         dest='email',
         help='This argument is required unless you pass the '
@@ -707,8 +753,8 @@ if __name__ == '__main__':
             + 'streaming server and the motion detection system.')
     (options, args) = parser.parse_args()
 
-    Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.")
-    if options.passive:
+    Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.",options.verbose)
+    if options.standby_mode:
         netgear = Netgear(password=options.router_password)
     else:
         netgear = None
@@ -716,16 +762,19 @@ if __name__ == '__main__':
     if not FileOpts.file_exists('/var/log/motiondetection.log'):
         FileOpts.create_file('/var/log/motiondetection.log')
 
-    if not FileOpts.dir_exists('/home/pi/.motiondetection'):
-        FileOpts.mkdir_p('/home/pi/.motiondetection')
+    burst_opts = [opt for opt in options.burst_mode_opts]
+    options.burst_mode_opts = BurstMode.format_opts(burst_opts)
 
     options_dict = {
+        'standby_mode': options.standby_mode,
+        'camera_delay_time': options.camera_delay_time,
         'logfile': options.logfile, 'fps': options.fps,
         'netgear': netgear, 'disable_email': options.disable_email,
         'server_port': options.server_port, 'email': options.email,
         'delta_thresh_max': options.delta_thresh_max, 'ip': options.ip, 
         'password': options.password, 'cam_location': options.cam_location,
         'email_port': options.email_port, 'camview_port': options.camview_port,
+        'verbose': options.verbose, 'burst_mode_opts': options.burst_mode_opts,
         'accesslist': options.accesslist, 'delta_thresh_min': options.delta_thresh_min,
         'router_password': options.router_password, 'motion_thresh_min': options.motion_thresh_min,
     }
