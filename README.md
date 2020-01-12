@@ -27,7 +27,9 @@ An RPI4 B image can be found [COMING SOON]().
 
 **Password:** `ping*omit`
 
-#### <**Remote Access**>
+---
+
+### [Remote Access]
 
 **IP Address:** `192.168.1.235`
 
