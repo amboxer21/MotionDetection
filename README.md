@@ -10,13 +10,13 @@ An RPI3 B+ image can be found [HERE](https://drive.google.com/open?id=11fAc2o3Dc
 An RPI4 B image can be found [COMING SOON]().
 
 ### [Login Credentials]
-> **Raspberry Pi**
+#### <**Raspberry Pi**>
 
 **Username:** `pi`
 
 **Password:** `raspberry`
 
-> **Wi-Fi**
+#### <**Wi-Fi**>
 
 **Username:** `Guest`
 
