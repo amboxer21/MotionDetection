@@ -1,34 +1,15 @@
 # MotionDetection(In need of a new RPI3 B+)
 
-**Help needed!** I am currently in need of a new RPI(I have a 3B+ but could move the system to an RPI4 if that's what I was given) because the board that I currently have is now broken. I am in the middle of working on a UI to help the user configure the system. Help getting a new board would be much appreciated! You can donate to the paypal link that I have included below, send me a board, or any other way you might be able to help me achieve this goal. 
-
+**Notice:** I am currently in need of a new RPI3 B+ and until I get one, everything has been moved to an RPI4 B. I will leave the RPI3 B+ image link up and available. 
 >
-**Description:**  This system is called MotionDetection and it monitors motion from a USB webcam and Raspberry Pi 3 using the OpenCV API. Once motion is detected by the system, it takes a picture of what set the motion detection software off and E-mails that picture to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! Donate [here](https://paypal.me/motiondetection) if you'd like. You can contact me via E-mail if you have any questions at amboxer21@gmail.com.
+**Description:**  This system is called MotionDetection and it monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set the motion detection software off and E-mails that picture to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! Donate [here](https://paypal.me/motiondetection) if you'd like. You can contact me via E-mail if you have any questions at amboxer21@gmail.com.
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 
-An image of my RPI3 can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
-
-**DISCLAIMER:** Building the system can be very difficult and extremely complex. Some have tried but so far all have failed. I am willing to provide an image of my RPI3 on an SD card or you can DD the image from the link above. E-mail Anthony Guevara at amboxer21@gmail.com with any questions and I will be more than glad to help out.
+An RPI3 B+ image can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
+An RPI4 B image can be found [COMING SOON](). 
 
 ### [Build Options]
-
-#### **CMAKE BUILD OPTIONS FOR OpenCV:** 
-
-```python
-sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 .. && sudo make -j3
-```
-
-#### **CMAKE BUILD OPTIONS for OpenCV on my Gentoo box**
-```python
-sudo cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4.3 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 .. && sudo make -j3
-```
-
-#### **FFMpeg configure options**
-
-```python
-sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
-```
 
 > **NOTE** ^^ The above build depends on OpenCV being built with the build3.4(NOT MASTER) branch of the opencv_contrib repo before OpenCV is built!! Download links can be found further down.
 
@@ -40,7 +21,7 @@ sudo ./configure --enable-libv4l2 --enable-opengl --enable-libmp3lame
 pi@raspberrypi:~/Documents/Python/MotionDetection $ readarray -t a < <(lsb_release -irs); echo "${a[@]}"
 ```
 
->Raspbian 8.0
+>Raspbian 10
 
 #### **GCC VERSION**
 
@@ -48,7 +29,7 @@ pi@raspberrypi:~/Documents/Python/MotionDetection $ readarray -t a < <(lsb_relea
 pi@raspberrypi:~/Documents/Python/MotionDetection $ dpkg -s gcc | grep ^Version
 ```
 
->Version: 4:4.9.2-2
+>Version: 4:8.3.0-1+rpi2
 
 #### **CMAKE VERSION**
 
@@ -56,22 +37,14 @@ pi@raspberrypi:~/Documents/Python/MotionDetection $ dpkg -s gcc | grep ^Version
 pi@raspberrypi:~/Documents/Python/MotionDetection $ cmake --version
 ```
 
->cmake version 3.5.1
-
-#### **OpenCV System VERSION**
-
-```python
-aguevara@anthony ~ $ opencv_version 
-```
-
->2.4.13.6
+>cmake version 3.13.4
 
 #### **OpenCV Python VERSION**
 
 ```javascript
 pi@raspberrypi:~ $ python -c 'import cv2; print(str(cv2.__version__))'
 ```
->3.1.0
+>4.1.1
 
 #### **FFMPEG VERSION**
 
@@ -80,55 +53,30 @@ pi@raspberrypi:~/Documents/Python/MotionDetection $ ffmpeg -version
 ```
 
 ```python
-ffmpeg version 3.4.5 Copyright (c) 2000-2018 the FFmpeg developers
-built with gcc 4.9.2 (Raspbian 4.9.2-10+deb8u1)
-configuration: --enable-libmp3lame --enable-libv4l2 --enable-opengl
-libavutil      55. 78.100 / 55. 78.100
-libavcodec     57.107.100 / 57.107.100
-libavformat    57. 83.100 / 57. 83.100
-libavdevice    57. 10.100 / 57. 10.100
-libavfilter     6.107.100 /  6.107.100
-libswscale      4.  8.100 /  4.  8.100
-libswresample   2.  9.100 /  2.  9.100
+ffmpeg version 4.1.4-1+rpt6~deb10u1 Copyright (c) 2000-2019 the FFmpeg developers
+built with gcc 8 (Raspbian 8.3.0-6+rpi1)
+configuration: --prefix=/usr --extra-version='1+rpt6~deb10u1' --toolchain=hardened --incdir=/usr/include/arm-linux-gnueabihf --enable-gpl --disable-stripping --enable-avresample --disable-filter=resample --enable-avisynth --enable-gnutls --enable-ladspa --enable-libaom --enable-libass --enable-libbluray --enable-libbs2b --enable-libcaca --enable-libcdio --enable-libcodec2 --enable-libflite --enable-libfontconfig --enable-libfreetype --enable-libfribidi --enable-libgme --enable-libgsm --enable-libjack --enable-libmp3lame --enable-libmysofa --enable-libopenjpeg --enable-libopenmpt --enable-libopus --enable-libpulse --enable-librsvg --enable-librubberband --enable-libshine --enable-libsnappy --enable-libsoxr --enable-libspeex --enable-libssh --enable-libtheora --enable-libtwolame --enable-libvidstab --enable-libvorbis --enable-libvpx --enable-libwavpack --enable-libwebp --enable-libx265 --enable-libxml2 --enable-libxvid --enable-libzmq --enable-libzvbi --enable-lv2 --enable-omx --enable-openal --enable-opengl --enable-sdl2 --enable-omx-rpi --enable-mmal --enable-neon --disable-vaapi --disable-vdpau --enable-rpi --enable-libdc1394 --enable-libdrm --enable-libiec61883 --enable-chromaprint --enable-frei0r --enable-libx264 --enable-shared --libdir=/usr/lib/arm-linux-gnueabihf --cpu=arm1176jzf-s --arch=arm
+libavutil      56. 22.100 / 56. 22.100
+libavcodec     58. 35.100 / 58. 35.100
+libavformat    58. 20.100 / 58. 20.100
+libavdevice    58.  5.100 / 58.  5.100
+libavfilter     7. 40.101 /  7. 40.101
+libavresample   4.  0.  0 /  4.  0.  0
+libswscale      5.  3.100 /  5.  3.100
+libswresample   3.  3.100 /  3.  3.100
+libpostproc    55.  3.100 / 55.  3.100
+
 ```
 
-#### ** BUILT WITH:**
-
->ffmpeg-3.4.5
-
->cmake version 3.5.1
-
->opencv-2.4.13.6
-
->opencv-3.1.0
-
->opencv_contrib-3.4
-
-### [Download Links]
-
-[FFMPEG 3.4.5](https://www.ffmpeg.org/releases/ffmpeg-3.4.5.tar.gz)
-
-[CMake 3.5.1](https://github.com/Kitware/CMake/releases/download/v3.5.1/cmake-3.5.1.tar.gz)
-
-[OpenCV 2.4.13.6](https://github.com/opencv/opencv/archive/2.4.13.6.zip)
-
-[OpenCV 3.1.0](https://github.com/opencv/opencv/archive/3.1.0.zip)
-
-[OpenCV open_contrib 3.4](https://github.com/opencv/opencv_contrib/tree/3.4)
 
 ### [DEPS]
 
 **Debian:**
-
+> Needs to be fixed to make more accurate!
 ```python
 sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
 ```
 
-**RHEL:**
-
-```python
-...
-```
 
 ### [DEMO]
 
