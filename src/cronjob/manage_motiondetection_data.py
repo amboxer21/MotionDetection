@@ -14,8 +14,8 @@ import logging.handlers
 
 from optparse import OptionParser
 
-from email.MIMEImage import MIMEImage
-from email.MIMEMultipart import MIMEMultipart
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 from email.mime.application import MIMEApplication
 
 class Logging(object):
@@ -76,7 +76,7 @@ class Mail(object):
             message['Body'] = body
             message['Subject'] = subject
             if file_name is not None:
-                message.attach(MIMEApplication(file(file_name,'rb').read()))
+                message.attach(MIMEApplication(open(file_name,'rb').read()))
             mail = smtplib.SMTP('smtp.gmail.com',port)
             mail.starttls()
             mail.login(sender,password)

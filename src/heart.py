@@ -14,8 +14,8 @@ import logging.handlers
 
 from optparse import OptionParser
 
-from email.MIMEImage import MIMEImage
-from email.MIMEMultipart import MIMEMultipart
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 
 class Logging(object):
 
