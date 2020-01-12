@@ -9,10 +9,6 @@ A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 An RPI3 B+ image can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
 An RPI4 B image can be found [COMING SOON](). 
 
-### [Build Options]
-
-> **NOTE** ^^ The above build depends on OpenCV being built with the build3.4(NOT MASTER) branch of the opencv_contrib repo before OpenCV is built!! Download links can be found further down.
-
 ### [System Component Versions]
 
 #### **SYSTEM OS VERSION**
