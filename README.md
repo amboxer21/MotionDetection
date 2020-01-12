@@ -9,6 +9,8 @@ A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 An RPI3 B+ image can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
 An RPI4 B image can be found [COMING SOON]().
 
+---
+
 ### [Login Credentials]
 #### <**Raspberry Pi**>
 
@@ -22,6 +24,7 @@ An RPI4 B image can be found [COMING SOON]().
 
 **Password:** `ping*omit`
 
+---
 
 ### [System Component Versions]
 
@@ -78,6 +81,7 @@ libpostproc    55.  3.100 / 55.  3.100
 
 ```
 
+---
 
 ### [DEPS]
 
@@ -87,10 +91,13 @@ libpostproc    55.  3.100 / 55.  3.100
 sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
 ```
 
+---
 
 ### [DEMO]
 
 Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
+
+---
 
 ### [SCREEN SHOTS]
 
