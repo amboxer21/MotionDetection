@@ -21,7 +21,7 @@ An RPI4 B image can be found [COMING SOON]().
 
 **Password:** `raspberry`
 
-#### <**Wi-Fi**>
+#### <**Wi-Fi**> (NOT yet working)
 
 **Username:** `Guest`
 
@@ -29,7 +29,7 @@ An RPI4 B image can be found [COMING SOON]().
 
 ---
 
-### [Remote Access]
+### [Remote Access] (WIRED)
 
 **IP Address:** `192.168.1.235`
 
