@@ -1,4 +1,4 @@
-# MotionDetection for Python3
+# MotionDetection for Python3 on the Raspberry Pi 4 B
 
 **Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B.
 
