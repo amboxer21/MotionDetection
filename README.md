@@ -1,13 +1,41 @@
-# MotionDetection
+# MotionDetection for Python3 on the Raspberry Pi 4 B
 
-**Notice:** I am currently in need of a new RPI3 B+ and until I get one, everything has been moved to an RPI4 B. I will leave the RPI3 B+ image link up and available. `This software is written in Python3.`
->
+**Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B.
+
+**Notice:** I am currently in need of a new RPI3 B+ and until I get one, everything has been moved to an RPI4 B. I will leave the RPI3 B+ image link up and available. Though the image for the RPI3 needs a bit of tweaking on the command line once it is installed. Things like the static route in place, the entry in wpa_suuplicant.conf to connect to an AP, etc. - small tweaks. On the other hand, the RPI4 image is complete and will just boot up if you use a wired connection.
+
 **Description:**  This system is called MotionDetection and it monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set the motion detection software off and E-mails that picture to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! Donate [here](https://paypal.me/motiondetection) if you'd like. You can contact me via E-mail if you have any questions at amboxer21@gmail.com.
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 
-An RPI3 B+ image can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
-An RPI4 B image can be found [COMING SOON](). 
+A `Raspberry Pi 3 B+` **image** can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
+
+A `Raspberry Pi 4 B` **image** can be found [COMING SOON]().
+
+---
+
+### [Login Credentials]
+#### <**Raspberry Pi**>
+
+**Username:** `pi`
+
+**Password:** `raspberry`
+
+#### <**Wi-Fi**> (NOT yet working)
+
+**Username:** `Guest`
+
+**Password:** `ping*omit`
+
+---
+
+### [Remote Access]
+
+**IP Address:** `192.168.1.235`
+
+**Port Number:** `1194`
+
+---
 
 ### [System Component Versions]
 
@@ -64,6 +92,7 @@ libpostproc    55.  3.100 / 55.  3.100
 
 ```
 
+---
 
 ### [DEPS]
 
@@ -73,10 +102,13 @@ libpostproc    55.  3.100 / 55.  3.100
 sudo apt-get install build-essential pkg-config libjpeg-dev libtiff5-dev libjasper-dev libpng12-dev libv4l-dev libxvidcore-dev libx264-dev libgtk2.0-dev libatlas-base-dev gfortran python2.7-dev python3-dev 
 ```
 
+---
 
 ### [DEMO]
 
 Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDyZsqIcBnk) demonstrating the program. Which can also be found at the top of this page.
+
+---
 
 ### [SCREEN SHOTS]
 
