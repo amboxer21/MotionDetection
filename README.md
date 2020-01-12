@@ -10,7 +10,7 @@ A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 
 A `Raspberry Pi 3 B+` **image** can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
 
-A `Raspberry Pi 4 B` **image** can be found [HERE](https://drive.google.com/file/d/1rbN_TKwHdn4pcAUOPAK1j6j02ByqI8iS).
+A `Raspberry Pi 4 B` **image** can be found [COMING SOON]().
 
 ---
 
