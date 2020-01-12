@@ -10,7 +10,6 @@ import email
 import socket
 import smtplib
 import logging
-import StringIO
 import threading
 import subprocess
 import multiprocessing
@@ -19,14 +18,15 @@ import logging.handlers
 import numpy as np
 
 from PIL import Image
+from io import StringIO
 from pynetgear import Netgear
 from optparse import OptionParser
 
-from email.MIMEImage import MIMEImage
-from email.MIMEMultipart import MIMEMultipart
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 
-from SocketServer import ThreadingMixIn
-from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from socketserver import ThreadingMixIn
+from http.server import BaseHTTPRequestHandler,HTTPServer
 
 import requests
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -97,7 +97,7 @@ class PS(object):
         _aux_ = os.system("/bin/ps aux | /usr/bin/awk '/^"
             +str(user)+".*"+str(process)
             +"/{if($11 !~ /awk|ps/) print}'")
-        print _aux_
+        print(str(_aux_))
         return _aux_
 
 class Time(object):
@@ -116,7 +116,7 @@ class Mail(object):
                 message = MIMEMultipart()
                 message['Body'] = body
                 message['Subject'] = subject
-                message.attach(MIMEImage(file("/home/pi/.motiondetection/capture"
+                message.attach(MIMEImage(open("/home/pi/.motiondetection/capture"
                     + str(MotionDetection.img_num())
                     + ".png","rb").read()))
                 mail = smtplib.SMTP('smtp.gmail.com',port)
@@ -147,7 +147,7 @@ class VideoFeed(type):
     def __new__(meta,name,bases,dct):
         if not hasattr(meta,'lock'):
             meta.lock = multiprocessing.Lock()
-        return super(VideoFeed, meta).__new__(meta, name, bases, dct)
+        return super().__new__(meta, name, bases, dct)
 
     def __init__(cls,name,bases,dct):
         if not hasattr(cls,'lock'):
@@ -187,12 +187,10 @@ class VideoFeed(type):
             cls.timeout = 0
         super(VideoFeed,cls).__init__(name,bases,dct)
 
-class MotionDetection(object):
-
-    __metaclass__ = VideoFeed
+class MotionDetection(metaclass=VideoFeed):
 
     def __init__(self,options_dict={}):
-        super(MotionDetection,self).__init__()
+        super().__init__()
 
         self.tracker           = 0
         self.count             = 60
@@ -339,11 +337,9 @@ class MotionDetection(object):
             current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
             current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
 
-class CamHandler(BaseHTTPRequestHandler,object):
+class CamHandler(BaseHTTPRequestHandler,metaclass=VideoFeed):
 
     __record__    = False
-
-    __metaclass__ = VideoFeed
 
     def do_GET(self):
         try:
@@ -409,12 +405,10 @@ class ThreadedHTTPServer(ThreadingMixIn,HTTPServer):
         self.video_capture = video_capture
         HTTPServer.allow_reuse_address = True
 
-class Stream(MotionDetection):
-
-    __metaclass__ = VideoFeed
+class Stream(MotionDetection,metaclass=VideoFeed):
 
     def __init__(self):
-        super(Stream, self).__init__(options_dict)
+        super().__init__(options_dict)
         self.fps          = options_dict['fps']
         self.verbose      = options_dict['verbose']
         self.camview_port = options_dict['camview_port']
@@ -463,28 +457,49 @@ class Stream(MotionDetection):
             queue.close()
 
 class FileOpts(object):
-  
+
+    def __init__(self,logfile):
+
+        if not self.dir_exists(self.root_directory()):
+            self.mkdir_p(self.root_directory())
+
+        if not FileOpts.file_exists(logfile):
+            FileOpts.create_file(logfile)
+
+    def root_directory(self):
+        return "/home/pi/.motiondetection"
+
     @staticmethod
     def file_exists(file_name):
         return os.path.isfile(file_name)
 
     @staticmethod
     def create_file(file_name):
-        if FileOpts.file_exists(file_name):
-            Logging.log("INFO",
-                "(FileOpts.compress_file) - File "
+        if self.file_exists(file_name):
+            Logging.log("INFO", "(FileOpts.compress_file) - File "
                 + str(file_name)
                 + " exists.")
             return
-        Logging.log("INFO",
-            "(FileOpts.compress_file) - Creating file "
+        Logging.log("INFO", "(FileOpts.compress_file) - Creating file "
             + str(file_name)
             + ".")
         open(file_name, 'w')
 
-class AccessList(object):
+    def dir_exists(self,dir_path):
+        return os.path.isdir(dir_path)
 
-    __metaclass__ = VideoFeed 
+    def mkdir_p(self,dir_path):
+        try:
+            Logging.log("INFO", "Creating directory " + str(dir_path))
+            os.makedirs(dir_path)
+        except OSError as e:
+            if e.errno == errno.EEXIST and self.dir_exists(dir_path):
+                pass
+            else:
+                Logging.log("ERROR", "mkdir error: " + str(e))
+                raise
+            
+class AccessList(metaclass=VideoFeed):
 
     @staticmethod
     def set_default_values(semaphore,listed=False,locked=False):
@@ -522,12 +537,10 @@ class AccessList(object):
             AccessList.set_default_values(semaphore,False,False)
             pass
 
-class Server(MotionDetection):
-
-    __metaclass__ = VideoFeed
+class Server(MotionDetection,metaclass=VideoFeed):
 
     def __init__(self,queue):
-        super(Server, self).__init__(options_dict)
+        super().__init__(options_dict)
 
         self.queue = queue
         self.camview_port = options_dict['camview_port']
@@ -759,8 +772,7 @@ if __name__ == '__main__':
     else:
         netgear = None
 
-    if not FileOpts.file_exists('/var/log/motiondetection.log'):
-        FileOpts.create_file('/var/log/motiondetection.log')
+    fileOpts = FileOpts(options.logfile)
 
     burst_opts = [opt for opt in options.burst_mode_opts]
     options.burst_mode_opts = BurstMode.format_opts(burst_opts)
