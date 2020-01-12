@@ -29,7 +29,7 @@ An RPI4 B image can be found [COMING SOON]().
 
 ---
 
-### [Remote Access] (WIRED)
+### [Remote Access]
 
 **IP Address:** `192.168.1.235`
 
