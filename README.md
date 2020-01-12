@@ -7,7 +7,21 @@
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 
 An RPI3 B+ image can be found [HERE](https://drive.google.com/open?id=11fAc2o3DcJfO78mSmx6JLptXjQdwnBMb).
-An RPI4 B image can be found [COMING SOON](). 
+An RPI4 B image can be found [COMING SOON]().
+
+### [Login Credentials]
+> **Raspberry Pi**
+
+**Username:** `pi`
+
+**Password:** `raspberry`
+
+> **Wi-Fi**
+
+**Username:** `Guest`
+
+**Password:** `ping*omit`
+
 
 ### [System Component Versions]
 
