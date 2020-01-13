@@ -30,8 +30,9 @@ A `Raspberry Pi 4 B`  **image** can be found [COMING SOON]().
 ---
 
 ### [Remote Access]
+> Depending on the router that you are using, the IP address range will most likely either be **192.168.1.xx** or **10.0.0.xx**.
 
-**IP Address:** `192.168.1.235`
+**IP Address:** `192.168.1.235` or `10.0.0.235`
 
 **Port Number:** `1194`
 
