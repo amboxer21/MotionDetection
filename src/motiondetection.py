@@ -299,6 +299,7 @@ class MotionDetection(metaclass=VideoFeed):
 
             time.sleep(0.1)
 
+            # Meta class is needed for setting up the variables for the camera, variables for taking pictures, etc.
             frame_delta = cv2.absdiff(previous_frame, current_frame)
             #(ret, frame_delta) = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY) # Original values
             (ret, frame_delta) = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)
@@ -320,15 +321,15 @@ class MotionDetection(metaclass=VideoFeed):
                         'Motion Detected','MotionDecetor.py detected movement!')'''
                     # Access list feature
                     if not AccessList.mac_addr_listed:
-                        time.sleep(float(self.camera_delay_time))
-                        MotionDetection.take_picture(colored_frame)
-                        MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
-                        #for placeholder in range(0,int(self.burst_mode_opts[0])):
-                        #    self.take_picture(colored_frame)
-                        #    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        #        'Motion Detected','MotionDecetor.py detected movement!')
-                        #    time.sleep(int(self.burst_mode_opts[1]))
+                        for placeholder in range(0,int(self.burst_mode_opts[0])):
+                            MotionDetection.take_picture(colored_frame)
+                            MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                                'Motion Detected','MotionDecetor.py detected movement!')
+                            # A check needs to be performed here to make sure both options are not used simultaneously
+                            if '0.0' in str(self.camera_delay_time):
+                                time.sleep(int(self.burst_mode_opts[1]))
+                            else:
+                                time.sleep(float(self.camera_delay_time))
             elif delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -706,10 +707,6 @@ if __name__ == '__main__':
         dest='fps', type='int', default='30',
         help='This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s.')
-    parser.add_option('-b', '--burst-mode',
-        dest='burst_mode_opts', default=[], action='append',
-        help='This allows the motiondetection framework to take '
-            + 'multiple pictures instead of one once it detects motion.')
     parser.add_option('-w', '--white-list',
         dest='accesslist', default='/home/pi/.motiondetection/accesslist',
         help='This ensures that the MotionDetection system does not run '
@@ -751,6 +748,13 @@ if __name__ == '__main__':
             + 'programs image capturingi/motion routines stops working. '
             + 'If movement above this level is detected then this program '
             + ' will not perform any tasks and sit idle. The default value is set at 10000.')
+    parser.add_option('-b', '--burst-mode',
+        dest='burst_mode_opts', default=[1,0], action='append',
+        help='This allows the motiondetection framework to take '
+            + 'multiple pictures instead of a single picture once it '
+            + 'detects motion. Example usage for burst mode would look '
+            + 'like: --burst-mode=3,1 . 3 being the number of photos to take '
+            + 'and 1 being the seconds to sleep in between each photo taken.')
     parser.add_option('-m', '--motion-threshold-min',
         dest='motion_thresh_min', type='int', default=500,
         help='Sets the minimum movement threshold to start the framework '
