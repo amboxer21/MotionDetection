@@ -30,11 +30,13 @@ A `Raspberry Pi 4 B`  **image** can be found [COMING SOON]().
 ---
 
 ### [Remote Access]
-> Depending on the router that you are using, the IP address range will most likely either be **192.168.1.xx** or **10.0.0.xx**.
+> The IP address used for remote access depends on the type of router that you are using. I have included network routes for both 192 and 10 IP ranges. You should just be able to power the device up, plug in an ethernet cable and access the Pi remotely with either of these addresses.
 
 **IP Address:** `192.168.1.235` or `10.0.0.235`
 
 **Port Number:** `1194`
+
+**Command to remotely access Pi:** `ssh -p1194 pi@192.168.1.235` or `ssh -p1194 pi@10.0.0.235`
 
 ---
 
