@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import re
 import os
@@ -189,6 +189,8 @@ class VideoFeed(type):
 
 class MotionDetection(metaclass=VideoFeed):
 
+    __verbose__ = False
+
     def __init__(self,options_dict={}):
         super().__init__()
 
@@ -214,8 +216,8 @@ class MotionDetection(metaclass=VideoFeed):
         self.delta_thresh_max  = options_dict['delta_thresh_max']
         self.motion_thresh_min = options_dict['motion_thresh_min']
 
-        Mail.__disabled__   = self.disable_email
-
+        Mail.__disabled__ = self.disable_email
+        MotionDetection.__verbose__ = self.verbose
         self.accesslist_semaphore = threading.Semaphore(1)
 
         if not self.disable_email and (self.email is None or self.password is None):
@@ -229,7 +231,7 @@ class MotionDetection(metaclass=VideoFeed):
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
         if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
-            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.",self.verbose)
+            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.",MotionDetection.__verbose__)
             FileOpts.create_file('/home/pi/.motiondetection/capture1.png')
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
@@ -319,7 +321,7 @@ class MotionDetection(metaclass=VideoFeed):
                     # Access list feature
                     if not AccessList.mac_addr_listed:
                         time.sleep(float(self.camera_delay_time))
-                        self.take_picture(colored_frame)
+                        MotionDetection.take_picture(colored_frame)
                         MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                             'Motion Detected','MotionDecetor.py detected movement!')
                         #for placeholder in range(0,int(self.burst_mode_opts[0])):
@@ -475,7 +477,7 @@ class FileOpts(object):
 
     @staticmethod
     def create_file(file_name):
-        if self.file_exists(file_name):
+        if FileOpts.file_exists(file_name):
             Logging.log("INFO", "(FileOpts.compress_file) - File "
                 + str(file_name)
                 + " exists.")
