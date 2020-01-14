@@ -243,7 +243,6 @@ class MotionDetection(metaclass=VideoFeed):
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             img_list.append(int(num.group(2)))
-        print('Current img number = '+str(img_list))
         return max(img_list)
     
     @staticmethod
@@ -293,12 +292,12 @@ class MotionDetection(metaclass=VideoFeed):
         MotionDetection.camera_object = cv2.VideoCapture(self.cam_location)
         MotionDetection.camera_object.set(cv2.CAP_PROP_FPS, self.fps)
 
-        (ret, MotionDetection.previous_frame) = MotionDetection.camera_object.read()
+        MotionDetection.previous_frame = MotionDetection.camera_object.read()[1]
         MotionDetection.colored_frame  = MotionDetection.previous_frame 
         MotionDetection.previous_frame = cv2.cvtColor(MotionDetection.previous_frame, cv2.COLOR_RGB2GRAY)
         MotionDetection.previous_frame = cv2.GaussianBlur(MotionDetection.previous_frame, (21, 21), 0)
 
-        (ret, MotionDetection.current_frame) = MotionDetection.camera_object.read()
+        MotionDetection.current_frame = MotionDetection.camera_object.read()[1]
         MotionDetection.current_frame = cv2.cvtColor(MotionDetection.current_frame, cv2.COLOR_RGB2GRAY)
         MotionDetection.current_frame = cv2.GaussianBlur(MotionDetection.current_frame, (21, 21), 0)
 
@@ -337,13 +336,17 @@ class MotionDetection(metaclass=VideoFeed):
                     # Access list feature
                     if not AccessList.mac_addr_listed:
                         for placeholder in range(0,int(self.burst_mode_opts[0])):
+                            print('DEBUG => taking picture')
                             MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
+                            print('DEBUG => sending email')
                             MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                                 'Motion Detected','MotionDecetor.py detected movement!')
+                            print('DEBUG => sleeping')
                             if '0.0' in str(self.camera_delay_time):
                                 time.sleep(int(self.burst_mode_opts[1]))
                             else:
                                 time.sleep(float(self.camera_delay_time))
+                            print('DEBUG => end of loop')
             elif MotionDetection.delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
