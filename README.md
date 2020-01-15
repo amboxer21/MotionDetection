@@ -12,6 +12,8 @@ A `Raspberry Pi 3 B+` **image** can be found [HERE](https://drive.google.com/fil
 
 A `Raspberry Pi 4 B`  **image** can be found [HERE](https://drive.google.com/file/d/1lB12wnUZYOvb6XDHCMW_cYA4w3Ao1_Fc).
 
+[How to DD](https://gist.github.com/amboxer21/778d1ba7415f314e74ea01f4245deed5) one of the images above, onto your SD Card or create an image of your SD Card.
+
 ---
 
 ### [Login Credentials]
