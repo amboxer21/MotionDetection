@@ -336,7 +336,7 @@ class MotionDetection(metaclass=VideoFeed):
                     if not AccessList.mac_addr_listed:
                         for placeholder in range(0,self.burst_mode_opts):
                             time.sleep(1)
-                            MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
+                            MotionDetection.start_thread(MotionDetection.take_picture,MotionDetection.camera_object.read()[1])
                             MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                                 'Motion Detected','MotionDecetor.py detected movement!')
             elif MotionDetection.delta_count < self.motion_thresh_min:
