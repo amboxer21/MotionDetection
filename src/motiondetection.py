@@ -334,7 +334,7 @@ class MotionDetection(metaclass=VideoFeed):
                         + "!", self.verbose)
                     # Access list feature
                     if not AccessList.mac_addr_listed:
-                        for placeholder in range(0,int(self.burst_mode_opts[0])):
+                        for placeholder in range(0,self.burst_mode_opts):
                             time.sleep(1)
                             MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
                             MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
@@ -653,30 +653,6 @@ class Server(MotionDetection,metaclass=VideoFeed):
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: "
                     + str(eAccept))
 
-class BurstMode(object):
-
-    @staticmethod
-    def arg_is_an_integer(args):
-        try:
-            all([int(arg) for arg in args])
-        except ValueError:
-            Loggin.log("ERROR","Arguments must be of type 'int'")
-            sys.exit(1)
-        return args
-
-    @staticmethod
-    def format_opts(opts):
-        """ opts[0] = number of photos to take """
-        if len(opts) == 0:
-            return [1]
-        elif len(opts) > 1:
-            Logging.log("ERROR","Burst mode option only takes one argument.")
-            sys.exit(0)
-        else:
-            if BurstMode.arg_is_an_integer(opts[0]):
-                return opts
-        return opts
-
 if __name__ == '__main__':
 
     parser = OptionParser()
@@ -749,11 +725,11 @@ if __name__ == '__main__':
             + 'If movement above this level is detected then this program '
             + ' will not perform any tasks and sit idle. The default value is set at 10000.')
     parser.add_option('-b', '--burst-mode',
-        dest='burst_mode_opts', default=[], action='append',
+        dest='burst_mode_opts', type='int', default='1',
         help='This allows the motiondetection framework to take '
             + 'multiple pictures instead of a single picture once it '
             + 'detects motion. Example usage for burst mode would look '
-            + 'like: --burst-mode=3 . 3 being the number of photos to take '
+            + 'like: --burst-mode=10. 10 being the number of photos to take '
             + 'once motion has been detected.')
     parser.add_option('-m', '--motion-threshold-min',
         dest='motion_thresh_min', type='int', default=500,
@@ -779,9 +755,6 @@ if __name__ == '__main__':
         netgear = None
 
     fileOpts = FileOpts(options.logfile)
-
-    burst_opts = [opt for opt in options.burst_mode_opts]
-    options.burst_mode_opts = BurstMode.format_opts(burst_opts)
 
     options_dict = {
         'standby_mode': options.standby_mode,
