@@ -189,7 +189,14 @@ class VideoFeed(type):
 
 class MotionDetection(metaclass=VideoFeed):
 
-    __verbose__ = False
+    verbose = False
+
+    colored_frame  = None
+    camera_object  = None
+    current_frame  = None
+    previous_frame = None
+
+    delta_count = None
 
     def __init__(self,options_dict={}):
         super().__init__()
@@ -210,14 +217,13 @@ class MotionDetection(metaclass=VideoFeed):
         self.cam_location      = options_dict['cam_location']
         self.disable_email     = options_dict['disable_email']
         self.burst_mode_opts   = options_dict['burst_mode_opts']
-        self.camera_delay_time = options_dict['camera_delay_time']
 
         self.delta_thresh_min  = options_dict['delta_thresh_min']
         self.delta_thresh_max  = options_dict['delta_thresh_max']
         self.motion_thresh_min = options_dict['motion_thresh_min']
 
         Mail.__disabled__ = self.disable_email
-        MotionDetection.__verbose__ = self.verbose
+        MotionDetection.verbose = self.verbose
         self.accesslist_semaphore = threading.Semaphore(1)
 
         if not self.disable_email and (self.email is None or self.password is None):
@@ -231,7 +237,7 @@ class MotionDetection(metaclass=VideoFeed):
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
         if not FileOpts.file_exists('/home/pi/.motiondetection/capture1.png'):
-            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.",MotionDetection.__verbose__)
+            Logging.log("INFO", "(MotionDetection.img_num) - Creating capture1.png.",MotionDetection.verbose)
             FileOpts.create_file('/home/pi/.motiondetection/capture1.png')
         for file_name in glob.glob("*.png"):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
@@ -259,6 +265,22 @@ class MotionDetection(metaclass=VideoFeed):
                 "Threading exception eStartThread => "
                 + str(eStartThread))
 
+    @classmethod
+    def calculate_delta(cls):
+        frame_delta = cv2.absdiff(cls.previous_frame, cls.current_frame)
+        (ret, frame_delta) = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)
+        frame_delta = cv2.dilate(frame_delta,np.ones((5,5), np.uint8),iterations=1)
+        frame_delta = cv2.normalize(frame_delta, None, 0, 255, cv2.NORM_MINMAX)
+        cls.delta_count = cv2.countNonZero(frame_delta)
+
+    @classmethod
+    def update_current_frame(cls):
+        cls.previous_frame = cls.current_frame
+        (ret, cls.current_frame) = cls.camera_object.read()
+        cls.colored_frame = cls.current_frame
+        cls.current_frame = cv2.cvtColor(cls.current_frame, cv2.COLOR_RGB2GRAY)
+        cls.current_frame = cv2.GaussianBlur(cls.current_frame, (21, 21), 0)
+
     def capture(self,queue=None):
 
         MotionDetection.lock.acquire()
@@ -266,24 +288,24 @@ class MotionDetection(metaclass=VideoFeed):
         Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!",self.verbose)
         Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!", self.verbose)
     
-        self.camera_motion = cv2.VideoCapture(self.cam_location)
-        self.camera_motion.set(cv2.CAP_PROP_FPS, self.fps)
+        MotionDetection.camera_object = cv2.VideoCapture(self.cam_location)
+        MotionDetection.camera_object.set(cv2.CAP_PROP_FPS, self.fps)
 
-        (ret, previous_frame) = self.camera_motion.read()
-        colored_frame  = previous_frame 
-        previous_frame = cv2.cvtColor(previous_frame, cv2.COLOR_RGB2GRAY)
-        previous_frame = cv2.GaussianBlur(previous_frame, (21, 21), 0)
+        MotionDetection.previous_frame = MotionDetection.camera_object.read()[1]
+        MotionDetection.colored_frame  = MotionDetection.previous_frame 
+        MotionDetection.previous_frame = cv2.cvtColor(MotionDetection.previous_frame, cv2.COLOR_RGB2GRAY)
+        MotionDetection.previous_frame = cv2.GaussianBlur(MotionDetection.previous_frame, (21, 21), 0)
 
-        (ret, current_frame) = self.camera_motion.read()
-        current_frame = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
-        current_frame = cv2.GaussianBlur(current_frame, (21, 21), 0)
+        MotionDetection.current_frame = MotionDetection.camera_object.read()[1]
+        MotionDetection.current_frame = cv2.cvtColor(MotionDetection.current_frame, cv2.COLOR_RGB2GRAY)
+        MotionDetection.current_frame = cv2.GaussianBlur(MotionDetection.current_frame, (21, 21), 0)
 
         while(True):
 
             if not queue.empty() and queue.get() == 'start_monitor':
                 Logging.log("INFO",
                     "(MotionDetection.capture) - (Queue message) -> Killing camera.",self.verbose)
-                del(self.camera_motion)
+                del(MotionDetection.camera_object)
                 queue.close()
                 MotionDetection.lock.release()
                 break
@@ -299,45 +321,29 @@ class MotionDetection(metaclass=VideoFeed):
 
             time.sleep(0.1)
 
-            frame_delta = cv2.absdiff(previous_frame, current_frame)
-            #(ret, frame_delta) = cv2.threshold(frame_delta, 5, 100, cv2.THRESH_BINARY) # Original values
-            (ret, frame_delta) = cv2.threshold(frame_delta, 25, 255, cv2.THRESH_BINARY)
-            frame_delta = cv2.dilate(frame_delta,np.ones((5,5), np.uint8),iterations=1)
-            frame_delta = cv2.normalize(frame_delta, None, 0, 255, cv2.NORM_MINMAX)
-            delta_count = cv2.countNonZero(frame_delta)
+            MotionDetection.calculate_delta()
 
-            if delta_count > self.delta_thresh_min and delta_count < self.delta_thresh_max:
+            if MotionDetection.delta_count > self.delta_thresh_min and MotionDetection.delta_count < self.delta_thresh_max:
                 self.tracker += 1
                 if self.tracker >= 60 or self.count >= 60:
                     self.count   = 0
                     self.tracker = 0
                     Logging.log("INFO",
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
-                        + str(delta_count)
+                        + str(MotionDetection.delta_count)
                         + "!", self.verbose)
-                    '''self.take_picture(colored_frame)
-                    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        'Motion Detected','MotionDecetor.py detected movement!')'''
                     # Access list feature
                     if not AccessList.mac_addr_listed:
-                        time.sleep(float(self.camera_delay_time))
-                        MotionDetection.take_picture(colored_frame)
-                        MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                            'Motion Detected','MotionDecetor.py detected movement!')
-                        #for placeholder in range(0,int(self.burst_mode_opts[0])):
-                        #    self.take_picture(colored_frame)
-                        #    MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                        #        'Motion Detected','MotionDecetor.py detected movement!')
-                        #    time.sleep(int(self.burst_mode_opts[1]))
-            elif delta_count < self.motion_thresh_min:
+                        for placeholder in range(0,self.burst_mode_opts):
+                            time.sleep(1)
+                            MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
+                            MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                                'Motion Detected','MotionDecetor.py detected movement!')
+            elif MotionDetection.delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
 
-            previous_frame = current_frame
-            (ret, current_frame) = self.camera_motion.read()
-            colored_frame  = current_frame 
-            current_frame  = cv2.cvtColor(current_frame, cv2.COLOR_RGB2GRAY)
-            current_frame  = cv2.GaussianBlur(current_frame, (21, 21), 0)
+            MotionDetection.update_current_frame()
 
 class CamHandler(BaseHTTPRequestHandler,metaclass=VideoFeed):
 
@@ -647,32 +653,6 @@ class Server(MotionDetection,metaclass=VideoFeed):
                 Logging.log("ERROR", "(Server.server_main) - Socket accept error: "
                     + str(eAccept))
 
-class BurstMode(object):
-
-    @staticmethod
-    def args_are_integers(args):
-        try:
-            all([int(arg) for arg in args])
-        except ValueError:
-            print("Arguments must be of type 'int'")
-            sys.exit(1)
-        return args
-
-    @staticmethod
-    def format_opts(opts):
-        """ opts[0] = number of photos to take
-            opts[1] = pause(seconds) in between taking photos """
-        if len(opts) == 0:
-            return [1,0]
-        else:
-            if not re.search(',', str(opts), re.M) is None:
-                o = re.search('(\w+),(\w+)', str([opt for opt in opts]), re.M)
-                if o is None:
-                    return BurstMode.args_are_integers(opts[:2])
-                return BurstMode.args_are_integers([o.group(n) for n in range(1,3)])
-            return opts
-        return opts
-
 if __name__ == '__main__':
 
     parser = OptionParser()
@@ -688,9 +668,6 @@ if __name__ == '__main__':
     parser.add_option('-l', '--log-file',
         dest='logfile', default='/var/log/motiondetection.log',
         help='Log file defaults to /var/log/motiondetection.log.')
-    parser.add_option('-d', '--camera-delay-time',
-        dest='camera_delay_time', type='float', default='0.0',
-        help='The amount of time in seconds before taking a picture.')
     parser.add_option('-D', '--disable-email',
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
@@ -706,10 +683,6 @@ if __name__ == '__main__':
         dest='fps', type='int', default='30',
         help='This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s.')
-    parser.add_option('-b', '--burst-mode',
-        dest='burst_mode_opts', default=[], action='append',
-        help='This allows the motiondetection framework to take '
-            + 'multiple pictures instead of one once it detects motion.')
     parser.add_option('-w', '--white-list',
         dest='accesslist', default='/home/pi/.motiondetection/accesslist',
         help='This ensures that the MotionDetection system does not run '
@@ -751,6 +724,13 @@ if __name__ == '__main__':
             + 'programs image capturingi/motion routines stops working. '
             + 'If movement above this level is detected then this program '
             + ' will not perform any tasks and sit idle. The default value is set at 10000.')
+    parser.add_option('-b', '--burst-mode',
+        dest='burst_mode_opts', type='int', default='1',
+        help='This allows the motiondetection framework to take '
+            + 'multiple pictures instead of a single picture once it '
+            + 'detects motion. Example usage for burst mode would look '
+            + 'like: --burst-mode=10. 10 being the number of photos to take '
+            + 'once motion has been detected.')
     parser.add_option('-m', '--motion-threshold-min',
         dest='motion_thresh_min', type='int', default=500,
         help='Sets the minimum movement threshold to start the framework '
@@ -776,12 +756,8 @@ if __name__ == '__main__':
 
     fileOpts = FileOpts(options.logfile)
 
-    burst_opts = [opt for opt in options.burst_mode_opts]
-    options.burst_mode_opts = BurstMode.format_opts(burst_opts)
-
     options_dict = {
         'standby_mode': options.standby_mode,
-        'camera_delay_time': options.camera_delay_time,
         'logfile': options.logfile, 'fps': options.fps,
         'netgear': netgear, 'disable_email': options.disable_email,
         'server_port': options.server_port, 'email': options.email,
