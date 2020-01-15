@@ -217,7 +217,6 @@ class MotionDetection(metaclass=VideoFeed):
         self.cam_location      = options_dict['cam_location']
         self.disable_email     = options_dict['disable_email']
         self.burst_mode_opts   = options_dict['burst_mode_opts']
-        self.camera_delay_time = options_dict['camera_delay_time']
 
         self.delta_thresh_min  = options_dict['delta_thresh_min']
         self.delta_thresh_max  = options_dict['delta_thresh_max']
@@ -336,17 +335,10 @@ class MotionDetection(metaclass=VideoFeed):
                     # Access list feature
                     if not AccessList.mac_addr_listed:
                         for placeholder in range(0,int(self.burst_mode_opts[0])):
-                            print('DEBUG => taking picture')
+                            time.sleep(1)
                             MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
-                            print('DEBUG => sending email')
                             MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                                 'Motion Detected','MotionDecetor.py detected movement!')
-                            print('DEBUG => sleeping')
-                            if '0.0' in str(self.camera_delay_time):
-                                time.sleep(int(self.burst_mode_opts[1]))
-                            else:
-                                time.sleep(float(self.camera_delay_time))
-                            print('DEBUG => end of loop')
             elif MotionDetection.delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -664,27 +656,25 @@ class Server(MotionDetection,metaclass=VideoFeed):
 class BurstMode(object):
 
     @staticmethod
-    def args_are_integers(args):
+    def arg_is_an_integer(args):
         try:
             all([int(arg) for arg in args])
         except ValueError:
-            print("Arguments must be of type 'int'")
+            Loggin.log("ERROR","Arguments must be of type 'int'")
             sys.exit(1)
         return args
 
     @staticmethod
     def format_opts(opts):
-        """ opts[0] = number of photos to take
-            opts[1] = pause(seconds) in between taking photos """
+        """ opts[0] = number of photos to take """
         if len(opts) == 0:
-            return [1,0]
+            return [1]
+        elif len(opts) > 1:
+            Logging.log("ERROR","Burst mode option only takes one argument.")
+            sys.exit(0)
         else:
-            if not re.search(',', str(opts), re.M) is None:
-                o = re.search('(\w+),(\w+)', str([opt for opt in opts]), re.M)
-                if o is None:
-                    return BurstMode.args_are_integers(opts[:2])
-                return BurstMode.args_are_integers([o.group(n) for n in range(1,3)])
-            return opts
+            if BurstMode.arg_is_an_integer(opts[0]):
+                return opts
         return opts
 
 if __name__ == '__main__':
@@ -702,9 +692,6 @@ if __name__ == '__main__':
     parser.add_option('-l', '--log-file',
         dest='logfile', default='/var/log/motiondetection.log',
         help='Log file defaults to /var/log/motiondetection.log.')
-    parser.add_option('-d', '--camera-delay-time',
-        dest='camera_delay_time', type='float', default='0.0',
-        help='The amount of time in seconds before taking a picture.')
     parser.add_option('-D', '--disable-email',
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
@@ -762,12 +749,12 @@ if __name__ == '__main__':
             + 'If movement above this level is detected then this program '
             + ' will not perform any tasks and sit idle. The default value is set at 10000.')
     parser.add_option('-b', '--burst-mode',
-        dest='burst_mode_opts', default=[1,0], action='append',
+        dest='burst_mode_opts', default=[], action='append',
         help='This allows the motiondetection framework to take '
             + 'multiple pictures instead of a single picture once it '
             + 'detects motion. Example usage for burst mode would look '
-            + 'like: --burst-mode=3,1 . 3 being the number of photos to take '
-            + 'and 1 being the seconds to sleep in between each photo taken.')
+            + 'like: --burst-mode=3 . 3 being the number of photos to take '
+            + 'once motion has been detected.')
     parser.add_option('-m', '--motion-threshold-min',
         dest='motion_thresh_min', type='int', default=500,
         help='Sets the minimum movement threshold to start the framework '
@@ -798,7 +785,6 @@ if __name__ == '__main__':
 
     options_dict = {
         'standby_mode': options.standby_mode,
-        'camera_delay_time': options.camera_delay_time,
         'logfile': options.logfile, 'fps': options.fps,
         'netgear': netgear, 'disable_email': options.disable_email,
         'server_port': options.server_port, 'email': options.email,
@@ -809,10 +795,6 @@ if __name__ == '__main__':
         'accesslist': options.accesslist, 'delta_thresh_min': options.delta_thresh_min,
         'router_password': options.router_password, 'motion_thresh_min': options.motion_thresh_min,
     }
-
-    if not '0.0' in str(options.camera_delay_time) and not ('1' and '0') in [str(a) for a in options.burst_mode_opts]:
-        Logging.log("ERROR", "Burst mode arguments and camera delay time cannot be used together.",options.verbose)
-        sys.exit(0)
 
     motion_detection = MotionDetection(options_dict)
     Server(multiprocessing.Queue()).server_main()
