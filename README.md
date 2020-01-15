@@ -1,6 +1,6 @@
 # MotionDetection for Python3 on the Raspberry Pi 4 B
 
-**Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B. The E-mails are sent to sshmonitorapp@gmail.com by default. Please change this address!
+**Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B. The E-mails are sent to sshmonitorapp@gmail.com by default - please change this address! `I can make custom images using your E-mail, so that you can just plug the system in and the pictures are sent to you.` No tweaking necessary on your part. Shoot me an E-mail if this sounds like something that you'd be interested in doing. 
 
 **Notice:** I am currently in need of a new RPI3 B+ and until I get one, everything has been moved to an RPI4 B. I will leave the RPI3 B+ image link up and available. Though the image for the RPI3 needs a bit of tweaking on the command line once it is installed. Things like the static route in place, the entry in wpa_suuplicant.conf to connect to an AP, etc. - small tweaks. On the other hand, the RPI4 image is complete and will just boot up if you use a wired connection.
 
