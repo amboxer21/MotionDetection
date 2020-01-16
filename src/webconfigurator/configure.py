@@ -3,26 +3,32 @@ from flask import Flask, render_template
 
 app = Flask(__name__, template_folder="templates")
 
+@app.route('/reload')
+def reload():
+    return "Reloading the MotionDetection framework!"
+
 def extract_email(credentials):
     obj = str(credentials).split(",")
     if obj is not None:
         return obj[0]
-    return credentials
+    return str()
 
 def extract_password(credentials):
     obj = str(credentials).split(",")
     if obj is not None:
         return obj[1]
-    return credentials 
+    return str() 
 
 def validate_email(email):
-    addr = re.search('(\A[\w+\.\-]+)(@)(\w+)(\.)(\w+)\Z', str(email), re.M | re.I)
+    regex = '(\A[\w+\.\-]+)(@)(\w+)(\.)(\w+)\Z'
+    addr  = re.search(regex, str(email), re.M | re.I)
     if addr is not None:
         return True
     return False 
 
 def validate_password(password):
-    passwd = re.search('\A\w+\Z', str(password), re.M | re.I)
+    regex  = '\A\w+\Z'
+    passwd = re.search(regex, str(password), re.M | re.I)
     if passwd is not None:
         return True
     return False
@@ -36,4 +42,4 @@ def change_credentials(credentials):
     return render_template("invalid_credential_format.html")
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = True,host='0.0.0.0')
