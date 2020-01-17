@@ -1,19 +1,15 @@
 import re
 from flask import Flask, render_template
 
-app = Flask(__name__, template_folder="templates")
+config = Flask(__name__, template_folder="templates")
 
-@app.route('/reload')
-def reload():
-    return "Reloading the MotionDetection framework!"
-
-def extract_email(credentials):
+def email(credentials):
     obj = str(credentials).split(",")
     if obj is not None:
         return obj[0]
     return str()
 
-def extract_password(credentials):
+def password(credentials):
     obj = str(credentials).split(",")
     if obj is not None:
         return obj[1]
@@ -33,13 +29,17 @@ def validate_password(password):
         return True
     return False
 
-@app.route('/configure/<credentials>')
-def change_credentials(credentials):
-    email  = extract_email(credentials)
-    passwd = extract_password(credentials)
-    if validate_email(email) and validate_password(passwd):
-        return "Using %s as the system email address with password: %s." % email % passwd
+@config.route('/reload')
+def reload_framework():
+    return "Reloading the MotionDetection framework!"
+
+@config.route('/configure/<credentials>',methods=['POST'])
+def update_credentials(credentials):
+    addr   = email(credentials)
+    passwd = password(credentials)
+    if validate_email(addr) and validate_password(passwd):
+        return "Using %s as the system email address with password: %s." % (addr, passwd)
     return render_template("invalid_credential_format.html")
 
 if __name__ == '__main__':
-    app.run(debug = True,host='0.0.0.0')
+    config.run(debug=True, host='0.0.0.0')
