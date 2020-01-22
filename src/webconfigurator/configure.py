@@ -33,7 +33,7 @@ def validate_password(password):
 def reload_framework():
     return "Reloading the MotionDetection framework!"
 
-@config.route('/configure/<credentials>',methods=['POST'])
+@config.route('/configure/<credentials>')
 def update_credentials(credentials):
     addr   = email(credentials)
     passwd = password(credentials)
