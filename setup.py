@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from distutils.cmd import Command
 from setuptools import setup, find_packages
 from distutils.errors import DistutilsError, DistutilsExecError
