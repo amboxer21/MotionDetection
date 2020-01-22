@@ -1,3 +1,7 @@
 Android/CamView/bin/*
 Android/CamView/gen/*
 *.sw*
+.eggs
+MotionDetection.egg-info
+build
+dist
