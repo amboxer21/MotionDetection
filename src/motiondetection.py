@@ -85,6 +85,103 @@ class Logging(object):
             pass
         return
 
+# The config filename is passed to this class in the ImageCapture classes __init__ method.
+# The option is the default value set in optparser and is blank by default. See the 
+# optparser declaration at the bottom in the if __name__ == '__main__' check.
+class ConfigFile(object):
+
+    def __init__(self, file_name):
+        self.args_list = []
+        self.file_name = file_name
+        if file_name:
+            try:
+                self.config_file = open(file_name,'r').read().splitlines()
+                self.config_file_syntax_sanity_check()
+            except IOError:
+                Logging.log("ERROR","Config file does not exist.")
+                sys.exit(0)
+
+    def __getattr__(self, key):
+        pass
+
+    def __setattr__(self, key, val):
+        pass
+
+    # If a config file is 'NOT' passed via command line then this method will set the global
+    # base variables for the config_dict data structure using the optparsers default values.
+    # ---
+    # If a config file 'IS' passed via command line then this method will read in the options
+    # values and set the base options for the global config_dict data structure. If the config
+    # files options have empty values then those options are loaded into an array nested inside
+    # of the config_dict data structure. Which will later be used as a reference against the 
+    # config_data structure so it knows to use optparsers default values for these options.
+    def config_options(self):
+        # If config file is 'NOT' supplied use optparsers default values.
+        if not self.file_name:
+            for default_opt in config_dict[0].keys():
+                config_dict[0][default_opt][0] = config_dict[0][default_opt][1]
+                Logging.log("INFO", "Setting option("
+                    + default_opt + "): "
+                    + str(config_dict[0][default_opt][0]))
+            return
+        # If the config file exists and the syntax is correct we will have to convert the
+        # 'bool' values in the file which are being loaded in as strings to actual bool values.
+        # The same applies for integers otehrwise load the values in as is.
+        for line in self.config_file:
+            comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
+            if comm is not None:
+                if not comm.group(2):
+                    config_dict[1].append(comm.group(1))
+                elif re.search('true', comm.group(2), re.I) is not None:
+                    config_dict[0][comm.group(1)][0] = True
+                elif re.search('false', comm.group(2), re.I) is not None:
+                    config_dict[0][comm.group(1)][0] = False
+                elif re.search('([0-9]{1,6})', comm.group(2)) is not None:
+                    config_dict[0][comm.group(1)][0] = int(comm.group(2))
+                else:
+                    config_dict[0][comm.group(1)][0] = comm.group(2)
+        return config_dict
+
+    # If command line options 'ARE' passed via optparser/command line then this method
+    # will override the default values set with optparser as well as override the options
+    # in the config file that was passed.
+    def override_values(self):
+        for default_opt in config_dict[0].keys():
+            comm = re.search('-(\w{0,9}|)'
+                + config_dict[0][default_opt][2], str(sys.argv[1:]), re.M)
+            if comm is not None:
+                Logging.log("INFO", "Overriding "
+                    + str(default_opt)
+                    + " default value with command line switch value("
+                    + str(config_dict[0][default_opt][1]) + ")")
+                config_dict[0][default_opt][0] = config_dict[0][default_opt][1]
+
+    # If a config file is supplied then this method will use the default options
+    # in optparser if the option in the config file has no value. So if the password 
+    # option in the config file looks like this -> password= then it will be populated 
+    # by this method.
+    def populate_empty_options(self):
+        if config_dict[1] and self.config_file_supplied():
+            for opt in config_dict[1]:
+                config_dict[0][opt][0] = config_dict[0][opt][1]
+
+    def config_file_supplied(self):
+        if re.search(r'(\-C|\-\-config\-file)',str(sys.argv[1:]), re.M) is None:
+            return False
+        return True
+
+    def config_file_syntax_sanity_check(self):
+        for line in self.config_file:
+            comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
+            if comm is not None:
+                try:
+                    config_dict[0][comm.group(1)]
+                except KeyError:
+                    Logging.log("ERROR", "Config file option("
+                        + comm.group(1)
+                        + ") is not a recognized option!")
+                    sys.exit(0)
+
 class User(object):
     @staticmethod
     def name():
@@ -200,6 +297,11 @@ class MotionDetection(metaclass=VideoFeed):
 
     def __init__(self,options_dict={}):
         super().__init__()
+
+        configFile = ConfigFile(options.configfile)
+        configFile.config_options()
+        configFile.populate_empty_options()
+        configFile.override_values()
 
         self.tracker           = 0
         self.count             = 60
@@ -671,6 +773,9 @@ if __name__ == '__main__':
     parser.add_option('-D', '--disable-email',
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
+    parser.add_option("-g", "--config-file",
+        dest="configfile", default='',
+        help="Configuration file path.")
     parser.add_option('-P', '--standby-mode',
         dest='standby_mode', action='store_true', default=False,
         help='This option allows you to disable the system if your phone '
@@ -755,6 +860,54 @@ if __name__ == '__main__':
         netgear = None
 
     fileOpts = FileOpts(options.logfile)
+
+    # These strings are used to compare against the command line args passed.
+    # It could have been done with an action but default values were used instead.
+    # These strings are coupled with their respective counterpart in the config_dist
+    # data structure declared below.
+
+    ip = '(i|--ip)'
+    fps = '(f|--fps)'
+    email = '(e|--email)'
+    verbose = '(v|--verbose)'
+    password = '(p|--password)'
+    logfile = '(l|--log-file)'
+    email_port = '(E|--email-port)'
+    config_file = '(g|--config-file)'
+    burst_mode_opts = '(b|--burst-mode)'
+    accesslist = '(w|--white-list)'
+    server_port = '(S|--server-port)'
+    camview_port = '(C|--camview-port)'
+    standby_mode = '(P|--standby-mode)'
+    disable_email = '(D|--disable-email)'
+    cam_location = '(c|--camera-location)'
+    router_password = '(r|--router-password)'
+    delta_thresh_max = '(T|--delta-threshold-max)'
+    delta_thresh_min = '(t|--delta-threshold-min)'
+    motion_thresh_min = '(m|--motion-threshold-min)'
+
+    config_dict = [{
+        'ip': ['', options.ip, ip],
+        'fps': ['', options.fps, fps],
+        'netgear': ['', netgear, netgear],
+        'email': ['', options.email, email],
+        'verbose': ['', options.verbose, verbose],
+        'logfile': ['', options.logfile, logfile],
+        'password': ['', options.password, password],
+        'email_port': ['', options.email_port, email_port],
+        'accesslist': ['', options.accesslist, accesslist],
+        'configfile': ['', options.configfile, configfile],
+        'server_port': ['', options.server_port, server_port],
+        'standby_mode': ['', options.standby_mode, standby_mode],
+        'cam_location': ['', options.cam_location, cam_location],
+        'camview_port': ['', options.camview_port, camview_port],
+        'disable_email': ['', options.disable_email, disable_email],
+        'burst_mode_opts': ['', options.burst_mode_opts, burst_mode_opts],
+        'router_password': ['', options.router_password, router_password],
+        'delta_thresh_max': ['', options.delta_thresh_max, delta_thresh_max],
+        'delta_thresh_min': ['', options.delta_thresh_min, delta_thresh_min],
+        'motion_thresh_min': ['', options.motion_thresh_min, motion_thresh_min]
+    }, []]
 
     options_dict = {
         'standby_mode': options.standby_mode,
