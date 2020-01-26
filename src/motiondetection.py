@@ -298,11 +298,6 @@ class MotionDetection(metaclass=VideoFeed):
     def __init__(self,options_dict={}):
         super().__init__()
 
-        configFile = ConfigFile(options.configfile)
-        configFile.config_options()
-        configFile.populate_empty_options()
-        configFile.override_values()
-
         self.tracker           = 0
         self.count             = 60
 
@@ -314,6 +309,7 @@ class MotionDetection(metaclass=VideoFeed):
         self.password          = options_dict['password']
         self.email_port        = options_dict['email_port']
         self.accesslist        = options_dict['accesslist']
+        self.configfile        = options_dict['configfile']
         self.server_port       = options_dict['server_port']
         self.standby_mode      = options_dict['standby_mode']
         self.cam_location      = options_dict['cam_location']
@@ -323,6 +319,11 @@ class MotionDetection(metaclass=VideoFeed):
         self.delta_thresh_min  = options_dict['delta_thresh_min']
         self.delta_thresh_max  = options_dict['delta_thresh_max']
         self.motion_thresh_min = options_dict['motion_thresh_min']
+
+        configFile = ConfigFile(self.configfile)
+        configFile.config_options()
+        configFile.populate_empty_options()
+        configFile.override_values()
 
         Mail.__disabled__ = self.disable_email
         MotionDetection.verbose = self.verbose
