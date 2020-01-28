@@ -511,10 +511,6 @@ class Stream(MotionDetection,metaclass=VideoFeed):
 
     def __init__(self):
         super().__init__(config_dict)
-        self.fps          = config_dict['fps']
-        self.verbose      = config_dict['verbose']
-        self.camview_port = config_dict['camview_port']
-        self.cam_location = config_dict['cam_location']
 
     def stream_main(self,queue=None):
         Stream.lock.acquire()
@@ -607,7 +603,6 @@ class Server(MotionDetection,metaclass=VideoFeed):
         super().__init__(config_dict)
 
         self.queue = queue
-        #self.camview_port = camview_port']
 
         self.process = multiprocessing.Process(
             target=MotionDetection(config_dict).capture,name='capture',args=(queue,)
