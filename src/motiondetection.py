@@ -94,7 +94,6 @@ class ConfigFile(object):
         self.file_name = filename
         if filename:
             try:
-                self.config_file = open(filename,'r').read().splitlines()
                 self.config_file_syntax_sanity_check(filename)
             except IOError:
                 Logging.log("ERROR","Config file does not exist.")
@@ -119,14 +118,14 @@ class ConfigFile(object):
         if not self.file_name:
             for default_opt in config_dict[0].keys():
                 config_dict[0][default_opt][0] = config_dict[0][default_opt][1]
-                Logging.log("INFO", "Setting option("
+                Logging.log("INFO", "(ConfigFile.config_options) Setting option("
                     + default_opt + "): "
                     + str(config_dict[0][default_opt][0]))
             return
         # If the config file exists and the syntax is correct we will have to convert the
         # 'bool' values in the file which are being loaded in as strings to actual bool values.
         # The same applies for integers otehrwise load the values in as is.
-        for line in self.config_file:
+        for line in open(self.file_name,'r').read().splitlines():
             comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
             if comm is not None:
                 if not comm.group(2):
@@ -147,10 +146,12 @@ class ConfigFile(object):
     def override_values(self):
 
         for default_opt in config_dict[0].keys():
-            comm = re.search('-(\w{0,9}|)'
-                + config_dict[0][default_opt][2], str(sys.argv[1:]), re.M)
+            #comm = re.search('-(\w{0,9}|-\w{0-9}|)'
+            comm = re.search(config_dict[0][default_opt][2], str(sys.argv[1:]), re.M)
             if comm is not None:
-                Logging.log("INFO", "Overriding "
+                print('[ @@@@@@@@@@@@ ] DEBUG sys.argv[1:] => '+str(sys.argv[1:]))
+                print('[ @@@@@@@@@@@@ ] DEBUG config_dict[0][default_opt][2] => '+str(config_dict[0][default_opt][2]))
+                Logging.log("INFO", "(ConfigFile.override_values) Overriding "
                     + str(default_opt)
                     + " default value with command line switch value("
                     + str(config_dict[0][default_opt][1]) + ")")
@@ -299,11 +300,6 @@ class MotionDetection(metaclass=VideoFeed):
     def __init__(self,config_dict={}):
         super().__init__()
 
-        configFile = ConfigFile(config_dict[0]['configfile'][0])
-        configFile.config_options()
-        configFile.populate_empty_options()
-        configFile.override_values()
-
         self.tracker           = 0
         self.count             = 60
 
@@ -322,11 +318,6 @@ class MotionDetection(metaclass=VideoFeed):
         self.delta_thresh_min  = config_dict[0]['delta_thresh_min'][0]
         self.delta_thresh_max  = config_dict[0]['delta_thresh_max'][0]
         self.motion_thresh_min = config_dict[0]['motion_thresh_min'][0]
-
-        configFile = ConfigFile(self.configfile)
-        configFile.config_options()
-        configFile.populate_empty_options()
-        configFile.override_values()
 
         Mail.__disabled__ = self.disable_email
         MotionDetection.verbose = self.verbose
@@ -745,12 +736,6 @@ if __name__ == '__main__':
             + 'pass the --disable-email flag on the command line. '
             + 'Your E-mail password is used to send the pictures taken '
             + 'as well as notify you of motion detected.')
-    parser.add_option('-r', '--router-password',
-        dest='router_password', default='password',
-        help='This option is your routers password. This is used to '
-            + 'circumvent the motiondetection system. If your phone is '
-            + 'connected to your router and in the access list. The '
-            + 'MotionDetection system will not run.')
     parser.add_option('-C', '--camview-port',
         dest='camview_port', type='int', default=5000,
         help='CamView port defaults to port 5000'
@@ -813,7 +798,6 @@ if __name__ == '__main__':
     camview_port = '(C|--camview-port)'
     disable_email = '(D|--disable-email)'
     cam_location = '(c|--camera-location)'
-    router_password = '(r|--router-password)'
     delta_thresh_max = '(T|--delta-threshold-max)'
     delta_thresh_min = '(t|--delta-threshold-min)'
     motion_thresh_min = '(m|--motion-threshold-min)'
@@ -832,11 +816,15 @@ if __name__ == '__main__':
         'camview_port': ['', options.camview_port, camview_port],
         'disable_email': ['', options.disable_email, disable_email],
         'burst_mode_opts': ['', options.burst_mode_opts, burst_mode_opts],
-        'router_password': ['', options.router_password, router_password],
         'delta_thresh_max': ['', options.delta_thresh_max, delta_thresh_max],
         'delta_thresh_min': ['', options.delta_thresh_min, delta_thresh_min],
         'motion_thresh_min': ['', options.motion_thresh_min, motion_thresh_min]
     }, []]
+
+    configFile = ConfigFile(options.configfile)
+    configFile.config_options()
+    configFile.populate_empty_options()
+    configFile.override_values()
 
     motion_detection = MotionDetection(config_dict)
     Server(multiprocessing.Queue()).server_main()
