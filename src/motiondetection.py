@@ -109,6 +109,7 @@ class ConfigFile(object):
 
     # If a config file is 'NOT' passed via command line then this method will set the global
     # base variables for the config_dict data structure using the optparsers default values.
+    # Each optparser option has a default value, so do not worry about None being passed.
     # ---
     # If a config file 'IS' passed via command line then this method will read in the options
     # values and set the base options for the global config_dict data structure. If the config
@@ -132,7 +133,9 @@ class ConfigFile(object):
                     Logging.log("INFO","(ConfigFile.config_options) Configuration file override, setting option["
                         + str(comm.group(1)) + "]: " 
                         + str(comm.group(2)))
-                    if re.search('true', comm.group(2), re.I) is not None:
+                    if not comm.group(2):
+                        config_dict[1].append(comm.group(1))
+                    elif re.search('true', comm.group(2), re.I) is not None:
                         config_dict[0][comm.group(1)][0] = True
                     elif re.search('false', comm.group(2), re.I) is not None:
                         config_dict[0][comm.group(1)][0] = False
@@ -143,6 +146,19 @@ class ConfigFile(object):
                     else:
                         config_dict[0][comm.group(1)][0] = comm.group(2)
         return config_dict
+
+    # If a config file is supplied then this method will use the default options
+    # in optparser if the option in the config file has no value. So if the password
+    # option in the config file looks like this -> password= then it will be populated
+    # by this method.
+    def populate_empty_options(self):
+        if config_dict[1] and os.path.isfile(str(ConfigFile.__CFG__)):
+            for opt in config_dict[1]:
+                Logging.log("INFO","(ConfigFile.populate_empty_options) Configuration option["
+                    + str(opt)
+                    + "] has no value. Using default value: "
+                    + str(config_dict[0][opt][1]))
+                config_dict[0][opt][0] = config_dict[0][opt][1]
 
     def config_file_syntax_sanity_check(self,filename=str()):
         for line in open(filename,'r').read().splitlines():
@@ -779,6 +795,7 @@ if __name__ == '__main__':
 
     configFile = ConfigFile(options.configfile)
     configFile.config_options()
+    configFile.populate_empty_options()
 
     motion_detection = MotionDetection(config_dict)
     Server(multiprocessing.Queue()).server_main()
