@@ -31,6 +31,9 @@ setup(
         'Operating System :: POSIX :: Linux',
         'License :: OSI Approved :: GNU General Public License (GPL)',
     ],
+    data_files=[
+        ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg'])
+    ],
     zip_safe=True,
     setup_requires=['pynetgear','Pillow','opencv-python','flask'],
 )
