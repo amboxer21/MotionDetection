@@ -6,7 +6,7 @@
 
 **Description:**  This system is called MotionDetection and it monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set the motion detection software off and E-mails that picture to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! Donate [here](https://paypal.me/motiondetection) if you'd like. You can contact me via E-mail if you have any questions at amboxer21@gmail.com.
 
-**In the Works:** I am working on something that will allow you to update the applications configuration options via POST request. This way all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated variables.
+**In the Works:** I am working on something that will allow you to update the applications configuration options via `POST` request. This way all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated variables.
 
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
