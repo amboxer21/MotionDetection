@@ -132,7 +132,16 @@ class ConfigFile(object):
                     Logging.log("INFO","(ConfigFile.config_options) Configuration file override, setting option["
                         + str(comm.group(1)) + "]: " 
                         + str(comm.group(2)))
-                    config_dict[0][comm.group(1)][0] = comm.group(2)
+                    if re.search('true', comm.group(2), re.I) is not None:
+                        config_dict[0][comm.group(1)][0] = True
+                    elif re.search('false', comm.group(2), re.I) is not None:
+                        config_dict[0][comm.group(1)][0] = False
+                    elif re.search('\d+\.\d+\.\d+\.\d+', comm.group(2), re.I) is not None:
+                        config_dict[0][comm.group(1)][0] = str(comm.group(2))
+                    elif re.search('([0-9]{1,6})', comm.group(2)) is not None:
+                        config_dict[0][comm.group(1)][0] = int(comm.group(2))
+                    else:
+                        config_dict[0][comm.group(1)][0] = comm.group(2)
         return config_dict
 
     def config_file_syntax_sanity_check(self,filename=str()):
