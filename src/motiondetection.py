@@ -89,9 +89,11 @@ class Logging(object):
 # optparser declaration at the bottom in the if __name__ == '__main__' check.
 class ConfigFile(object):
 
+    __CFG__ = str()
+
     def __init__(self, filename):
         self.args_list = []
-        self.file_name = filename
+        ConfigFile.__CFG__ = filename
         if filename:
             try:
                 self.config_file_syntax_sanity_check(filename)
@@ -114,66 +116,27 @@ class ConfigFile(object):
     # of the config_dict data structure. Which will later be used as a reference against the 
     # config_data structure so it knows to use optparsers default values for these options.
     def config_options(self):
+        for default_opt in config_dict[0].keys():
+            config_dict[0][default_opt][0] = config_dict[0][default_opt][1]
+            Logging.log("INFO", "(ConfigFile.config_options) Setting option("
+                + default_opt + "): "
+                + str(config_dict[0][default_opt][0]))
         # If config file is 'NOT' supplied use optparsers default values.
-        if not self.file_name:
-            for default_opt in config_dict[0].keys():
-                config_dict[0][default_opt][0] = config_dict[0][default_opt][1]
-                Logging.log("INFO", "(ConfigFile.config_options) Setting option("
-                    + default_opt + "): "
-                    + str(config_dict[0][default_opt][0]))
-            return
-        # If the config file exists and the syntax is correct we will have to convert the
-        # 'bool' values in the file which are being loaded in as strings to actual bool values.
-        # The same applies for integers otehrwise load the values in as is.
-        for line in open(self.file_name,'r').read().splitlines():
-            comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
-            if comm is not None:
-                if not comm.group(2):
-                    config_dict[1].append(comm.group(1))
-                elif re.search('true', comm.group(2), re.I) is not None:
-                    config_dict[0][comm.group(1)][0] = True
-                elif re.search('false', comm.group(2), re.I) is not None:
-                    config_dict[0][comm.group(1)][0] = False
-                elif re.search('([0-9]{1,6})', comm.group(2)) is not None:
-                    config_dict[0][comm.group(1)][0] = int(comm.group(2))
-                else:
+        if os.path.isfile(str(ConfigFile.__CFG__)):
+            # If the config file exists and the syntax is correct we will have to convert the
+            # 'bool' values in the file which are being loaded in as strings to actual bool values.
+            # The same applies for integers otehrwise load the values in as is.
+            for line in open(ConfigFile.__CFG__,'r').read().splitlines():
+                comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
+                if comm is not None:
+                    Logging.log("INFO","(ConfigFile.config_options) Configuration file override, setting option["
+                        + str(comm.group(1)) + "]: " 
+                        + str(comm.group(2)))
                     config_dict[0][comm.group(1)][0] = comm.group(2)
         return config_dict
 
-    # If command line options 'ARE' passed via optparser/command line then this method
-    # will override the default values set with optparser as well as override the options
-    # in the config file that was passed.
-    def override_values(self):
-
-        for default_opt in config_dict[0].keys():
-            #comm = re.search('-(\w{0,9}|-\w{0-9}|)'
-            comm = re.search(config_dict[0][default_opt][2], str(sys.argv[1:]), re.M)
-            if comm is not None:
-                print('[ @@@@@@@@@@@@ ] DEBUG sys.argv[1:] => '+str(sys.argv[1:]))
-                print('[ @@@@@@@@@@@@ ] DEBUG config_dict[0][default_opt][2] => '+str(config_dict[0][default_opt][2]))
-                Logging.log("INFO", "(ConfigFile.override_values) Overriding "
-                    + str(default_opt)
-                    + " default value with command line switch value("
-                    + str(config_dict[0][default_opt][1]) + ")")
-                config_dict[0][default_opt][0] = config_dict[0][default_opt][1]
-
-    # If a config file is supplied then this method will use the default options
-    # in optparser if the option in the config file has no value. So if the password 
-    # option in the config file looks like this -> password= then it will be populated 
-    # by this method.
-    def populate_empty_options(self):
-        if config_dict[1] and self.config_file_supplied():
-            for opt in config_dict[1]:
-                config_dict[0][opt][0] = config_dict[0][opt][1]
-
-    def config_file_supplied(self):
-        if re.search(r'(\-C|\-\-config\-file)',str(sys.argv[1:]), re.M) is None:
-            return False
-        return True
-
     def config_file_syntax_sanity_check(self,filename=str()):
         for line in open(filename,'r').read().splitlines():
-            print('ConfigFile.config_file_syntax_sanity_check line => '+str(line))
             comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
             if comm is not None:
                 try:
@@ -183,6 +146,7 @@ class ConfigFile(object):
                         + comm.group(1)
                         + ") is not a recognized option!")
                     sys.exit(0)
+        Logging.log("INFO","(ConfigFile.config_file_syntax_sanity_check) Configuration file sanity check complete.")
 
 class User(object):
     @staticmethod
@@ -714,7 +678,7 @@ if __name__ == '__main__':
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
     parser.add_option("-g", "--config-file",
-        dest="configfile", default='etc/motiondetection/motiondetection.cfg',
+        dest="configfile", default=str(),
         help="Configuration file path.")
     parser.add_option('-c', '--camera-location',
         dest='cam_location', type='int', default=0,
@@ -785,46 +749,27 @@ if __name__ == '__main__':
     # These strings are coupled with their respective counterpart in the config_dist
     # data structure declared below.
 
-    ip = '(i|--ip)'
-    fps = '(f|--fps)'
-    email = '(e|--email)'
-    verbose = '(v|--verbose)'
-    password = '(p|--password)'
-    logfile = '(l|--log-file)'
-    email_port = '(E|--email-port)'
-    configfile = '(g|--config-file)'
-    burst_mode_opts = '(b|--burst-mode)'
-    server_port = '(S|--server-port)'
-    camview_port = '(C|--camview-port)'
-    disable_email = '(D|--disable-email)'
-    cam_location = '(c|--camera-location)'
-    delta_thresh_max = '(T|--delta-threshold-max)'
-    delta_thresh_min = '(t|--delta-threshold-min)'
-    motion_thresh_min = '(m|--motion-threshold-min)'
-
     config_dict = [{
-        'ip': ['', options.ip, ip],
-        'fps': ['', options.fps, fps],
-        'email': ['', options.email, email],
-        'verbose': ['', options.verbose, verbose],
-        'logfile': ['', options.logfile, logfile],
-        'password': ['', options.password, password],
-        'email_port': ['', options.email_port, email_port],
-        'configfile': ['', options.configfile, configfile],
-        'server_port': ['', options.server_port, server_port],
-        'cam_location': ['', options.cam_location, cam_location],
-        'camview_port': ['', options.camview_port, camview_port],
-        'disable_email': ['', options.disable_email, disable_email],
-        'burst_mode_opts': ['', options.burst_mode_opts, burst_mode_opts],
-        'delta_thresh_max': ['', options.delta_thresh_max, delta_thresh_max],
-        'delta_thresh_min': ['', options.delta_thresh_min, delta_thresh_min],
-        'motion_thresh_min': ['', options.motion_thresh_min, motion_thresh_min]
+        'ip': ['', options.ip],
+        'fps': ['', options.fps],
+        'email': ['', options.email],
+        'verbose': ['', options.verbose],
+        'logfile': ['', options.logfile],
+        'password': ['', options.password],
+        'email_port': ['', options.email_port],
+        'configfile': ['', options.configfile],
+        'server_port': ['', options.server_port],
+        'cam_location': ['', options.cam_location],
+        'camview_port': ['', options.camview_port],
+        'disable_email': ['', options.disable_email],
+        'burst_mode_opts': ['', options.burst_mode_opts],
+        'delta_thresh_max': ['', options.delta_thresh_max],
+        'delta_thresh_min': ['', options.delta_thresh_min],
+        'motion_thresh_min': ['', options.motion_thresh_min]
     }, []]
 
     configFile = ConfigFile(options.configfile)
     configFile.config_options()
-    configFile.populate_empty_options()
-    configFile.override_values()
 
     motion_detection = MotionDetection(config_dict)
     Server(multiprocessing.Queue()).server_main()
