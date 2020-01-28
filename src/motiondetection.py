@@ -19,7 +19,6 @@ import numpy as np
 
 from PIL import Image
 from io import StringIO
-from pynetgear import Netgear
 from optparse import OptionParser
 
 from email.mime.image import MIMEImage
@@ -90,13 +89,13 @@ class Logging(object):
 # optparser declaration at the bottom in the if __name__ == '__main__' check.
 class ConfigFile(object):
 
-    def __init__(self, file_name):
+    def __init__(self, filename):
         self.args_list = []
-        self.file_name = file_name
-        if file_name:
+        self.file_name = filename
+        if filename:
             try:
-                self.config_file = open(file_name,'r').read().splitlines()
-                self.config_file_syntax_sanity_check()
+                self.config_file = open(filename,'r').read().splitlines()
+                self.config_file_syntax_sanity_check(filename)
             except IOError:
                 Logging.log("ERROR","Config file does not exist.")
                 sys.exit(0)
@@ -146,6 +145,7 @@ class ConfigFile(object):
     # will override the default values set with optparser as well as override the options
     # in the config file that was passed.
     def override_values(self):
+
         for default_opt in config_dict[0].keys():
             comm = re.search('-(\w{0,9}|)'
                 + config_dict[0][default_opt][2], str(sys.argv[1:]), re.M)
@@ -170,8 +170,9 @@ class ConfigFile(object):
             return False
         return True
 
-    def config_file_syntax_sanity_check(self):
-        for line in self.config_file:
+    def config_file_syntax_sanity_check(self,filename=str()):
+        for line in open(filename,'r').read().splitlines():
+            print('ConfigFile.config_file_syntax_sanity_check line => '+str(line))
             comm = re.search(r'(^.*)=(.*)', str(line), re.M | re.I)
             if comm is not None:
                 try:
@@ -295,30 +296,32 @@ class MotionDetection(metaclass=VideoFeed):
 
     delta_count = None
 
-    def __init__(self,options_dict={}):
+    def __init__(self,config_dict={}):
         super().__init__()
+
+        configFile = ConfigFile(config_dict[0]['configfile'][0])
+        configFile.config_options()
+        configFile.populate_empty_options()
+        configFile.override_values()
 
         self.tracker           = 0
         self.count             = 60
 
-        self.ip                = options_dict['ip']
-        self.fps               = options_dict['fps']
-        self.email             = options_dict['email']
-        self.netgear           = options_dict['netgear']
-        self.verbose           = options_dict['verbose']  
-        self.password          = options_dict['password']
-        self.email_port        = options_dict['email_port']
-        self.accesslist        = options_dict['accesslist']
-        self.configfile        = options_dict['configfile']
-        self.server_port       = options_dict['server_port']
-        self.standby_mode      = options_dict['standby_mode']
-        self.cam_location      = options_dict['cam_location']
-        self.disable_email     = options_dict['disable_email']
-        self.burst_mode_opts   = options_dict['burst_mode_opts']
+        self.ip                = config_dict[0]['ip'][0]
+        self.fps               = config_dict[0]['fps'][0]
+        self.email             = config_dict[0]['email'][0]
+        self.verbose           = config_dict[0]['verbose'][0]
+        self.password          = config_dict[0]['password'][0]
+        self.email_port        = config_dict[0]['email_port'][0]
+        self.configfile        = config_dict[0]['configfile'][0]
+        self.server_port       = config_dict[0]['server_port'][0]
+        self.cam_location      = config_dict[0]['cam_location'][0]
+        self.disable_email     = config_dict[0]['disable_email'][0]
+        self.burst_mode_opts   = config_dict[0]['burst_mode_opts'][0]
 
-        self.delta_thresh_min  = options_dict['delta_thresh_min']
-        self.delta_thresh_max  = options_dict['delta_thresh_max']
-        self.motion_thresh_min = options_dict['motion_thresh_min']
+        self.delta_thresh_min  = config_dict[0]['delta_thresh_min'][0]
+        self.delta_thresh_max  = config_dict[0]['delta_thresh_max'][0]
+        self.motion_thresh_min = config_dict[0]['motion_thresh_min'][0]
 
         configFile = ConfigFile(self.configfile)
         configFile.config_options()
@@ -327,7 +330,6 @@ class MotionDetection(metaclass=VideoFeed):
 
         Mail.__disabled__ = self.disable_email
         MotionDetection.verbose = self.verbose
-        self.accesslist_semaphore = threading.Semaphore(1)
 
         if not self.disable_email and (self.email is None or self.password is None):
             Logging.log("ERROR",
@@ -413,15 +415,6 @@ class MotionDetection(metaclass=VideoFeed):
                 MotionDetection.lock.release()
                 break
 
-            if self.standby_mode:
-                accesslist_thread = threading.Thread(
-                    target=AccessList.mac_addr_presence,
-                    args=(self.accesslist_semaphore,self.netgear,self.accesslist)
-                )
-                if not AccessList.thread_locked and AccessList.timedout(30):
-                    AccessList.thread_locked = True
-                    accesslist_thread.start()
-
             time.sleep(0.1)
 
             MotionDetection.calculate_delta()
@@ -435,13 +428,11 @@ class MotionDetection(metaclass=VideoFeed):
                         "(MotionDetection.capture) - Motion detected with threshold levels at "
                         + str(MotionDetection.delta_count)
                         + "!", self.verbose)
-                    # Access list feature
-                    if not AccessList.mac_addr_listed:
-                        for placeholder in range(0,self.burst_mode_opts):
-                            time.sleep(1)
-                            MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
-                            MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
-                                'Motion Detected','MotionDecetor.py detected movement!')
+                    for placeholder in range(0,self.burst_mode_opts):
+                        time.sleep(1)
+                        MotionDetection.take_picture(MotionDetection.camera_object.read()[1])
+                        MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                            'Motion Detected','MotionDecetor.py detected movement!')
             elif MotionDetection.delta_count < self.motion_thresh_min:
                 self.count  += 1
                 self.tracker = 0
@@ -519,11 +510,11 @@ class ThreadedHTTPServer(ThreadingMixIn,HTTPServer):
 class Stream(MotionDetection,metaclass=VideoFeed):
 
     def __init__(self):
-        super().__init__(options_dict)
-        self.fps          = options_dict['fps']
-        self.verbose      = options_dict['verbose']
-        self.camview_port = options_dict['camview_port']
-        self.cam_location = options_dict['cam_location']
+        super().__init__(config_dict)
+        self.fps          = config_dict['fps']
+        self.verbose      = config_dict['verbose']
+        self.camview_port = config_dict['camview_port']
+        self.cam_location = config_dict['cam_location']
 
     def stream_main(self,queue=None):
         Stream.lock.acquire()
@@ -610,54 +601,16 @@ class FileOpts(object):
                 Logging.log("ERROR", "mkdir error: " + str(e))
                 raise
             
-class AccessList(metaclass=VideoFeed):
-
-    @staticmethod
-    def set_default_values(semaphore,listed=False,locked=False):
-        AccessList.mac_addr_listed = listed
-        semaphore.release()
-        AccessList.thread_locked = locked
-
-    @classmethod
-    def timedout(cls,seconds=60):
-        if AccessList.timeout == 0:
-            AccessList.timeout += 1
-        elif AccessList.timeout >= 10 * seconds:
-            AccessList.timeout = 0
-            return True
-        else:
-            AccessList.timeout += 1
-
-    @classmethod
-    def mac_addr_presence(cls,semaphore,netgear,accesslist):
-        semaphore.acquire(blocking=True)
-        try:
-            if isinstance(netgear, Netgear):
-                for device in netgear.get_attached_devices():
-                    if not device.mac in open(accesslist,'r').read():
-                        AccessList.set_default_values(semaphore,False,False)
-                    else:
-                        Logging.log("INFO","(AccessList.mac_addr_presence) - Device name: "+str(device.name))
-                        Logging.log("INFO","(AccessList.mac_addr_presence) - Device IP address: "+str(device.ip))
-                        Logging.log("INFO","(AccessList.mac_addr_presence) - Device MAC address: "+str(device.mac))
-                        AccessList.set_default_values(semaphore,True,False)
-                        break
-            else:
-                AccessList.set_default_values(semaphore,False,False)
-        except:
-            AccessList.set_default_values(semaphore,False,False)
-            pass
-
 class Server(MotionDetection,metaclass=VideoFeed):
 
     def __init__(self,queue):
-        super().__init__(options_dict)
+        super().__init__(config_dict)
 
         self.queue = queue
-        self.camview_port = options_dict['camview_port']
+        #self.camview_port = camview_port']
 
         self.process = multiprocessing.Process(
-            target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
+            target=MotionDetection(config_dict).capture,name='capture',args=(queue,)
         )
         self.process.daemon = True
         self.process.start()
@@ -715,7 +668,7 @@ class Server(MotionDetection,metaclass=VideoFeed):
                     self.process.terminate()
                 Server.lock.release()
                 self.process = multiprocessing.Process(
-                    target=MotionDetection(options_dict).capture,name='capture',args=(queue,)
+                    target=MotionDetection(config_dict).capture,name='capture',args=(queue,)
                 )
                 self.process.daemon = True
                 self.process.start()
@@ -775,12 +728,8 @@ if __name__ == '__main__':
         dest='disable_email', action='store_true', default=False,
         help='This option allows you to disable the sending of E-mails.')
     parser.add_option("-g", "--config-file",
-        dest="configfile", default='',
+        dest="configfile", default='etc/motiondetection/motiondetection.cfg',
         help="Configuration file path.")
-    parser.add_option('-P', '--standby-mode',
-        dest='standby_mode', action='store_true', default=False,
-        help='This option allows you to disable the system if your phone '
-            + 'is connected to Wi-Fi.')
     parser.add_option('-c', '--camera-location',
         dest='cam_location', type='int', default=0,
         help='Camera index number that defaults to 0. This is the '
@@ -789,11 +738,6 @@ if __name__ == '__main__':
         dest='fps', type='int', default='30',
         help='This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s.')
-    parser.add_option('-w', '--white-list',
-        dest='accesslist', default='/home/pi/.motiondetection/accesslist',
-        help='This ensures that the MotionDetection system does not run '
-            + 'if the mac is in the accesslist. This defaults to '
-            + '/home/pi/.motiondetection/accesslist.')
     parser.add_option('-e', '--email',
         dest='email',
         help='This argument is required unless you pass the '
@@ -854,12 +798,6 @@ if __name__ == '__main__':
             + 'streaming server and the motion detection system.')
     (options, args) = parser.parse_args()
 
-    Logging.log("INFO", "(MotionDetection.__main__) - Initializing netgear object.",options.verbose)
-    if options.standby_mode:
-        netgear = Netgear(password=options.router_password)
-    else:
-        netgear = None
-
     fileOpts = FileOpts(options.logfile)
 
     # These strings are used to compare against the command line args passed.
@@ -874,12 +812,10 @@ if __name__ == '__main__':
     password = '(p|--password)'
     logfile = '(l|--log-file)'
     email_port = '(E|--email-port)'
-    config_file = '(g|--config-file)'
+    configfile = '(g|--config-file)'
     burst_mode_opts = '(b|--burst-mode)'
-    accesslist = '(w|--white-list)'
     server_port = '(S|--server-port)'
     camview_port = '(C|--camview-port)'
-    standby_mode = '(P|--standby-mode)'
     disable_email = '(D|--disable-email)'
     cam_location = '(c|--camera-location)'
     router_password = '(r|--router-password)'
@@ -890,16 +826,13 @@ if __name__ == '__main__':
     config_dict = [{
         'ip': ['', options.ip, ip],
         'fps': ['', options.fps, fps],
-        'netgear': ['', netgear, netgear],
         'email': ['', options.email, email],
         'verbose': ['', options.verbose, verbose],
         'logfile': ['', options.logfile, logfile],
         'password': ['', options.password, password],
         'email_port': ['', options.email_port, email_port],
-        'accesslist': ['', options.accesslist, accesslist],
         'configfile': ['', options.configfile, configfile],
         'server_port': ['', options.server_port, server_port],
-        'standby_mode': ['', options.standby_mode, standby_mode],
         'cam_location': ['', options.cam_location, cam_location],
         'camview_port': ['', options.camview_port, camview_port],
         'disable_email': ['', options.disable_email, disable_email],
@@ -910,18 +843,5 @@ if __name__ == '__main__':
         'motion_thresh_min': ['', options.motion_thresh_min, motion_thresh_min]
     }, []]
 
-    options_dict = {
-        'standby_mode': options.standby_mode,
-        'logfile': options.logfile, 'fps': options.fps,
-        'netgear': netgear, 'disable_email': options.disable_email,
-        'server_port': options.server_port, 'email': options.email,
-        'delta_thresh_max': options.delta_thresh_max, 'ip': options.ip, 
-        'password': options.password, 'cam_location': options.cam_location,
-        'email_port': options.email_port, 'camview_port': options.camview_port,
-        'verbose': options.verbose, 'burst_mode_opts': options.burst_mode_opts,
-        'accesslist': options.accesslist, 'delta_thresh_min': options.delta_thresh_min,
-        'router_password': options.router_password, 'motion_thresh_min': options.motion_thresh_min,
-    }
-
-    motion_detection = MotionDetection(options_dict)
+    motion_detection = MotionDetection(config_dict)
     Server(multiprocessing.Queue()).server_main()
