@@ -62,7 +62,7 @@ If you're not using my system image and you are installing the software on somet
 
 * The `third` cron entry will ensure that the data manager program is always running. This program compresses the logs, pictures, etc., E-mails the data then deletes it all. This is so your system doesn't fill up after a day of use. 
 
-> How to add the cronjob
+#### How to add the cronjob
 
 Run the following command and then paste the above commands into the terminal.
 
