@@ -30,7 +30,12 @@ setup(
         'License :: OSI Approved :: GNU General Public License (GPL)',
     ],
     data_files=[
-        ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg'])
+        ('/usr/local/bin/', ['src/heart.py']),
+        ('/usr/local/bin/', ['src/motiondetection.py']),
+        ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg']),
+        ('/home/pi/.motiondetection/scripts/', ['src/cronjob/is_heartbeat_running.sh']),
+        ('/home/pi/.motiondetection/scripts/', ['src/cronjob/is_motiondetection_running.sh']),
+        ('/home/pi/.motiondetection/scripts/', ['src/cronjob/manage_motiondetection_data.py'])
     ],
     zip_safe=True,
     setup_requires=['pynetgear','Pillow','opencv-python','flask'],
