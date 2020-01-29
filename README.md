@@ -45,6 +45,32 @@ A `Raspberry Pi 4 B`  **image** can be found [HERE](https://drive.google.com/fil
 
 ---
 
+### [Root Crontab]
+
+If you're not using my system image and you are installing the software on something other than a Raspberry Pi 4; If you just want to use your own Pi but utilise this software then you're going to need to add a few entries into your root's crontab!
+
+> Crontab
+```
+* * * * * /usr/bin/sudo /bin/bash /home/pi/.motiondetection/scripts/is_heartbeat_running.sh
+* * * * * /bin/bash /home/pi/.motiondetection/scripts/is_motiondetection_running.sh
+* * * * * /usr/bin/python /home/pi/.motiondetection/scripts/manage_motiondetection_data.py
+```
+
+* The `first` cron entry will ensure that the heartbeat monitoring program is always running. Heartbeat makes sure that the remote viewing feature never locks up and never prevents you from viewing the remote feed from your phone.
+
+* The `second` cron entry will ensure that the motiondetection framework is always running. Motiondetection is this software - A **FREE** DIY CCTV system/framework.
+
+* The `third` cron entry will ensure that the data manager program is always running. This program compresses the logs, pictures, etc., E-mails the data then deletes it all. This is so your system doesn't fill up after a day of use. 
+
+> How to add the cronjob
+
+Run the following command and then paste the above commands into the terminal.
+
+```
+sudo crontab -euroot
+```
+---
+
 ### [System Component Versions]
 
 #### **SYSTEM OS VERSION**
