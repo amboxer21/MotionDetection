@@ -69,6 +69,9 @@ Run the following command and then paste the above commands into the terminal.
 ```
 sudo crontab -euroot
 ```
+
+**Note:** The `setup.py python script` will install the files that the crontab refer to, in the proper places if you run `sudo python3 setup.py install`. Alternatively, you can do this manually by lloking at the setup.py script and looking at the install paths thenmanually copying the files to those paths. 
+
 ---
 
 ### [System Component Versions]
