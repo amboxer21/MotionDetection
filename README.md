@@ -47,7 +47,7 @@ A `Raspberry Pi 4 B`  **image** can be found [HERE](https://drive.google.com/fil
 
 ### [Root Crontab]
 
-If you're not using my system image and you are installing the software on something other than a Raspberry Pi 4; If you just want to use your own Pi but utilise this software then you're going to need to add a few entries into your root's crontab!
+If you're not using my system image; If you are installing the software on something other than a Raspberry Pi 4; If you just want to use your own Pi but utilise this software then you're going to need to add a few entries into your root's crontab!
 
 > Crontab
 ```
