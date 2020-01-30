@@ -176,6 +176,26 @@ if __name__ == '__main__':
     @configure.route('/')
     def index():
         return render_template('index.html')
+
+    @configure.route('/about.html')
+    def about():
+        return render_template('about.html')
+
+    @configure.route('/usage.html')
+    def usage():
+        return render_template('usage.html')
+
+    @configure.route('/filler1.html')
+    def filler1():
+        return render_template('filler1.html')
+
+    @configure.route('/filler2.html')
+    def filler2():
+        return render_template('filler2.html')
+
+    @configure.route('/filler3.html')
+    def filler3():
+        return render_template('filler3.html')
     
     @configure.route('/reload')
     def reload_framework():

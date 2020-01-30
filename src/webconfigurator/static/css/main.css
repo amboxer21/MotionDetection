@@ -1,3 +1,26 @@
-h1.about,h1.usage {
+.body {
+    background-color: #85DCB;
+}
+
+div.tabs,a.home {
+    width: 50%;
+    display: block;
+    font-size: xx-large;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    background-color: ;
+}
+
+h1 {
+    padding-right: 20px;
+    display: inline-block;
+}
+
+h1.about,h1.usage,h1.filler1,h1.filler2,h1.filler3,a.home {
     color: blue;
+}
+
+h1.about:hover,h1.usage:hover,h1.filler1:hover,h1.filler2:hover,h1.filler3:hover {
+    text-color: black;
 }
