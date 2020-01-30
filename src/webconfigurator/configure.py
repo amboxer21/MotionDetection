@@ -116,7 +116,7 @@ class FileOpts(object):
 
         if not FileOpts.file_exists("/etc/motiondetection/motiondetection.cfg"):
            FileOpts.create_file("/etc/motiondetection/motiondetection.cfg")
-           self.write_to_config_file(ConfigurationFile.contents())
+           self.populate_config_file(ConfigurationFile.contents())
 
     def root_directory(self):
         return "/etc/motiondetection"
@@ -151,17 +151,31 @@ class FileOpts(object):
                 Logging.log("ERROR", "mkdir error: " + str(e))
                 raise
 
-    def write_to_config_file(self,contents):
+    def populate_config_file(self,contents):
         Logging.log("WARN","(FileOpts.write_to_config_file) Populating configuration file with default options.")
         file_name = open('/etc/motiondetection/motiondetection.cfg', 'w')
         file_name.write(contents)
         file_name.close()
+
+    def read_in_config_file(self):
+        return open('/etc/motiondetection/motiondetection.cfg', 'r').read()
+
+    def overwrite_config_options(self,**kwargs):
+        content = self.read_in_config_file()
+        new_content = content 
+        for option,value in kwargs.items():
+            new_content = re.sub("\n"+option+"=.*\n","\n"+option+"="+value+"\n",new_content)
+            self.populate_config_file(new_content)
 
 if __name__ == '__main__':
 
     configure = Configure(__name__, template_folder="templates")
 
     ConfigurationFile.contents()
+
+    @configure.route('/')
+    def index():
+        return render_template('index.html')
     
     @configure.route('/reload')
     def reload_framework():
@@ -177,6 +191,7 @@ if __name__ == '__main__':
         passwd   = configure.password(credentials)
         if configure.validate_email(addr) and configure.validate_password(passwd):
             Logging.log("INFO","(Configure.__main__) Using %s as the system email address with password: %s." % (addr, passwd))
+            fileOpts.overwrite_config_options(email=addr,password=passwd)
             return "Using %s as the system email address with password: %s." % (addr, passwd)
         return render_template("invalid_credential_format.html")
 
