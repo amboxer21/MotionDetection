@@ -7,6 +7,7 @@ import sys
 import time
 import glob
 import email
+import signal
 import socket
 import smtplib
 import logging
@@ -600,7 +601,7 @@ class Server(MotionDetection,metaclass=VideoFeed):
 
         try:
             self.sock = socket.socket()
-            self.sock.bind(('0.0.0.0', self.server_port))
+            self.sock.bind(('0.0.0.0', int(self.server_port)))
         except Exception as eSock:
             #if 'Address already in use' in eSock and PS.aux('motiondetection') is not None:
             if 'Address already in use' in eSock:
@@ -653,8 +654,14 @@ class Server(MotionDetection,metaclass=VideoFeed):
                 queue.put('start_recording')
             elif(message == 'stop_recording'):
                 queue.put('stop_recording')
-            elif(message == 'ping'):
-                sock.send(str([Server.main_pid,MotionDetection.pid,Server.parent_pid]))
+            elif re.search('reload', str(message), re.M | re.I) is not None:
+                sock.sendto(("(MotionDetction.server_main) Reload requested, restarting MotionDetection framework!").encode(),(str(self.ip), int(self.server_port)))
+                Logging.log("INFO","(MotionDetction.server_main) Reload requested, restarting MotionDetection framework!")
+                [os.kill(int(pid), signal.SIGKILL) for pid in [MotionDetection.pid, Server.parent_pid, Server.main_pid]]
+                MotionDetection.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
+                    'HeartBeat','HeartBeat reset program!')
+            elif('ping', str(message), re.M | re.I) is not None:
+                sock.sendto(('['+str(MotionDetection.pid)+','+str(Server.parent_pid)+','+str(Server.main_pid)+']').encode(),(str(self.ip), int(self.server_port)))
             else:
                 pass
             sock.close()
