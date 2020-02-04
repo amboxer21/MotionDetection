@@ -239,6 +239,7 @@ class VideoFeed(type):
         return super().__new__(meta, name, bases, dct)
 
     def __init__(cls,name,bases,dct):
+
         if not hasattr(cls,'lock'):
             Logging.log("INFO", '(VideoFeed.__init__) - Passing "Lock" object to class "'
             + cls.__name__
@@ -278,14 +279,12 @@ class VideoFeed(type):
 
 class MotionDetection(metaclass=VideoFeed):
 
-    verbose = False
-
+    verbose        = False
+    delta_count    = None
     colored_frame  = None
     camera_object  = None
     current_frame  = None
     previous_frame = None
-
-    delta_count = None
 
     def __init__(self,config_dict={}):
         super().__init__()
@@ -373,11 +372,18 @@ class MotionDetection(metaclass=VideoFeed):
 
         Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!",self.verbose)
         Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!", self.verbose)
-    
+
         MotionDetection.camera_object = cv2.VideoCapture(self.cam_location)
         MotionDetection.camera_object.set(cv2.CAP_PROP_FPS, self.fps)
 
         MotionDetection.previous_frame = MotionDetection.camera_object.read()[1]
+
+        if MotionDetection.previous_frame is None:
+            Logging.log("ERROR","(MotionDetection.capture) Camera is not present or cannot be found.")
+            [os.kill(int(pid), signal.SIGKILL) for pid in [Server.main_pid, Server.parent_pid, MotionDetection.pid]]
+            sys.exit(0)
+
+
         MotionDetection.colored_frame  = MotionDetection.previous_frame 
         MotionDetection.previous_frame = cv2.cvtColor(MotionDetection.previous_frame, cv2.COLOR_RGB2GRAY)
         MotionDetection.previous_frame = cv2.GaussianBlur(MotionDetection.previous_frame, (21, 21), 0)
