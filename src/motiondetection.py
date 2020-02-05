@@ -287,7 +287,6 @@ class MotionDetection(metaclass=VideoFeed):
     previous_frame = None
 
     def __init__(self,config_dict={}):
-        super().__init__()
 
         self.tracker           = 0
         self.count             = 60
@@ -406,6 +405,13 @@ class MotionDetection(metaclass=VideoFeed):
 
             MotionDetection.calculate_delta()
 
+            # If the motion generated(delta_count) is greater than the minimum and max threshold required, then we should
+            # take a picture. We can now move onto the next part of the flow control to determine if a picture will be taken or not.
+            # The second layer of the flow control keeps track of the seconds and time that has passed without or without movement.
+            # If no movement has been detected since the last motiondetection trigger, then we can move even deeper into the flow control nested
+            # structure. If movement has been continuous for more than 60 seconds, then we can move even deeper into the flow control nested 
+            # structure. Count is the amount of seconds passed and tracker is the amount of seconds for tracked continuous movement. If you move
+            # for 40 continuous seconds then tracker will be 40.
             if MotionDetection.delta_count > self.delta_thresh_min and MotionDetection.delta_count < self.delta_thresh_max:
                 self.tracker += 1
                 if self.tracker >= 60 or self.count >= 60:
@@ -424,6 +430,10 @@ class MotionDetection(metaclass=VideoFeed):
                 self.count  += 1
                 self.tracker = 0
 
+            # Sets the previous frame to the current captured frame.
+            # This way, on the next pass, a new picture will be captured.
+            # This will allow us to compare the old frame at the end of the pass
+            # here with the new picture to see if anything has changed - any movement has occured.
             MotionDetection.update_current_frame()
 
 class CamHandler(BaseHTTPRequestHandler,metaclass=VideoFeed):
@@ -501,7 +511,7 @@ class Stream(MotionDetection,metaclass=VideoFeed):
 
     def stream_main(self,queue=None):
         Stream.lock.acquire()
-        Logging.log("INFO", "(Stream.stream_main) - Lock acquired!")
+        Logging.log("INFO", "(Stream.stream_main) - Lock acquired!",self.verbose)
         try:
             video_capture = cv2.VideoCapture(self.cam_location)
             video_capture.set(3,320)
@@ -515,7 +525,7 @@ class Stream(MotionDetection,metaclass=VideoFeed):
                 )
             )
             Stream.lock.release()
-            Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
+            Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started",self.verbose)
             server = ThreadedHTTPServer(
                 ('0.0.0.0', self.camview_port), CamHandler, queue, video_capture, video_output
             )
@@ -538,7 +548,7 @@ class Stream(MotionDetection,metaclass=VideoFeed):
         except Exception as eThreadedHTTPServer:
             Logging.log("ERROR",
                 "(Stream.stream_main) - eThreadedHTTPServer => "
-                + str(eThreadedHTTPServer))
+                + str(eThreadedHTTPServer),self.verbose)
             queue.close()
 
 class FileOpts(object):

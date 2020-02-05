@@ -145,7 +145,7 @@ class Heart(object):
                 data = sock.recv(1024)
                 print('data => '+str(data))
                 print('type(data) => '+str(type(data)))
-                if data is not None:
+                if not data or data is not None:
                     Heart.__pids__ = Heart.format_data(data)
                 sock.close()
                 Heart.__timeout__ = self.min_thresh_interval
