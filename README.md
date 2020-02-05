@@ -1,4 +1,4 @@
-# MotionDetection for Python3 on the Raspberry Pi 4 B
+# MotionDetection(CCTV) for Python3 on the Raspberry Pi 4 B
 
 **Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B. The E-mails are sent to sshmonitorapp@gmail.com by default - please change this address! `I can make custom images using your E-mail, so that you can just plug the system in and the pictures are sent to you.` No tweaking necessary on your part. Shoot me an E-mail if this sounds like something that you'd be interested in doing. 
 
