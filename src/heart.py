@@ -143,14 +143,11 @@ class Heart(object):
                 sock.connect((self.ip,self.port))
                 sock.send('ping')
                 data = sock.recv(1024)
-                print('data => '+str(data))
-                print('type(data) => '+str(type(data)))
                 if not data or data is not None:
                     Heart.__pids__ = Heart.format_data(data)
                 sock.close()
                 Heart.__timeout__ = self.min_thresh_interval
             except Exception as e:
-                print('Heart.__pids__ => '+str(Heart.__pids__))
                 if Heart.__pids__:
                     Logging.log('INFO',
                         'Lost connection to the MotionDetection framework. Killing system now!')
@@ -224,6 +221,5 @@ if __name__ == '__main__':
         'email': options.email,'password':options.password
     }
 
-    #time.sleep(210)
-    time.sleep(10)
+    time.sleep(210)
     heart = Heart(options_dict).beat() 
