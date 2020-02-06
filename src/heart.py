@@ -155,10 +155,8 @@ class Heart(object):
                     Heart.start_thread(Mail.send,self.email,self.email,self.password,self.email_port,
                         'HeartBeat','HeartBeat reset program!')
                     Heart.__timeout__ = self.max_thresh_interval
-                print('(Heart.beat) exception e => '+str(e))
                 pass
             except OSError:
-                print('(Heart.beat) exception OSError => '+str(OSError))
                 pass
 
 if __name__ == '__main__':
