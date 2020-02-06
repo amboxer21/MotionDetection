@@ -20,6 +20,7 @@ import numpy as np
 
 from PIL import Image
 from io import StringIO
+from pathlib import Path
 from optparse import OptionParser
 
 from email.mime.image import MIMEImage
@@ -790,31 +791,23 @@ if __name__ == '__main__':
             + 'streaming server and the motion detection system.')
     (options, args) = parser.parse_args()
 
-    fileOpts = FileOpts(options.logfile)
-
     # These strings are used to compare against the command line args passed.
     # It could have been done with an action but default values were used instead.
     # These strings are coupled with their respective counterpart in the config_dist
     # data structure declared below.
 
     config_dict = [{
-        'ip': ['', options.ip],
-        'fps': ['', options.fps],
-        'email': ['', options.email],
-        'verbose': ['', options.verbose],
-        'logfile': ['', options.logfile],
-        'password': ['', options.password],
-        'email_port': ['', options.email_port],
-        'configfile': ['', options.configfile],
-        'server_port': ['', options.server_port],
-        'cam_location': ['', options.cam_location],
-        'camview_port': ['', options.camview_port],
-        'disable_email': ['', options.disable_email],
-        'burst_mode_opts': ['', options.burst_mode_opts],
-        'delta_thresh_max': ['', options.delta_thresh_max],
-        'delta_thresh_min': ['', options.delta_thresh_min],
-        'motion_thresh_min': ['', options.motion_thresh_min]
+        'ip': ['', options.ip], 'motion_thresh_min': ['', options.motion_thresh_min],
+        'fps': ['', options.fps], 'delta_thresh_min': ['', options.delta_thresh_min],
+        'logfile': ['', options.logfile], 'disable_email': ['', options.disable_email],
+        'password': ['', options.password], 'camview_port': ['', options.camview_port],
+        'configfile': ['', options.configfile], 'server_port': ['', options.server_port],
+        'email': ['', options.email], 'delta_thresh_max': ['', options.delta_thresh_max],
+        'verbose': ['', options.verbose], 'burst_mode_opts': ['', options.burst_mode_opts],
+        'email_port': ['', options.email_port], 'cam_location': ['', options.cam_location],
     }, []]
+
+    fileOpts = FileOpts(options.logfile)
 
     configFile = ConfigFile(options.configfile)
     configFile.config_options()
