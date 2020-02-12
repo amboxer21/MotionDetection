@@ -185,9 +185,9 @@ if __name__ == '__main__':
     def usage():
         return render_template('usage.html')
 
-    @configure.route('/filler1.html')
-    def filler1():
-        return render_template('filler1.html')
+    @configure.route('/demo.html')
+    def demo():
+        return render_template('demo.html')
 
     @configure.route('/filler2.html')
     def filler2():

@@ -2,7 +2,7 @@
     background-color: #85DCB;
 }
 
-div.tabs,a.home {
+div.tabs,div.main,a.home {
     width: 50%;
     display: block;
     font-size: xx-large;
@@ -10,6 +10,26 @@ div.tabs,a.home {
     margin-right: auto;
     text-align: center;
     background-color: ;
+}
+
+div.main {
+    background-color: green;
+}
+
+div.main > div.main_sub {
+    left: 0px;
+    right: 0px;
+    float: left;
+    position: absolute;
+    background-color: blue;
+}
+
+h1.heading_main {
+    font-size: 50%;
+}
+
+p {
+    font-size: 50%;
 }
 
 h1 {
