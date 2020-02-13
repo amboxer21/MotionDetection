@@ -1,8 +1,14 @@
 .body {
-    background-color: #85DCB;
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
 }
 
-div.tabs,div.main,a.home {
+a:link {
+  text-decoration: none ;
+}
+
+div.tabs,div.main_sub {
     width: 50%;
     display: block;
     font-size: xx-large;
@@ -12,19 +18,35 @@ div.tabs,div.main,a.home {
 }
 
 h1.heading_main {
-    font-size: 100%;
+    font-size: 50px;
     padding-top: 2%;
+    color: #c0b283;
     font-family: sans-serif;
+}
+
+div.tabs {
+    width: 100%;
+    height: 100%;
+    background-color: white;
 }
 
 div.main {
     width: 100%;
+    height: 100%;
+}
+
+.bold {
+    color: #373737;
 }
 
 p {
-    padding-left: 10%;
+    color: #dcd0c0;
+    width: 100%;
+    font-size: 80%;
+    text-align: left;
     padding-right: 10%;
     word-wrap: break-word;
+    font-family: "Times New Roman", Sans-serif;
 }
 
 h1.about,h1.usage,h1.filler1,h1.filler2,h1.filler3,a.home {
