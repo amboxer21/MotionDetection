@@ -44,7 +44,7 @@ class Logging(object):
                     + " - MotionDetection - "
                     + str(message)))
             elif comm.group() == 'WARN':
-                logging.warn(str(time.asctime(time.localtime(time.time()))
+                logging.warning(str(time.asctime(time.localtime(time.time()))
                     + " - MotionDetection - "
                     + str(message)))
             if verbose or str(level) == 'ERROR':
@@ -143,8 +143,7 @@ class Heart(object):
                 sock.connect((self.ip,self.port))
                 sock.send('ping')
                 data = sock.recv(1024)
-                if data is not None:
-                    print('PIDS: '+str(Heart.format_data(data)))
+                if not data or data is not None:
                     Heart.__pids__ = Heart.format_data(data)
                 sock.close()
                 Heart.__timeout__ = self.min_thresh_interval
