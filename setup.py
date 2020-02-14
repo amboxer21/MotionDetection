@@ -38,5 +38,5 @@ setup(
         ('/home/pi/.motiondetection/scripts/', ['src/cronjob/manage_motiondetection_data.py'])
     ],
     zip_safe=True,
-    setup_requires=['pynetgear','Pillow','opencv-python','flask'],
+    setup_requires=['Pillow','opencv-python','flask'],
 )
