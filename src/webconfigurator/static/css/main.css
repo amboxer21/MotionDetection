@@ -5,7 +5,9 @@
 }
 
 a:link {
-  text-decoration: none ;
+    padding-left: 2%;
+    padding-right: 3%;
+    text-decoration: none ;
 }
 
 div.tabs,div.main_sub {
@@ -25,8 +27,11 @@ h1.heading_main {
 }
 
 div.tabs {
+    top: 0px;
+    left: 0px;
     width: 100%;
-    height: 100%;
+    height: 5%;
+    position: absolute;
     background-color: white;
 }
 
