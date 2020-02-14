@@ -1,0 +1,34 @@
+iframe {
+    top: 5%;
+    right: 0px;
+    width: 100%;
+    height: 90%;
+    display: block;
+    position: absolute;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar {
+    top: 0px;
+    left: 0px;
+    height: 5%;
+    width: 100%;
+    position: absolute;
+    background-color: #d7cec7;
+}
+
+a {
+    width: 50%;
+    color: #76323f;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    font-size: xx-large;
+    text-decoration: none;
+}
+
+.container {
+    width: 100%;
+}

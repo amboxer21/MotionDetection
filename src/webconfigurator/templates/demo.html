@@ -2,14 +2,19 @@
 <html>
     <head>
         <title>Demo</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/demo.css') }}">
     </head>
     <body>
-	      <a href='/' class="home">Home</a>
-        <iframe
-            width="560" height="315" frameborder="0"
-            src="https://www.youtube.com/embed/ZDyZsqIcBnk"
-            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-        </iframe>
+        <div class='container'>
+            <div class='navbar'>
+	              <a href='/' class="home">Home</a>
+            </div>
+            <div>
+                <iframe
+                    src="https://www.youtube.com/embed/ZDyZsqIcBnk" frameborder="0"
+                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                </iframe>
+            </div>
+        </div>
     </body>
 </html>
