@@ -562,8 +562,12 @@ class FileOpts(object):
         if not FileOpts.file_exists(logfile):
             FileOpts.create_file(logfile)
 
+    @staticmethod
+    def home():
+        return str(Path.home())
+
     def root_directory(self):
-        return "/home/pi/.motiondetection"
+        return FileOpts.home()+"/.motiondetection"
 
     @staticmethod
     def file_exists(file_name):
