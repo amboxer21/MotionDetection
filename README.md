@@ -1,3 +1,7 @@
+# [As of 2020-08-03] Currently fixing up this repo's code and working on a new Gentoo based ISO image
+
+---
+
 # ** !! SEEMS THAT THE SYSTEM IMAGE FOR THE RPI4b IS CORRUPT and I will have to roll it AGAIN !! **
 
 # MotionDetection(CCTV) for Python3 on the Raspberry Pi 4 B
