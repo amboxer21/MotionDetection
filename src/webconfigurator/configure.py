@@ -1,10 +1,12 @@
 import re
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 config = Flask(__name__, template_folder="templates")
 
-def write_config_file_into_hash():
-    pass
+def write_config_file_into_hash(hash=dict()):
+    with open('/etc/motiondetection/motiondetection.cfg','w') as f:
+        for key,value in hash.items():
+            f.write(key+"="+value+"\n")
 
 def read_config_file_into_hash(hash=dict()):
     with open('/etc/motiondetection/motiondetection.cfg','r') as line:
@@ -32,15 +34,15 @@ def read_config_file_into_hash(hash=dict()):
                     hash['verbose'] = 'Verbose...'
                     pass
 
-            email = re.search('^email=(.*$)',f, re.M | re.I)
-            if email is not None:
-                hash['email'] = email.group(1)
+            email_port = re.search('^email_port=(.*$)',f, re.M | re.I)
+            if email_port is not None:
+                hash['email_port'] = email_port.group(1)
             else:
                 try:
-                    if not hash['email']:
+                    if not hash['email_port']:
                         pass
                 except KeyError:
-                    hash['email'] = 'E-mail Address...'
+                    hash['email_port'] = 'E-mail Address...'
                     pass
     
             logfile = re.search('^logfile=(.*$)', f, re.M | re.I)
@@ -97,6 +99,18 @@ def read_config_file_into_hash(hash=dict()):
                 except KeyError:
                     hash['fps'] = 'Camera\'s Frames Per Second...'
                     pass
+
+            email = re.search('^email=(.*$)',f, re.M | re.I)
+            if email is not None:
+                hash['email'] = email.group(1)
+            else:
+                try:
+                    if not hash['email']:
+                        pass
+                except KeyError:
+                    hash['email'] = 'E-mail Address...'
+                    pass
+
     
             password = re.search('^password=(.*$)', f, re.M | re.I)
             if password is not None:
@@ -199,9 +213,26 @@ def validate_password(password):
         return True
     return False
 
-@config.route('/reload')
-def reload_framework():
-    return "Reloading the MotionDetection framework!"
+@config.route('/reload',methods=['POST'])
+def reload_framework(hash=dict()):
+    hash['ip']                = request.form['ip']
+    hash['fps']               = request.form['fps']
+    hash['verbose']           = request.form['verbose']
+    hash['email_port']        = request.form['email_port']
+    hash['logfile']           = request.form['logfile']
+    hash['disable_email']     = request.form['disable_email']
+    hash['configfile']        = request.form['configfile']
+    hash['cam_location']      = request.form['cam_location']
+    hash['email']             = request.form['email']
+    hash['password']          = request.form['password']
+    hash['camview_port']      = request.form['camview_port']
+    hash['delta_thresh_min']  = request.form['delta_thresh_min']
+    hash['delta_thresh_max']  = request.form['delta_thresh_max']
+    hash['burst_mode_opts']   = request.form['burst_mode_opts']
+    hash['motion_thresh_min'] = request.form['motion_thresh_min']
+    hash['server_port']       = request.form['server_port']
+    write_config_file_into_hash(hash)
+    return render_template('index.html',value=read_config_file_into_hash())
 
 @config.route('/', methods=['GET', 'POST'])
 def index():
