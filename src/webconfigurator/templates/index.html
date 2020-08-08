@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MotionDetection WebConfigurator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style>
+      .container {
+        max-width: 1000px;
+      }
+    </style>
+    <script>
+        var test = "{{ value[1] }}";
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>MotionDetection WebConfigurator</h1>
+      <form role="form" method='POST' action='/'>
+        <div class="form-group">
+          <!--<input type="text" name="url" class="form-control" id="url-box" placeholder="IP Address..." style="max-width: 500px;" autofocus required>-->
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['ip'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['verbose'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['email'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['logfile'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['disable_email'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['configfile'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['cam_location'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['fps'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['email'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['password'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['camview_port'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['delta_thresh_min'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['delta_thresh_max'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['burst_mode_opts'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['motion_thresh_min'] }}" style="max-width: 500px;" autofocus required>
+          <input type="text" name="url" class="form-control" id="url-box" placeholder="{{ value['server_port'] }}" style="max-width: 500px;" autofocus required>
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+      <br>
+      {% for error in errors %}
+        <h4>{{ error }}</h4>
+      {% endfor %}
+    </div>
+    <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  </body>
+</html>

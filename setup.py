@@ -30,5 +30,5 @@ setup(
         ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg'])
     ],
     zip_safe=True,
-    setup_requires=['Pillow','opencv-python','flask'],
+    install_requires=['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2'],
 )
