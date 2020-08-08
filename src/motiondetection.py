@@ -734,7 +734,7 @@ if __name__ == '__main__':
         dest="configfile", default=str(),
         help="Configuration file path.")
     parser.add_option('-c', '--camera-location',
-        dest='cam_location', type='int', default=0,
+        dest='cam_location', default='/dev/video0',
         help='Camera index number that defaults to 0. This is the '
             + 'location of the camera - Which is usually /dev/video0.')
     parser.add_option('-f', '--fps',

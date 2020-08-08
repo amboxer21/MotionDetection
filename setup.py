@@ -2,11 +2,6 @@ from distutils.cmd import Command
 from setuptools import setup, find_packages
 from distutils.errors import DistutilsError, DistutilsExecError
 
-import sys
-
-if sys.version_info.major < 3:
-    sys.exit('Sorry, Python2 is not supported. Please use Python3!')
-
 setup(
     name='MotionDetection',
     version='2.0.1',
@@ -32,10 +27,7 @@ setup(
     data_files=[
         ('/usr/local/bin/', ['src/heart.py']),
         ('/usr/local/bin/', ['src/motiondetection.py']),
-        ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg']),
-        ('/home/pi/.motiondetection/scripts/', ['src/cronjob/is_heartbeat_running.sh']),
-        ('/home/pi/.motiondetection/scripts/', ['src/cronjob/is_motiondetection_running.sh']),
-        ('/home/pi/.motiondetection/scripts/', ['src/cronjob/manage_motiondetection_data.py'])
+        ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg'])
     ],
     zip_safe=True,
     setup_requires=['Pillow','opencv-python','flask'],

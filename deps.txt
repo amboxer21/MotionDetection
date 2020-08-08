@@ -1,0 +1,567 @@
+pi@localhost ~ $ for package in `cat /var/lib/portage/world`; do eix -I $package; equery uses $package; done
+[I] app-admin/sudo
+     Available versions:  1.8.31 ~1.8.31_p1 ~1.9.0-r1 ~1.9.1 ~1.9.2 **9999*l {gcrypt ldap libressl nls offensive pam sasl +secure-path selinux +sendmail skey ssl sssd system-digest}
+     Installed versions:  1.8.31(06:01:01 05/11/20)(nls pam secure-path sendmail -gcrypt -ldap -libressl -offensive -sasl -selinux -skey -sssd -system-digest)
+     Homepage:            https://www.sudo.ws/
+     Description:         Allows users or groups to run commands as other users
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for app-admin/sudo-1.8.31:
+ U I
+ - - gcrypt        : Use message digest functions from dev-libs/libgcrypt instead of sudo's
+ - - ldap          : Add LDAP support (Lightweight Directory Access Protocol)
+ - - libressl      : Use message digest functions from dev-libs/libressl instead of sudo's
+ + + nls           : Add Native Language Support (using gettext - GNU locale utilities)
+ - - offensive     : Let sudo print insults when the user types the wrong password
+ + + pam           : Add support for PAM (Pluggable Authentication Modules) - DANGEROUS to arbitrarily flip
+ - - sasl          : Add support for the Simple Authentication and Security Layer
+ + + secure-path   : Replace PATH variable with compile time secure paths
+ + + sendmail      : Allow sudo to send emails with sendmail
+ - - skey          : Enable S/Key (Single use password) authentication support
+ - - system-digest : Use message digest functions from dev-libs/libgcrypt, dev-libs/libressl or dev-libs/openssl
+                     instead of sudo's internal SHA2 implementation 
+[I] app-admin/syslog-ng
+     Available versions:  3.22.1^t ~3.24.1^t ~3.25.1^t 3.26.1-r1^t ~3.28.1-r2^t {amqp caps dbi geoip geoip2 http ipv6 json kafka libressl mongodb pacct python redis smtp snmp spoof-source systemd tcpd test PYTHON_SINGLE_TARGET="python3_6 python3_7 python3_8 python3_9"}
+     Installed versions:  3.26.1-r1^t(09:36:56 08/05/20)(ipv6 tcpd -amqp -caps -dbi -geoip2 -http -json -kafka -libressl -mongodb -pacct -python -redis -smtp -snmp -spoof-source -systemd -test PYTHON_SINGLE_TARGET="python3_7 -python3_6 -python3_8")
+     Homepage:            https://syslog-ng.com/open-source-log-management
+     Description:         syslog replacement with advanced filtering features
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for app-admin/syslog-ng-3.26.1-r1:
+ U I
+ - - amqp                           : Enable support for AMQP destinations
+ - - caps                           : Use Linux capabilities library to control privilege
+ - - dbi                            : Enable dev-db/libdbi (database-independent abstraction layer) support
+ - - geoip2                         : Add support for geo lookup based on IPs via dev-libs/libmaxminddb
+ - - http                           : Enable support for HTTP destinations
+ + + ipv6                           : Add support for IP version 6
+ - - json                           : Enable support for JSON template formatting via dev-libs/json-c
+ - - kafka                          : Enable support for Kafka destinations
+ - - libressl                       : Use dev-libs/libressl instead of dev-libs/openssl when applicable (see also
+                                      the ssl useflag)
+ - - pacct                          : Enable support for reading Process Accounting files (EXPERIMENTAL, Linux only)
+ - - python                         : Add optional support/bindings for the Python language
+ - - python_single_target_python3_6 : Build for Python 3.6 only
+ + + python_single_target_python3_7 : Build for Python 3.7 only
+ - - python_single_target_python3_8 : Build for Python 3.8 only
+ - - redis                          : Enable support for Redis destinations
+ - - smtp                           : Enable support for SMTP destinations
+ - - snmp                           : Add support for the Simple Network Management Protocol if available
+ - - spoof-source                   : Enable support for spoofed source addresses
+ - - systemd                        : Enable use of systemd-specific libraries and features like socket activation
+                                      or session tracking
+ + + tcpd                           : Add support for TCP wrappers
+[I] app-editors/vim
+     Available versions:  8.2.0360 ~8.2.0508 ~8.2.0638 ~8.2.0814 **9999*l {X acl cscope debug gpm lua luajit minimal nls perl python racket ruby selinux sound tcl terminal vim-pager PYTHON_SINGLE_TARGET="python3_6 python3_7 python3_8"}
+     Installed versions:  8.2.0360(09:20:19 08/03/20)(acl nls perl python -X -cscope -debug -gpm -lua -luajit -minimal -racket -ruby -selinux -sound -tcl -terminal -vim-pager PYTHON_SINGLE_TARGET="python3_7 -python3_6 -python3_8")
+     Homepage:            https://vim.sourceforge.io/ https://github.com/vim/vim
+     Description:         Vim, an improved vi-style text editor
+
+[I] app-editors/vim-core
+     Available versions:  8.2.0360 ~8.2.0508 ~8.2.0638 ~8.2.0814 **9999*l {acl minimal nls}
+     Installed versions:  8.2.0360(09:13:24 08/03/20)(acl nls -minimal)
+     Homepage:            https://vim.sourceforge.io/ https://github.com/vim/vim
+     Description:         vim and gvim shared files
+
+Found 2 matches
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for app-editors/vim-8.2.0360:
+ U I
+ - - X                              : Link console vim against X11 libraries to enable title and clipboard features
+                                      in xterm
+ + + acl                            : Add support for Access Control Lists
+ - - cscope                         : Enable cscope interface
+ - - debug                          : Enable extra debug codepaths, like asserts and extra output. If you want to
+                                      get meaningful backtraces see
+                                      https://wiki.gentoo.org/wiki/Project:Quality_Assurance/Backtraces
+ - - gpm                            : Add support for sys-libs/gpm (Console-based mouse driver)
+ - - lua                            : Enable Lua scripting support
+ - - minimal                        : Install a very minimal build (disables, for example, plugins, fonts, most
+                                      drivers, non-critical features)
+ + + nls                            : Add Native Language Support (using gettext - GNU locale utilities)
+ + + perl                           : Add optional support/bindings for the Perl language
+ + + python                         : Add optional support/bindings for the Python language
+ - - python_single_target_python3_6 : Build for Python 3.6 only
+ + + python_single_target_python3_7 : Build for Python 3.7 only
+ - - python_single_target_python3_8 : Build for Python 3.8 only
+ - - ruby                           : Add support/bindings for the Ruby language
+ - - sound                          : Enable sound support
+ - - tcl                            : Add support the Tcl language
+ - - terminal                       : Enable terminal emulation support
+ - - vim-pager                      : Install vimpager and vimmanpager links
+[I] app-portage/cpuid2cpuflags
+     Available versions:  *1 9 10 ~11 **9999*l {PYTHON_TARGETS="python2_7"}
+     Installed versions:  10(09:04:07 08/03/20)
+     Homepage:            https://github.com/mgorny/cpuid2cpuflags
+     Description:         Tool to guess CPU_FLAGS_* flags for the host
+
+!!! No USE flags found for app-portage/cpuid2cpuflags-10
+[I] app-portage/eix
+     Available versions:  0.33.9-r1 0.33.11 ~0.34.1 ~0.34.2 0.34.4 {debug doc nls sqlite}
+     Installed versions:  0.34.4(08:54:38 08/01/20)(nls -debug -doc -sqlite)
+     Homepage:            https://github.com/vaeth/eix/
+     Description:         Search and query ebuilds
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for app-portage/eix-0.34.4:
+ U I
+ - - debug  : Build with upstream's CXXFLAGS/LDFLAGS for debugging support; not recommended for normal use.
+ - - doc    : Create description of the eix cache file additionally in html format
+ + + nls    : Add Native Language Support (using gettext - GNU locale utilities)
+ - - sqlite : Compile in support for portage's sqlite backend; to actually use it you need additional configuration
+              of portage and eix
+[I] app-portage/gentoolkit
+     Available versions:  0.4.6 ~0.4.7 0.4.8 ~0.5.0^t **9999*l^t {test PYTHON_TARGETS="pypy3 python3_6 python3_7 python3_8"}
+     Installed versions:  0.4.8(10:21:34 08/02/20)(PYTHON_TARGETS="python3_6 python3_7 python3_8 -pypy3")
+     Homepage:            https://wiki.gentoo.org/wiki/Project:Portage-Tools
+     Description:         Collection of administration scripts for Gentoo
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for app-portage/gentoolkit-0.4.8:
+ U I
+ + + python_targets_python3_6 : Build with Python 3.6
+ + + python_targets_python3_7 : Build with Python 3.7
+ + + python_targets_python3_8 : Build with Python 3.8
+[I] app-portage/layman
+     Available versions:  2.4.3^t **9999*l^t {cvs darcs g-sorcery +git gpg mercurial sqlite squashfs subversion sync-plugin-portage test KERNEL="linux" PYTHON_TARGETS="python3_6 python3_7 python3_8"}
+     Installed versions:  2.4.3^t(12:15:40 08/04/20)(git -cvs -darcs -g-sorcery -gpg -mercurial -sqlite -squashfs -subversion -sync-plugin-portage -test KERNEL="linux" PYTHON_TARGETS="python3_6 python3_7 python3_8")
+     Homepage:            https://wiki.gentoo.org/wiki/Layman
+     Description:         Tool to manage Gentoo overlays
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for app-portage/layman-2.4.3:
+ U I
+ - - cvs                      : Support dev-vcs/cvs based overlays
+ + + git                      : Support dev-vcs/git based overlays
+ - - gpg                      : Support app-crypt/gnupg signed overlays lists and manifests
+ - - mercurial                : Support dev-vcs/mercurial based overlays
+ + + python_targets_python3_6 : Build with Python 3.6
+ + + python_targets_python3_7 : Build with Python 3.7
+ + + python_targets_python3_8 : Build with Python 3.8
+ - - sqlite                   : Add support for sqlite - embedded sql database
+ - - squashfs                 : Support mounting squashfs image overlays locally read-only
+ - - subversion               : Support dev-vcs/subversion based overlays
+ - - sync-plugin-portage      : Install the sys-apps/portage sync module
+ - - test                     : Enable dependencies and/or preparations necessary to run tests (usually controlled
+                                by FEATURES=test but can be toggled independently)
+[I] dev-vcs/git
+     Available versions:  2.23.3^t 2.24.3^t 2.25.4^t 2.26.2^t ~2.27.0^t ~2.28.0^t **9999*l^t **9999-r1*l^t **9999-r2*l^t **9999-r3*l^t {+blksha1 cgi +curl cvs doc emacs gnome-keyring +gpg highlight +iconv libressl mediawiki mediawiki-experimental +nls +pcre +pcre-jit perforce +perl +ppcsha1 subversion test +threads tk +webdav xinetd PYTHON_SINGLE_TARGET="python3_6 python3_7"}
+     Installed versions:  2.26.2^t(15:15:45 08/03/20)(blksha1 curl cvs doc gpg highlight iconv nls pcre pcre-jit perl subversion threads webdav -cgi -emacs -gnome-keyring -libressl -mediawiki -mediawiki-experimental -perforce -ppcsha1 -test -tk -xinetd PYTHON_SINGLE_TARGET="python3_7 -python3_6")
+     Homepage:            https://www.git-scm.com/
+     Description:         stupid content tracker: distributed VCS designed for speed and efficiency
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for dev-vcs/git-2.26.2:
+ U I
+ + + blksha1                        : Use the new optimized SHA1 implementation
+ - - cgi                            : Install gitweb too
+ + + curl                           : Support fetching and pushing (requires webdav too) over http:// and https://
+                                      protocols
+ + + cvs                            : Enable CVS (Concurrent Versions System) integration
+ + + doc                            : Add extra documentation (API, Javadoc, etc). It is recommended to enable per
+                                      package instead of globally
+ - - emacs                          : Add support for GNU Emacs
+ - - gnome-keyring                  : Enable support for storing passwords via gnome-keyring
+ + + gpg                            : Pull in gnupg for signing -- without gnupg, attempts at signing will fail at
+                                      runtime!
+ + + highlight                      : GitWeb support for app-text/highlight
+ + + iconv                          : Enable support for the iconv character set conversion library
+ - - libressl                       : Use dev-libs/libressl instead of dev-libs/openssl when applicable (see also
+                                      the ssl useflag)
+ + + nls                            : Add Native Language Support (using gettext - GNU locale utilities)
+ + + pcre                           : Add support for Perl Compatible Regular Expressions
+ + + pcre-jit                       : Enable JIT for pcre
+ - - perforce                       : Add support for Perforce version control system (requires manual installation
+                                      of Perforce client)
+ + + perl                           : Add optional support/bindings for the Perl language
+ - - python_single_target_python3_6 : Build for Python 3.6 only
+ + + python_single_target_python3_7 : Build for Python 3.7 only
+ + + subversion                     : Include git-svn for dev-vcs/subversion support
+ - - test                           : Enable dependencies and/or preparations necessary to run tests (usually
+                                      controlled by FEATURES=test but can be toggled independently)
+ + + threads                        : Add threads support for various packages. Usually pthreads
+ - - tk                             : Include the 'gitk' and 'git gui' tools
+ + + webdav                         : Adds support for push'ing to HTTP/HTTPS repositories via DAV
+ - - xinetd                         : Add support for the xinetd super-server
+[I] media-libs/gstreamer
+     Available versions:  (1.0) 1.14.5^t ~1.16.2^t
+       {+caps +introspection nls +orc test unwind ABI_MIPS="n32 n64 o32" ABI_RISCV="lp64 lp64d" ABI_S390="32 64" ABI_X86="32 64 x32"}
+     Installed versions:  1.14.5(1.0)^t(22:34:50 08/03/20)(caps introspection nls -orc -test -unwind ABI_MIPS="-n32 -n64 -o32" ABI_RISCV="-lp64 -lp64d" ABI_S390="-32 -64" ABI_X86="-32 -64 -x32")
+     Homepage:            https://gstreamer.freedesktop.org/
+     Description:         Open source multimedia framework
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for media-libs/gstreamer-1.14.5:
+ U I
+ + + caps          : Use Linux capabilities library to control privilege
+ + + introspection : Add support for GObject based introspection
+ + + nls           : Add Native Language Support (using gettext - GNU locale utilities)
+ - - test          : Enable dependencies and/or preparations necessary to run tests (usually controlled by
+                     FEATURES=test but can be toggled independently)
+ - - unwind        : Enable sys-libs/libunwind usage for better backtrace support in leaks tracer module
+[I] media-libs/libv4l
+     Available versions:  1.6.2 1.10.1(0/0) ~1.16.3(0/0) ~1.16.6(0/0) ~1.18.0(0/0) ~1.18.1(0/0) {jpeg ABI_MIPS="n32 n64 o32" ABI_RISCV="lp64 lp64d" ABI_S390="32 64" ABI_X86="32 64 x32" KERNEL="linux"}
+     Installed versions:  1.10.1(0/0)(21:01:00 08/03/20)(jpeg ABI_MIPS="-n32 -n64 -o32" ABI_RISCV="-lp64 -lp64d" ABI_S390="-32 -64" ABI_X86="-32 -64 -x32" KERNEL="linux")
+     Homepage:            https://git.linuxtv.org/v4l-utils.git
+     Description:         Separate libraries ebuild from upstream v4l-utils package
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for media-libs/libv4l-1.10.1:
+ U I
+ + + jpeg : Add JPEG image support
+[I] media-libs/libwebp
+     Available versions:  1.0.2(0/7) ~1.0.3(0/7) 1.1.0(0/7) {gif +jpeg opengl +png static-libs swap-16bit-csp tiff ABI_MIPS="n32 n64 o32" ABI_RISCV="lp64 lp64d" ABI_S390="32 64" ABI_X86="32 64 x32" CPU_FLAGS_ARM="neon" CPU_FLAGS_X86="sse2 sse4_1"}
+     Installed versions:  1.1.0(0/7)(10:59:30 08/05/20)(jpeg png -gif -opengl -static-libs -swap-16bit-csp -tiff ABI_MIPS="-n32 -n64 -o32" ABI_RISCV="-lp64 -lp64d" ABI_S390="-32 -64" ABI_X86="-32 -64 -x32" CPU_FLAGS_ARM="-neon" CPU_FLAGS_X86="-sse2 -sse4_1")
+     Homepage:            https://developers.google.com/speed/webp/download
+     Description:         A lossy image compression format
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for media-libs/libwebp-1.1.0:
+ U I
+ - - cpu_flags_arm_neon : Use the NEON (ASIMD) instruction set
+ - - gif                : Add GIF image support
+ + + jpeg               : Add JPEG image support
+ - - opengl             : Add support for OpenGL (3D graphics)
+ + + png                : Add support for libpng (PNG images)
+ - - static-libs        : Build static versions of dynamic libraries as well
+ - - swap-16bit-csp     : Enable byte swapping for 16 bit colorspace
+ - - tiff               : Add support for the TIFF image format
+[I] media-libs/opencv
+     Available versions:  (~)4.1.2-r3(0/4.1.2) {contrib contribcvv contribdnn contribhdf contribsfm contribxfeatures2d cuda debug dnnsamples -download +eigen examples +features2d ffmpeg gdal gflags glog gphoto2 gstreamer gtk3 ieee1394 java jpeg jpeg2k lapack opencl opencvapps openexr opengl openmp pch png +python qt5 tesseract testprograms threads tiff v4l vaapi vtk webp xine ABI_MIPS="n32 n64 o32" ABI_RISCV="lp64 lp64d" ABI_S390="32 64" ABI_X86="32 64 x32" CPU_FLAGS_X86="avx avx2 fma3 popcnt sse sse2 sse3 sse4_1 sse4_2 ssse3" ELIBC="FreeBSD" PYTHON_TARGETS="python3_6 python3_7"}
+     Installed versions:  4.1.2-r3(0/4.1.2)(02:48:57 08/06/20)(contrib eigen features2d ffmpeg gstreamer jpeg lapack openmp png python v4l -contribcvv -contribdnn -contribhdf -contribsfm -contribxfeatures2d -cuda -debug -dnnsamples -download -examples -gdal -gflags -glog -gphoto2 -gtk3 -ieee1394 -java -jpeg2k -opencl -opencvapps -openexr -opengl -pch -qt5 -tesseract -testprograms -threads -tiff -vaapi -vtk -webp -xine ABI_MIPS="-n32 -n64 -o32" ABI_RISCV="-lp64 -lp64d" ABI_S390="-32 -64" ABI_X86="-32 -64 -x32" CPU_FLAGS_X86="-avx -avx2 -fma3 -popcnt -sse -sse2 -sse3 -sse4_1 -sse4_2 -ssse3" ELIBC="-FreeBSD" PYTHON_TARGETS="python3_6 python3_7")
+     Homepage:            https://opencv.org
+     Description:         A collection of algorithms and sample code for various computer vision problems
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for media-libs/opencv-4.1.2-r3:
+ U I
+ + + contrib                  : Install user contributed scripts from opencv_contrib (Experimental!)
+ - - contribcvv               : (Restricted to >=media-libs/opencv-3.1.0)
+                                CVV module requires Qt5
+ - - contribdnn               : (Restricted to >=media-libs/opencv-3.3.0)
+                                DNN module contrib requires tiny dnn
+ - - contribhdf               : (Restricted to >=media-libs/opencv-3.1.0)
+                                HDF module requires sci-libs/hdf5
+ - - contribsfm               : (Restricted to >=media-libs/opencv-3.1.0)
+                                SFM module requires eigen, gflags, and glog
+ - - debug                    : Enable extra debug codepaths, like asserts and extra output. If you want to get
+                                meaningful backtraces see
+                                https://wiki.gentoo.org/wiki/Project:Quality_Assurance/Backtraces
+ - - dnnsamples               : (Restricted to >=media-libs/opencv-3.4.0)
+                                Download dnn caffeemodel samples
+ - - download                 : (Restricted to >=media-libs/opencv-4.1.2)
+                                Enable download during cmake configure
+ + + eigen                    : Enable usage of dev-cpp/eigen for computations
+ - - examples                 : Install examples, usually source code
+ + + features2d               : Enable features2d module
+ + + ffmpeg                   : Enable ffmpeg/libav-based audio/video codec support
+ - - gdal                     : Enable support for sci-libs/gdal library
+ - - gflags                   : (Restricted to >=media-libs/opencv-3.1.0)
+                                Use Google's C++ argument parsing library
+ - - glog                     : (Restricted to >=media-libs/opencv-3.1.0)
+                                Use Google's C++ loggin library
+ + + gstreamer                : Add support for media-libs/gstreamer (Streaming media)
+ - - gtk3                     : Enable x11-libs/gtk+:3 support
+ - - java                     : Add support for Java
+ + + jpeg                     : Add JPEG image support
+ - - jpeg2k                   : Support for JPEG 2000, a wavelet-based image compression format
+ + + lapack                   : Add support for the virtual/lapack numerical library
+ - - opencvapps               : (Restricted to >=media-libs/opencv-4.1.2)
+                                Enable compilation with opencvapps
+ - - opengl                   : Add support for OpenGL (3D graphics)
+ + + openmp                   : Build support for the OpenMP (support parallel computing), requires
+                                >=sys-devel/gcc-4.2 built with USE="openmp"
+ - - pch                      : Enable precompiled header support for faster compilation at the expense of disk
+                                space and memory (>=sys-devel/gcc-3.4 only)
+ + + png                      : Add support for libpng (PNG images)
+ + + python                   : Add optional support/bindings for the Python language
+ + + python_targets_python3_6 : Build with Python 3.6
+ + + python_targets_python3_7 : Build with Python 3.7
+ - - qt5                      : Add support for the Qt 5 application and UI framework
+ - - tesseract                : (Restricted to >=media-libs/opencv-3.1.0)
+                                Use Google's OCR Engine
+ - - testprograms             : Build and install programs for testing OpenCV (performance)
+ - - threads                  : Add threads support for various packages. Usually pthreads
+ - - tiff                     : Add support for the TIFF image format
+ + + v4l                      : Enable support for video4linux (using linux-headers or userspace libv4l libraries)
+ - - vtk                      : Build new 3D visualization module viz based on sci-libs/vtk
+ - - webp                     : Add support for the WebP image format
+[I] media-video/ffmpeg
+     Available versions:  4.2.4(0/56.58.58)^td ~*4.3(0/56.58.58)^td ~4.3.1(0/56.58.58)^td **9999(0/56.58.58)*l^td {X alsa amr amrenc appkit bluray bs2b +bzip2 cdio chromaprint chromium codec2 cpudetection cuda (+)dav1d debug doc +encode fdk flite fontconfig frei0r fribidi gcrypt gme gmp (+)gnutls +gpl gsm hardcoded-tables +iconv iec61883 ieee1394 jack jpeg2k kvazaar ladspa libaom libaribb24 libass libcaca libdrm libilbc libressl librtmp libsoxr libtesseract libv4l libxml2 lv2 lzma mipsdspr1 mipsdspr2 mipsfpu mmal modplug mp3 +network openal opencl opengl openh264 openssl opus oss pic +postproc pulseaudio rav1e rubberband samba sdl snappy speex srt ssh static-libs svg test theora +threads truetype twolame v4l vaapi vdpau vidstab vorbis vpx vulkan wavpack webp x264 x265 xvid zeromq zimg +zlib zvbi ABI_MIPS="n32 n64 o32" ABI_RISCV="lp64 lp64d" ABI_S390="32 64" ABI_X86="32 64 x32" CPU_FLAGS_ARM="neon thumb thumb2 v6 v8 vfp vfpv3" CPU_FLAGS_PPC="altivec vsx vsx2" CPU_FLAGS_X86="3dnow 3dnowext aes avx avx2 fma3 fma4 mmx mmxext sse sse2 sse3 sse4_1 sse4_2 ssse3 xop" FFTOOLS="+aviocat +cws2fws +ffescape +ffeval +ffhash +fourcc2pixfmt +graph2dot +ismindex +pktdumper +qt-faststart +sidxindex +trasher" VIDEO_CARDS="nvidia"}
+     Installed versions:  4.2.4(0/56.58.58)^t(21:47:52 08/03/20)(bzip2 encode gpl iconv libv4l mp3 network openh264 postproc threads v4l x264 zlib -X -alsa -amr -amrenc -appkit -bluray -bs2b -cdio -chromaprint -chromium -codec2 -cpudetection -cuda -dav1d -debug -doc -fdk -flite -fontconfig -frei0r -fribidi -gcrypt -gme -gmp -gnutls -gsm -hardcoded-tables -iec61883 -ieee1394 -jack -jpeg2k -kvazaar -ladspa -libaom -libaribb24 -libass -libcaca -libdrm -libilbc -libressl -librtmp -libsoxr -libtesseract -libxml2 -lv2 -lzma -mipsdspr1 -mipsdspr2 -mipsfpu -mmal -modplug -openal -opencl -opengl -openssl -opus -oss -pic -pulseaudio -rubberband -samba -sdl -snappy -speex -srt -ssh -static-libs -svg -test -theora -truetype -twolame -vaapi -vdpau -vidstab -vorbis -vpx -wavpack -webp -x265 -xvid -zeromq -zimg -zvbi ABI_MIPS="-n32 -n64 -o32" ABI_RISCV="-lp64 -lp64d" ABI_S390="-32 -64" ABI_X86="-32 -64 -x32" CPU_FLAGS_ARM="thumb thumb2 v6 vfp vfpv3 -neon -v8" CPU_FLAGS_PPC="-altivec -vsx -vsx2" CPU_FLAGS_X86="-3dnow -3dnowext -aes -avx -avx2 -fma3 -fma4 -mmx -mmxext -sse -sse2 -sse3 -sse4_1 -sse4_2 -ssse3 -xop" FFTOOLS="aviocat cws2fws ffescape ffeval ffhash fourcc2pixfmt graph2dot ismindex pktdumper qt-faststart sidxindex trasher" VIDEO_CARDS="-nvidia")
+     Homepage:            https://ffmpeg.org/
+     Description:         Complete solution to record/convert/stream audio and video. Includes libavcodec
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for media-video/ffmpeg-4.2.4:
+ U I
+ - - X                     : Add support for X11
+ - - alsa                  : Add support for media-libs/alsa-lib (Advanced Linux Sound Architecture)
+ - - amr                   : Enables Adaptive Multi-Rate Audio support
+ - - amrenc                : Enables Adaptive Multi-Rate Audio encoding support with media-libs/vo-amrwbenc.
+ - - bluray                : Enable playback of Blu-ray filesystems
+ - - bs2b                  : Enables media-libs/libbs2b based Bauer stereo-to-binaural filter.
+ + + bzip2                 : Use the bzlib compression library
+ - - cdio                  : Enables audio CD grabbing with dev-libs/libcdio.
+ - - chromaprint           : Enables audio fingerprinting support with media-libs/chromaprint.
+ - - chromium              : Builds libffmpeg.so to enable media playback in Chromium-based browsers like Opera and
+                             Vivaldi.
+ - - codec2                : Enables codec2 low bit rate speech codec support via media-libs/codec2.
+ - - cpu_flags_arm_neon    : Use the NEON (ASIMD) instruction set
+ + + cpu_flags_arm_vfpv3   : Use the VFP version 3 instruction set
+ - - cpudetection          : Enables runtime CPU detection (useful for bindist, compatibility on other CPUs)
+ - - dav1d                 : Enables AV1 decoding via media-libs/dav1d.
+ - - debug                 : Enable extra debug codepaths, like asserts and extra output. If you want to get
+                             meaningful backtraces see
+                             https://wiki.gentoo.org/wiki/Project:Quality_Assurance/Backtraces
+ - - doc                   : Add extra documentation (API, Javadoc, etc). It is recommended to enable per package
+                             instead of globally
+ + + encode                : Add support for encoding of audio or video files
+ - - fdk                   : Use external fdk-aac library for AAC encoding
+ + + fftools_aviocat       : cat's a URL to another one, useful for dumping streams.
+ + + fftools_cws2fws       : converts cws files (Macromedia Flash, compressed) to fws ones (Macromedia Flash,
+                             uncompressed).
+ + + fftools_ffescape      : Escapes an input string, adopting the av_get_token() escaping logic.
+ + + fftools_ffeval        : A simple expression evalutor.
+ + + fftools_ffhash        : Computes a file's digest using libavutil algorithms.
+ + + fftools_fourcc2pixfmt : Shows the relationships between rawvideo pixel formats and FourCC tags.
+ + + fftools_graph2dot     : A tool to convert a libavfilter graph to a dot file.
+ + + fftools_ismindex      : A tool for creating smooth streaming manifests.
+ + + fftools_pktdumper     : Dumps packets as demuxed by libavformat.
+ + + fftools_qt-faststart  : Rearranges a Quicktime file to facilitate network streaming.
+ + + fftools_sidxindex     : Write an MPD file for fragmented MP4 files with a sidx index at the start of the file.
+ + + fftools_trasher       : Writes burts of random data into a file. Great for testing error
+                             robustness/resilience/concealment.
+ - - flite                 : Adds a text-to-speech filter based on app-accessibility/flite.
+ - - fontconfig            : Support for configuring and customizing font access via media-libs/fontconfig
+ - - fribidi               : Enables fribidi support in the drawtext filter.
+ - - gcrypt                : Enables gcrypt support: Needed for rtmp(t)e support if openssl, librtmp or gmp is not
+                             used.
+ - - gme                   : Enables support for media-libs/game-music-emu for playing various video game music
+                             formats.
+ - - gmp                   : Add support for dev-libs/gmp (GNU MP library)
+ - - gnutls                : Prefer net-libs/gnutls as SSL/TLS provider (ineffective with USE=-ssl)
+ + + gpl                   : Build GPL code. Should be enabled unless you require LGPL binaries.
+ - - gsm                   : Add support for the gsm lossy speech compression codec
+ - - hardcoded-tables      : Use pre-calculated tables rather than calculating them on the fly.
+ + + iconv                 : Enable support for the iconv character set conversion library
+ - - iec61883              : Support for FireWire DV/HDV input device using media-libs/libiec61883.
+ - - jack                  : Add support for the JACK Audio Connection Kit
+ - - jpeg2k                : Support for JPEG 2000, a wavelet-based image compression format
+ - - kvazaar               : Enables media-libs/kvazaar based HEVC encoder.
+ - - ladspa                : Enable the ability to support ladspa plugins
+ - - libaom                : Enables media-libs/libaom based AV1 codec support.
+ - - libaribb24            : Enables ARIB text and caption decoding via media-libs/aribb24.
+ - - libass                : SRT/SSA/ASS (SubRip / SubStation Alpha) subtitle support
+ - - libcaca               : Add support for colored ASCII-art graphics
+ - - libdrm                : Enables x11-libs/libdrm support for better screen grabbing and hardware accelerated
+                             codecs.
+ - - libilbc               : Enables iLBC de/encoding via media-libs/libilbc.
+ - - libressl              : Use dev-libs/libressl instead of dev-libs/openssl when applicable (see also the ssl
+                             useflag)
+ - - librtmp               : Enables Real Time Messaging Protocol using librtmp (media-video/rtmpdump) in addition
+                             to FFmpeg's native implementation.
+ - - libsoxr               : Enables audio resampling through media-libs/soxr.
+ - - libtesseract          : Enables the OCR filter via app-text/tesseract.
+ + + libv4l                : Uses media-libs/libv4l for video4linux instead of direct calls. Adds support for more
+                             devices via the userspace library.
+ - - libxml2               : Uses dev-libs/libxml2 to enable dash demuxing support.
+ - - lv2                   : Enables lv2 audio filter wrapper.
+ - - lzma                  : Support for LZMA (de)compression algorithm
+ - - mmal                  : Enables Multi-Media Abstraction Layer (MMAL) decoding support: Available e.g. on the
+                             Raspberry Pi.
+ - - modplug               : Add libmodplug support for playing SoundTracker-style music files
+ + + mp3                   : Add support for reading mp3 files
+ + + network               : Enables network streaming support
+ - - openal                : Add support for the Open Audio Library
+ - - opengl                : Add support for OpenGL (3D graphics)
+ + + openh264              : Enables H.264 encoding suppoprt via media-libs/openh264.
+ - - openssl               : Enables dev-libs/openssl support. Adds support for encrypted network protocols
+                             (TLS/HTTPS).
+ - - opus                  : Enable Opus audio codec support
+ - - oss                   : Add support for OSS (Open Sound System)
+ - - pic                   : Force shared libraries to be built as PIC (this is slower)
+ + + postproc              : Build and install libpostproc.
+ - - pulseaudio            : Add support for PulseAudio sound server
+ - - rubberband            : Adds time-stretching and pitch-shifting audio filter based on media-libs/rubberband.
+ - - samba                 : Add support for SAMBA (Windows File and Printer sharing)
+ - - sdl                   : Add support for Simple Direct Layer (media library)
+ - - snappy                : Enable app-arch/snappy support. Required for e.g. Vidvox Hap encoder.
+ - - speex                 : Add support for the speex audio codec (used for speech)
+ - - srt                   : Enable support for Secure Reliable Transport (SRT) via net-libs/srt
+ - - ssh                   : Enable SSH/sftp support via net-libs/libssh.
+ - - static-libs           : Build static versions of dynamic libraries as well
+ - - svg                   : Add support for SVG (Scalable Vector Graphics)
+ - - test                  : Enable dependencies and/or preparations necessary to run tests (usually controlled by
+                             FEATURES=test but can be toggled independently)
+ - - theora                : Add support for the Theora Video Compression Codec
+ + + threads               : Add threads support for various packages. Usually pthreads
+ - - truetype              : Add support for FreeType and/or FreeType2 fonts
+ - - twolame               : Enables MP2 encoding via media-sound/twolame as an alternative to the internal encoder.
+ + + v4l                   : Enable support for video4linux (using linux-headers or userspace libv4l libraries)
+ - - vidstab               : Enables video stabilization filter using vid.stab library (media-libs/vidstab).
+ - - vorbis                : Add support for the OggVorbis audio codec
+ - - vpx                   : Enables VP8 and VP9 codec support using libvpx: Decoding does not require this to be
+                             enabled but libvpx can also be used for decoding; encoding requires this useflag to be
+                             enabled though.
+ - - wavpack               : Add support for wavpack audio compression tools
+ - - webp                  : Add support for the WebP image format
+ + + x264                  : Enable h264 encoding using x264
+ - - x265                  : Enables HEVC encoding with media-libs/x265.
+ - - xvid                  : Add support for xvid.org's open-source mpeg-4 codec
+ - - zeromq                : Enables net-libs/zeromq support with the zmq/azmq filters.
+ - - zimg                  : Enables media-libs/zimg based scale filter.
+ + + zlib                  : Add support for zlib (de)compression
+ - - zvbi                  : Enables media-libs/zvbi based teletext decoder.
+[I] net-misc/openssh
+     Available versions:  8.1_p1-r3^t ~8.2_p1-r6^t ~8.3_p1-r4^t {X X509 audit bindist debug hpn kerberos ldns libedit libressl livecd pam +pie +scp sctp security-key selinux +ssl static test xmss ABI_MIPS="n32" KERNEL="linux"}
+     Installed versions:  8.1_p1-r3^t(06:50:03 05/11/20)(pam pie ssl -X -X509 -audit -bindist -debug -hpn -kerberos -ldns -libedit -libressl -livecd -sctp -selinux -static -test -xmss ABI_MIPS="-n32" KERNEL="linux")
+     Homepage:            https://www.openssh.com/
+     Description:         Port of OpenBSD's free SSH release
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for net-misc/openssh-8.1_p1-r3:
+ U I
+ - - X        : Add support for X11
+ - - X509     : Adds support for X.509 certificate authentication
+ - - bindist  : Disable EC/RC5 algorithms in OpenSSL for patent reasons.
+ - - debug    : Enable extra debug codepaths, like asserts and extra output. If you want to get meaningful
+                backtraces see https://wiki.gentoo.org/wiki/Project:Quality_Assurance/Backtraces
+ - - hpn      : Enable high performance ssh
+ - - kerberos : Add kerberos support
+ - - ldns     : Use LDNS for DNSSEC/SSHFP validation.
+ - - libedit  : Use the libedit library (replacement for readline)
+ - - libressl : Use dev-libs/libressl instead of dev-libs/openssl when applicable (see also the ssl useflag)
+ - - livecd   : Enable root password logins for live-cd environment.
+ + + pam      : Add support for PAM (Pluggable Authentication Modules) - DANGEROUS to arbitrarily flip
+ + + pie      : Build programs as Position Independent Executables (a security hardening technique)
+ - - sctp     : Support for Stream Control Transmission Protocol
+ + + ssl      : Enable additional crypto algorithms via OpenSSL
+ - - static   : !!do not set this during bootstrap!! Causes binaries to be statically linked instead of dynamically
+ - - test     : Enable dependencies and/or preparations necessary to run tests (usually controlled by FEATURES=test
+                but can be toggled independently)
+ - - xmss     : Enable XMSS post-quantum authentication algorithm
+[I] sci-libs/lapack
+     Available versions:  3.8.0 3.8.0-r1 {deprecated doc eselect-ldso lapacke}
+     Installed versions:  3.8.0-r1(09:31:20 08/04/20)(-deprecated -doc -eselect-ldso -lapacke)
+     Homepage:            http://www.netlib.org/lapack/
+     Description:         BLAS,CBLAS,LAPACK,LAPACKE reference implementations
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for sci-libs/lapack-3.8.0-r1:
+ U I
+ - - deprecated   : Also build deprecated functions
+ - - doc          : Add extra documentation (API, Javadoc, etc). It is recommended to enable per package instead of
+                    globally
+ - - eselect-ldso : Enable runtime library switching by eselect and ld.so.
+ - - lapacke      : Build LAPACKE
+[I] sys-apps/mlocate
+     Available versions:  0.26-r2 ~0.26-r3 {nls selinux}
+     Installed versions:  0.26-r2(17:22:49 08/03/20)(nls -selinux)
+     Homepage:            https://pagure.io/mlocate
+     Description:         Merging locate is an utility to index and quickly search for files
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for sys-apps/mlocate-0.26-r2:
+ U I
+ + + nls : Add Native Language Support (using gettext - GNU locale utilities)
+[I] sys-kernel/gentoo-sources
+     Available versions:  
+     (4.4.221) 4.4.221^bs
+     (4.4.228) 4.4.228^bs
+     (4.4.229) ~4.4.229^bs
+     (4.4.230) ~4.4.230^bs
+     (4.4.231) ~4.4.231^bs
+     (4.4.232) ~4.4.232^bs
+     (4.9.221) 4.9.221^bs
+     (4.9.228) 4.9.228^bs
+     (4.9.229) ~4.9.229^bs
+     (4.9.230) ~4.9.230^bs
+     (4.9.231) ~4.9.231^bs
+     (4.9.232) ~4.9.232^bs
+     (4.14.178) 4.14.178^bs
+     (4.14.185) 4.14.185^bs
+     (4.14.188) ~4.14.188^bs
+     (4.14.189) ~4.14.189^bs
+     (4.14.190) ~4.14.190^bs
+     (4.14.191) ~4.14.191^bs
+     (4.19.120) 4.19.120^bs
+     (4.19.129) 4.19.129^bs
+     (4.19.133) ~4.19.133^bs
+     (4.19.134) ~4.19.134^bs
+     (4.19.135) ~4.19.135^bs
+     (4.19.136) ~4.19.136^bs
+     (5.4.38) 5.4.38^bs
+     (5.4.48) 5.4.48^bs
+     (5.4.52) ~5.4.52^bs
+     (5.4.53) ~5.4.53^bs
+     (5.4.54) ~5.4.54^bs
+     (5.4.55) ~5.4.55^bs
+     (5.7.8) ~5.7.8^bs
+     (5.7.9) ~5.7.9^bs
+     (5.7.10) ~5.7.10^bs
+     (5.7.11) ~5.7.11^bs
+     (5.7.12) ~5.7.12^bs
+       {build experimental symlink}
+     Installed versions:  5.4.48(5.4.48)^bs(20:35:21 08/03/20)(-build -experimental -symlink)
+     Homepage:            https://dev.gentoo.org/~mpagano/genpatches
+     Description:         Full sources including the Gentoo patchset for the 5.7 kernel tree
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for sys-kernel/gentoo-sources-5.4.48:
+ U I
+ - - build        : !!internal use only!! DO NOT SET THIS FLAG YOURSELF!, used for creating build images and the
+                    first half of bootstrapping [make stage1]
+ - - experimental : Apply experimental patches; for more information, see
+                    "https://wiki.gentoo.org/wiki/Project:Kernel/Experimental".
+ - - symlink      : Force kernel ebuilds to automatically update the /usr/src/linux symlink
+[I] x11-libs/libxcb
+     Available versions:  1.14(0/1.12)^t {doc selinux static-libs test +xkb ABI_MIPS="n32 n64 o32" ABI_RISCV="lp64 lp64d" ABI_S390="32 64" ABI_X86="32 64 x32"}
+     Installed versions:  1.14(0/1.12)^t(11:01:59 08/06/20)(xkb -doc -selinux -static-libs -test ABI_MIPS="-n32 -n64 -o32" ABI_RISCV="-lp64 -lp64d" ABI_S390="-32 -64" ABI_X86="-32 -64 -x32")
+     Homepage:            https://xcb.freedesktop.org/ https://gitlab.freedesktop.org/xorg/lib/libxcb
+     Description:         X C-language Bindings library
+
+[ Legend : U - final flag setting for installation]
+[        : I - package is installed with flag     ]
+[ Colors : set, unset                             ]
+ * Found these USE flags for x11-libs/libxcb-1.14:
+ U I
+ - - doc         : Add extra documentation (API, Javadoc, etc). It is recommended to enable per package instead of
+                   globally
+ - - static-libs : Build static versions of dynamic libraries as well
+ - - test        : Enable dependencies and/or preparations necessary to run tests (usually controlled by
+                   FEATURES=test but can be toggled independently)
+ + + xkb         : Enable the XCB keyboard extension
+pi@localhost ~ $ 
