@@ -27,6 +27,8 @@ setup(
     data_files=[
         ('/usr/local/bin/', ['src/heart.py']),
         ('/usr/local/bin/', ['src/motiondetection.py']),
+        ('/usr/local/bin/', ['src/webconfigurator/templates']),
+        ('/usr/local/bin/', ['src/webconfigurator/configure.py']),
         ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg'])
     ],
     zip_safe=True,
