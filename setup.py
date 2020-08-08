@@ -27,9 +27,9 @@ setup(
     data_files=[
         ('/usr/local/bin/', ['src/heart.py']),
         ('/usr/local/bin/', ['src/motiondetection.py']),
-        ('/usr/local/bin/', ['src/webconfigurator/templates']),
-        ('/usr/local/bin/', ['src/webconfigurator/configure.py']),
-        ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg'])
+        ('/usr/local/bin/webconfigurator/', ['src/webconfigurator/configure.py']),
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/index.html'])
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/invalid_credential_format.html'])
     ],
     zip_safe=True,
     install_requires=['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2'],
