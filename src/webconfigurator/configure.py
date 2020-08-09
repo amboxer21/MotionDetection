@@ -1,5 +1,9 @@
 import re
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
+from wtforms import Form, BooleanField, StringField, PasswordField, validators
+
+from wtforms.fields.html5 import EmailField
+from wtforms.validators import DataRequired, Email
 
 config = Flask(__name__, template_folder="templates")
 
@@ -185,33 +189,6 @@ def read_config_file_into_hash(hash=dict()):
                 hash['server_port'] = 'Server Port...'
 
         return hash
-
-
-def email(credentials):
-    obj = str(credentials).split(",")
-    if obj is not None:
-        return obj[0]
-    return str()
-
-def password(credentials):
-    obj = str(credentials).split(",")
-    if obj is not None:
-        return obj[1]
-    return str() 
-
-def validate_email(email):
-    regex = '(\A[\w+\.\-]+)(@)(\w+)(\.)(\w+)\Z'
-    addr  = re.search(regex, str(email), re.M | re.I)
-    if addr is not None:
-        return True
-    return False 
-
-def validate_password(password):
-    regex  = '\A\w+\Z'
-    passwd = re.search(regex, str(password), re.M | re.I)
-    if passwd is not None:
-        return True
-    return False
 
 @config.route('/reload',methods=['POST'])
 def reload_framework(hash=dict()):
