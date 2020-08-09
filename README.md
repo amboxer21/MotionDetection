@@ -160,7 +160,10 @@ Here is an older(but still relevant) [video](https://www.youtube.com/watch?v=ZDy
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
-![alt_text](https://user-images.githubusercontent.com/2100258/89722300-e99e6000-d9b5-11ea-8331-2c3129f3212f.png)
+
+![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
+
+
 ---
 
 **Since `Nov 27, 2017`**
