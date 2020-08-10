@@ -7,6 +7,16 @@
 
 ---
 
+# Todo
+> Roll an image for the Raspberry Pi 3b.
+
+---
+
+# Notice
+If you need an image made, I can send you one via USPS(mail). E-mail me for more info - amboxer21@gmail.com.
+
+---
+
 # MotionDetection(CCTV) with Python3 on the Raspberry Pi 4 B on Gentoo Linux
 
 **Disclaimer:** The Raspberry Pi 4b doesn't like ghosted(dd) images. You must roll your own in order to get the system to boot. Instructions will be included below along with [this](https://youtu.be/DVcC540hxlk) video. You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
