@@ -81,13 +81,6 @@ anthony@anthony ~/rpi4b/firmware/boot $ umount -R /mnt/gentoo
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address + port 5000 - i.e., 192.168.1.232:5000. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
 
-### [SCREEN SHOTS]
-
-![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
-![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
-![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
-![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
-
 # [Todo]
 > Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
 
@@ -97,6 +90,13 @@ You can change the options that the Motiondetection framework runs with by openi
 [Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
 
 [MotionDetection Framework rsync data](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
+
+### [SCREEN SHOTS]
+
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
+![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
 
 ---
 
