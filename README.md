@@ -14,16 +14,6 @@ This system monitors motion from a USB webcam on a Raspberry Pi using the OpenCV
 
 >[ LATEST ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
-# [Todo]
-> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
-
-### [Resources]:
-[ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
-
-[Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
-
-[MotionDetection Framework rsync data](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
-
 ---
 
 # MotionDetection(CCTV) with Python3 on the Raspberry Pi 4b powered by Gentoo Linux
@@ -97,6 +87,16 @@ You can change the options that the Motiondetection framework runs with by openi
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
 ![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
+
+# [Todo]
+> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
+
+### [Resources]:
+[ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
+
+[Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
+
+[MotionDetection Framework rsync data](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
 
 ---
 
