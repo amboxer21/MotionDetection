@@ -1,4 +1,4 @@
-# Change Log
+# [Change Log]
 >[ OLD ][As of 2020-08-03] Currently fixing up this repo's code and working on a new Gentoo based ISO image
 
 >[ OLD ][As of 2020-08-03] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo [HERE](https://youtu.be/YYGSTYESsQk).
@@ -7,10 +7,10 @@
 
 >[ LATEST ][As of 2020-08-09] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
-# Todo
+# [Todo]
 > Roll an image for the Raspberry Pi 3b.
 
-# Notice
+# [Notice]
 If you need an image made, I can send you one via USPS(mail). E-mail me for more info - amboxer21@gmail.com.
 
 ---
@@ -19,10 +19,13 @@ If you need an image made, I can send you one via USPS(mail). E-mail me for more
 
 **Disclaimer:** The Raspberry Pi 4b doesn't like ghosted(dd) images. You must roll your own in order to get the system to boot. Instructions will be included below along with [THIS](https://youtu.be/DVcC540hxlk) video. You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
 
-### Download:
+### [Demo]:
+Find aquick demo [HERE](https://youtu.be/_jswANI5GCg)
+
+### [Download]:
 Download the Motiondetection framework [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
 
-### Rolling your own image:
+### [Rolling your own image]:
 >The follow script assumes that you downloaded the rpi4b tarball in your home directory.
 
 **PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH with the script below!!**
@@ -73,9 +76,16 @@ anthony@anthony ~/rpi4b/firmware/boot $ umount -R /mnt/gentoo
 
 ```
 
-### Changing Motiondetection options using a GUI
+### [Changing Motiondetection options using a GUI]:
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address + port 5000 - i.e., 192.168.1.232:5000. Here you can chage options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
+
+### [SCREEN SHOTS]
+
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
+![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
 
 ---
 
