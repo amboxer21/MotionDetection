@@ -1,11 +1,11 @@
 # [Change Log]
->[ OLD ][As of 2020-08-03] Currently fixing up this repo's code and working on a new Gentoo based ISO image
+>[ OLD ][**As of 2020-08-03**] Currently fixing up this repo's code and working on a new Gentoo based ISO image
 
->[ OLD ][As of 2020-08-03] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo of the webconfigurator [HERE](https://youtu.be/YYGSTYESsQk).
+>[ OLD ][**As of 2020-08-03**] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo of the webconfigurator [HERE](https://youtu.be/YYGSTYESsQk).
 
->[ OLD ][As of 2020-08-09] The framework that runs on Raspbian has been deprecated in favor of Gentoo Linux. The Raspbian system will no longer be updated but will be left in tact. 
+>[ OLD ][**As of 2020-08-09**] The framework that runs on Raspbian has been deprecated in favor of Gentoo Linux. The Raspbian system will no longer be updated but will be left in tact. 
 
->[ LATEST ][As of 2020-08-09] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
+>[ LATEST ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
 # [Todo]
 > Roll an image for the Raspberry Pi 3b.
@@ -96,7 +96,9 @@ You can change the options that the Motiondetection framework runs with by openi
 ---
 
 # DEPRECATED SECTION!
->Everything will be moved to Gentoo from Raspbian
+
+## [IMPORTANT]:
+>Everything will be moved to Gentoo from Raspbian. I DO NOT have a Raspberry Pi 3 at the moment, so I cannot be 150% sure but I believe that the images for the RPI3 are corrupted. I will make a new image for the Raspberry Pi 3b once I get another 3b. This image will be DD'able unlike the Raspberry Pi 4b system above. 
 
 **Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B. The E-mails are sent to sshmonitorapp@gmail.com by default - please change this address! `I can make custom images using your E-mail, so that you can just plug the system in and the pictures are sent to you.` No tweaking necessary on your part. Shoot me an E-mail if this sounds like something that you'd be interested in doing. 
 
