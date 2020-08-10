@@ -34,7 +34,7 @@ Find aquick demo [HERE](https://youtu.be/_jswANI5GCg)
 Download the Motiondetection framework [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
 
 ### [Rolling your own image]:
->The follow script assumes that you downloaded the rpi4b tarball in your home directory.
+>The following script assumes that you downloaded the rpi4b tarball in your home directory.
 
 **PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH with the script below!!**
 ```
