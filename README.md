@@ -1,19 +1,84 @@
-# [As of 2020-08-03] Currently fixing up this repo's code and working on a new Gentoo based ISO image
+# Change Log
+>[ OLD ][As of 2020-08-03] Currently fixing up this repo's code and working on a new Gentoo based ISO image
+
+>[ OLD ][As of 2020-08-03] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo [HERE](https://youtu.be/YYGSTYESsQk).
+
+>[ LATEST ][As of 2020-08-09] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
 ---
 
-# ** !! SEEMS THAT THE SYSTEM IMAGE FOR THE RPI4b IS CORRUPT and I will have to roll it AGAIN !! **
+# MotionDetection(CCTV) with Python3 on the Raspberry Pi 4 B on Gentoo Linux
 
-# MotionDetection(CCTV) for Python3 on the Raspberry Pi 4 B
+**Disclaimer:** The Raspberry Pi 4b doesn't like ghosted(dd) images. You must roll your own in order to get the system to boot. Instructions will be included below along with [this](https://youtu.be/DVcC540hxlk) video. You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
+
+### Download:
+Download the Motiondetection framework [here](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
+
+### Rolling your own image:
+>The follow script assumes that you downloaded the rpi4b tarball in your home directory.
+
+**PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH with the script below!!**
+```
+anthony@anthony ~ $ umount -R /mnt/gentoo
+anthony@anthony ~ $ parted /dev/mmcblk0 mklabel msdos
+
+anthony@anthony ~ $ for n in {1..4}; do echo -e 'y' | parted /dev/mmcblk0 rm $n 2>/dev/null; done
+anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary fat32 0% 513MB
+anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary linux-swap 513MB 2561MB
+anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary ext4 2561MB 100%
+anthony@anthony ~ $ parted /dev/mmcblk0 p
+
+anthony@anthony ~ $ mkfs.vfat -F32 /dev/mmcblk0p1
+anthony@anthony ~ $ mkswap /dev/mmcblk0p2
+anthony@anthony ~ $ echo 'y' | mkfs.ext4 /dev/mmcblk0p3
+
+anthony@anthony ~ $ mount /dev/mmcblk0p3 /mnt/gentoo
+
+anthony@anthony ~ $ tar xzvf rpi4b.tar.gz
+anthony@anthony ~ $ cd rpi4b
+anthony@anthony ~/rpi4b $ tar xzvf gentoo.tar.gz
+
+anthony@anthony ~/rpi4b $ time rsync -ra gentoo/* /mnt/gentoo/
+
+anthony@anthony ~/rpi4b $ time tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
+anthony@anthony ~/rpi4b $ time tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
+
+anthony@anthony ~/rpi4b $ mkdir /mnt/gentoo/boot
+anthony@anthony ~/rpi4b $ mount /dev/mmcblk0p1 /mnt/gentoo/boot
+
+anthony@anthony ~/rpi4b $ tar xzvf firmware.tar.gz
+anthony@anthony ~/rpi4b $ cd firmware/boot
+anthony@anthony ~/rpi4b/firmware/boot $ cp -r * /mnt/gentoo/boot/
+anthony@anthony ~/rpi4b/firmware/boot $ cp -r ../modules /mnt/gentoo/lib/
+
+anthony@anthony ~/rpi4b/firmware/boot $ echo -e "/dev/mmcblk0p1 /boot auto noauto,noatime 1 2\n/dev/mmcblk0p3 / ext4 noatime 0 1\n/dev/mmcblk0p2 none swap sw 0 0" >> /mnt/gentoo/etc/fstab
+
+anthony@anthony ~/rpi4b/firmware/boot $ echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p3 rootfstype=ext4 elevator=deadline rootwait" > /mnt/gentoo/boot/cmdline.txt
+
+anthony@anthony ~/rpi4b/firmware/boot $ cp /mnt/gentoo/usr/share/zoneinfo/America/New_York /mnt/gentoo/etc/localtime
+
+anthony@anthony ~/rpi4b/firmware/boot $ echo "America/New_York" > /mnt/gentoo/etc/timezone
+
+anthony@anthony ~/rpi4b/firmware/boot $ sed -i 's/^root:.*/root::::::::/' /mnt/gentoo/etc/shadow
+
+anthony@anthony ~/rpi4b/firmware/boot $ umount -R /mnt/gentoo
+
+```
+
+### Changing Motiondetection options using a GUI
+
+You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address + port 5000 - i.e., 192.168.1.232:5000. Here you can chage options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
+
+---
+
+# Deprecated!
+>Everything will be moved to Gentoo from Raspbian
 
 **Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B. The E-mails are sent to sshmonitorapp@gmail.com by default - please change this address! `I can make custom images using your E-mail, so that you can just plug the system in and the pictures are sent to you.` No tweaking necessary on your part. Shoot me an E-mail if this sounds like something that you'd be interested in doing. 
 
 **Notice:** I am currently in need of a new RPI3 B+ and until I get one, everything has been moved to an RPI4 B. I will leave the RPI3 B+ image link up and available. Though the image for the RPI3 needs a bit of tweaking on the command line once it is installed. Things like the static route in place, the entry in wpa_suuplicant.conf to connect to an AP, etc. - small tweaks. On the other hand, the RPI4 image is complete and will just boot up if you use a wired connection.
 
 **Description:**  This system is called MotionDetection and it monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set the motion detection software off and E-mails that picture to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! Donate [here](https://paypal.me/motiondetection) if you'd like. You can contact me via E-mail if you have any questions at amboxer21@gmail.com.
-
-**In the Works:** I am working on something that will allow you to update the applications configuration options via `POST` request. This way all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated variables.
-
 
 A video demo can be found [HERE](https://www.youtube.com/watch?v=ZDyZsqIcBnk).
 
