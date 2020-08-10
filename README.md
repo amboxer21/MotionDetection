@@ -21,8 +21,12 @@ If you need an image made, I can send you one via USPS(mail). E-mail me for more
 
 **Disclaimer:** The Raspberry Pi 4b doesn't like ghosted(dd) images. You must roll your own in order to get the system to boot. Instructions will be included below along with [this](https://youtu.be/DVcC540hxlk) video. You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
 
+---
+
 ### Download:
 Download the Motiondetection framework [here](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
+
+---
 
 ### Rolling your own image:
 >The follow script assumes that you downloaded the rpi4b tarball in your home directory.
@@ -81,7 +85,7 @@ You can change the options that the Motiondetection framework runs with by openi
 
 ---
 
-# Deprecated!
+# DEPRECATED SECTION!
 >Everything will be moved to Gentoo from Raspbian
 
 **Disclaimer:** The current code base does not work with anything other than a Raspberry Pi 4 B. The E-mails are sent to sshmonitorapp@gmail.com by default - please change this address! `I can make custom images using your E-mail, so that you can just plug the system in and the pictures are sent to you.` No tweaking necessary on your part. Shoot me an E-mail if this sounds like something that you'd be interested in doing. 
