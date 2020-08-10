@@ -5,6 +5,8 @@
 
 >[ OLD ][**As of 2020-08-09**] The framework that runs on Raspbian has been deprecated in favor of Gentoo Linux. The Raspbian system will no longer be updated but will be left in tact. 
 
+>[ OLD ][**As of 2020-08-09**] Daemon support was removed from the framework. You will either have to set it up yourself or rolling image. The image is plug-and-play power up the RPI4b and it just works.
+
 >[ LATEST ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
 # [Todo]
