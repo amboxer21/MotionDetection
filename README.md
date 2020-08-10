@@ -1,3 +1,8 @@
+# [Description]
+This system monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set off the framework then E-mails the picture(s) to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! You can contact me via E-mail if you have any questions at amboxer21@gmail.com. If you need an image made, I can send you one via USPS(mail).
+
+---
+
 # [Change Log]
 >[ OLD ][**As of 2020-08-03**] Currently fixing up this repo's code and working on a new Gentoo based ISO image
 
@@ -11,8 +16,6 @@
 
 # [Todo]
 > Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
-
-If you need an image made, I can send you one via USPS(mail). E-mail me for more info - amboxer21@gmail.com.
 
 ### [Resources]:
 [ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
