@@ -10,7 +10,6 @@
 # [Todo]
 > Roll an image for the Raspberry Pi 3b.
 
-# [Notice]
 If you need an image made, I can send you one via USPS(mail). E-mail me for more info - amboxer21@gmail.com.
 
 ---
