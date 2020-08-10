@@ -1,8 +1,6 @@
 # [Description]
 This system monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set off the framework then E-mails the picture(s) to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. This system is highly configurable and stable! You can contact me via E-mail if you have any questions at amboxer21@gmail.com. If you need an image made, I can send you one via USPS(mail).
 
----
-
 # [Change Log]
 >[ OLD ][**As of 2020-08-03**] Currently fixing up this repo's code and working on a new Gentoo based ISO image
 
@@ -13,6 +11,9 @@ This system monitors motion from a USB webcam on a Raspberry Pi using the OpenCV
 >[ OLD ][**As of 2020-08-09**] Daemon support was removed from the framework. You will either have to set it up yourself or roll an image. The image is plug-and-play, power up the RPI4b and it just works.
 
 >[ LATEST ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
+
+# [Todo]
+> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
 
 ---
 
@@ -80,9 +81,6 @@ anthony@anthony ~/rpi4b/firmware/boot $ umount -R /mnt/gentoo
 ### [Changing Motiondetection options using a GUI]:
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address + port 5000 - i.e., 192.168.1.232:5000. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
-
-# [Todo]
-> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
 
 ### [Resources]:
 [ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
