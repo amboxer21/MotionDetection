@@ -1,7 +1,7 @@
 # [Change Log]
 >[ OLD ][As of 2020-08-03] Currently fixing up this repo's code and working on a new Gentoo based ISO image
 
->[ OLD ][As of 2020-08-03] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo [HERE](https://youtu.be/YYGSTYESsQk).
+>[ OLD ][As of 2020-08-03] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo of the webconfigurator [HERE](https://youtu.be/YYGSTYESsQk).
 
 >[ OLD ][As of 2020-08-09] The framework that runs on Raspbian has been deprecated in favor of Gentoo Linux. The Raspbian system will no longer be updated but will be left in tact. 
 
