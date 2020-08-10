@@ -30,7 +30,7 @@ setup(
         ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg']),
         ('/usr/local/bin/webconfigurator/', ['src/webconfigurator/configure.py']),
         ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg.backup']),
-        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/index.html'])
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/index.html']),
         ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/invalid_credential_format.html'])
     ],
     zip_safe=True,
