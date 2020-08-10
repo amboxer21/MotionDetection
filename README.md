@@ -12,6 +12,13 @@
 
 If you need an image made, I can send you one via USPS(mail). E-mail me for more info - amboxer21@gmail.com.
 
+### [Resources]:
+[ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
+
+[Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
+
+[MotionDetection Framework rsync data](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
+
 ---
 
 # MotionDetection(CCTV) with Python3 on the Raspberry Pi 4b powered by Gentoo Linux
