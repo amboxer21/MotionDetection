@@ -8,7 +8,7 @@
 >[ LATEST ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
 # [Todo]
-> Roll a DD'able image for the Raspberry Pi 3b.
+> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
 
 If you need an image made, I can send you one via USPS(mail). E-mail me for more info - amboxer21@gmail.com.
 
