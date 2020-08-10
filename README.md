@@ -18,7 +18,7 @@ If you need an image made, I can send you one via USPS(mail). E-mail me for more
 **Disclaimer:** The Raspberry Pi 4b doesn't like ghosted(dd) images. You must roll your own in order to get the system to boot. Instructions will be included below along with [this](https://youtu.be/DVcC540hxlk) video. You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
 
 ### Download:
-Download the Motiondetection framework [here](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing)
+Download the Motiondetection framework [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
 
 ### Rolling your own image:
 >The follow script assumes that you downloaded the rpi4b tarball in your home directory.
