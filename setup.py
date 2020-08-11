@@ -34,5 +34,5 @@ setup(
         ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/invalid_credential_format.html'])
     ],
     zip_safe=True,
-    install_requires=['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator'],
+    install_requires=['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
 )
