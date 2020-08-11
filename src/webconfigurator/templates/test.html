@@ -1,20 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script>
+        var images = [];
+        $(function() {
+            $('button').click(function() {
+                document.getElementsByName('image').forEach(function(e) {
+                    if(e.checked) {
+                        $.ajax({
+                            url: '/delete_selected_photos',
+                            data: {image : e.id},
+                            type: 'POST',
+                            success: function(response) {
+                                console.log(response);
+                            },
+                            error: function(error) {
+                                console.log(error);
+                            }
+                        });
+                    }
+                }); 
+            });
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <form role="form" method='POST' action="{{ url_for('delete_selected_photos') }}">
             <div class="form-group">
                 {% for image in images %}
-                    <input type="checkbox" id="{{ image }}"/>
+                    <input type="checkbox" id="{{ image }}" name="image"/>
                     <label for="{{ image }}">
                         <img "width="200" height="200" src="{{ image }}"/>
                     </label>
                 {% endfor %}
             </div>
             <div>
-                <button type="submit" class="btn btn-default">Submit</button>
+                <button type="submit" id="submit" class="btn btn-default">Submit</button>
             </div>
         </form>
     </div>
