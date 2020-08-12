@@ -1,11 +1,46 @@
 import re
+import os
+
+from os import listdir
+from os.path import isfile, join
+from flask import Flask, render_template
+
 from flask import Flask, render_template, request, redirect, url_for
-from wtforms import Form, BooleanField, StringField, PasswordField, validators
 
-from wtforms.fields.html5 import EmailField
-from wtforms.validators import DataRequired, Email
+main = Flask(__name__, template_folder="templates")
 
-config = Flask(__name__, template_folder="templates")
+def images(photos=[]):
+    photos.clear()
+    files = [f for f in listdir('static') if isfile(join('static', f))]
+    for f in files:
+        if re.search('capture\d+.png',f, re.M | re.I) is not None:
+            photos.append(os.path.join('static', f))
+    return photos
+
+@main.route('/delete_selected_photos',methods=['POST'])
+def delete_selected_photos():
+
+    image  = request.form['image']
+
+    img    = re.sub('static/', '', image)
+
+    p_dir  = '/home/pi/.motiondetection' 
+    p_path = os.path.join(p_dir, img)
+
+    l_dir  = 'static' 
+    l_path = os.path.join(l_dir, img)
+
+    try:
+        os.remove(p_path)
+        os.remove(l_path)
+    except Exception as exception:
+        pass
+
+    return render_template("photos.html", images=images())
+
+@main.route('/photos')
+def photos():
+    return render_template("photos.html", images=images())
 
 def write_config_file_into_hash(hash=dict()):
     with open('/etc/motiondetection/motiondetection.cfg','w') as f:
@@ -190,7 +225,7 @@ def read_config_file_into_hash(hash=dict()):
 
         return hash
 
-@config.route('/reload',methods=['POST'])
+@main.route('/reload',methods=['POST'])
 def reload_framework(hash=dict()):
     hash['ip']                = request.form['ip']
     hash['fps']               = request.form['fps']
@@ -211,9 +246,14 @@ def reload_framework(hash=dict()):
     write_config_file_into_hash(hash)
     return render_template('configure.html',value=read_config_file_into_hash())
 
-@config.route('/configures', methods=['GET', 'POST'])
-def index():
+@main.route('/configure', methods=['GET', 'POST'])
+def configure():
     return render_template('configure.html',value=read_config_file_into_hash())
 
+
+@main.route('/')
+def index():
+    return render_template("main.html")
+
 if __name__ == '__main__':
-    config.run(debug=True, host='0.0.0.0')
+    main.run(debug=True, host='0.0.0.0')

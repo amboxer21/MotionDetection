@@ -36,11 +36,11 @@ def delete_selected_photos():
     except Exception as exception:
         pass
 
-    return render_template("test.html", images=images())
+    return render_template("photos.html", images=images())
 
 @photos.route('/')
 def show_index():
-    return render_template("test.html", images=images())
+    return render_template("photos.html", images=images())
 
 if __name__ == '__main__':
     photos.run(debug=True, host='0.0.0.0')
