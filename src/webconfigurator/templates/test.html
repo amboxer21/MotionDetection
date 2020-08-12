@@ -8,7 +8,7 @@
         $(function() {
             $('button').click(function() {
                 document.getElementsByName('image').forEach(function(e) {
-                    if(e.checked) {
+                    if(e.checked && (e.id !== '.hidden' || e.id !== 'on')) {
                         $.ajax({
                             url: '/delete_selected_photos',
                             data: {image : e.id},
@@ -27,8 +27,8 @@
     </script>
 </head>
 <body>
-    <div class="container">
-        <form role="form" method='POST' action="{{ url_for('delete_selected_photos') }}">
+    <form role="form" method='POST' action="{{ url_for('delete_selected_photos') }}">
+        <div class="container" style="overflow:scroll; height:400px;">
             <div class="form-group">
                 {% for image in images %}
                     <input type="checkbox" id="{{ image }}" name="image"/>
@@ -37,10 +37,10 @@
                     </label>
                 {% endfor %}
             </div>
-            <div>
-                <button type="submit" id="submit" class="btn btn-default">Submit</button>
-            </div>
-        </form>
-    </div>
+        </div>
+        <div>
+            <button type="submit" id="submit" class="btn btn-default">Submit</button>
+       </div>
+    </form>
 </body>
 </html>
