@@ -1,20 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
-    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <script>
+        var url = new URL(window.document.location);
+        $(function() {
+            $('a.nav-link.home').click(function() {
+                window.location.replace(url.origin);
+            });
+        });
+        $(function() {
+            $('a.nav-link.photos').click(function() {
+                window.location.replace(url.origin+'/photos');
+            });
+        });
+        $(function() {
+            $('a.nav-link.configure').click(function() {
+                window.location.replace(url.origin+'/configure');
+            });
+        });
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">MotionDetection</a>
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-                <a class="nav-link" href="#">Home</a>
-                <a class="nav-link" href="#">Photos</a>
-                <a class="nav-link" href="#">Configure</a>
+                <a class="nav-link home" href="#">Home</a>
+                <a class="nav-link photos" href="#">Photos</a>
+                <a class="nav-link configure" href="#">Configure</a>
             </div>
         </div>
     </nav>
