@@ -9,13 +9,6 @@
         max-width: 1000px;
       }
     </style>
-    <script>
-        $(document).ready(function(){
-            $("div input[name='ip']").hover(function() {
-	              $(this).tooltip('Test');
-	          });
-        });
-    </script>
   </head>
   <body>
     <div class="container">
@@ -39,7 +32,7 @@
           <input data-toggle="tooltip" title="Can be adjusted to prevent false positives. Default is set to 500." type="text" name="motion_thresh_min" placeholder="Motion Threshold Minimum..." class="form-control" value="{{ value['motion_thresh_min'] }}" style="max-width: 500px;" autofocus required>
           <input data-toggle="tooltip" title="The port that motiondetection listens on for incoming commands." type="text" name="server_port" placeholder="Server Port..." class="form-control" value="{{ value['server_port'] }}" style="max-width: 500px;" autofocus required>
         </div>
-        <button type="submit";" class="btn btn-default">Submit</button>
+        <button type="submit" class="btn btn-default">Update</button>
       </form>
     </div>
     <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>

@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script>
         var images = [];
         $(function() {
@@ -27,6 +30,17 @@
     </script>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">MotionDetection</a>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a class="nav-link  href="index.html">Home</a>
+                <a class="nav-link" href="#">Photos</a>
+                <a class="nav-link" href="#">Configure</a>
+            </div>
+        </div>
+    </nav>
+    </br>
     <form role="form" method='POST' action="{{ url_for('delete_selected_photos') }}">
         <div class="container" style="overflow:scroll; height:400px;">
             <div class="form-group">
@@ -39,7 +53,7 @@
             </div>
         </div>
         <div>
-            <button type="submit" id="submit" class="btn btn-default">Submit</button>
+            <button type="submit" id="submit" class="btn btn-default">Delete</button>
        </div>
     </form>
 </body>
