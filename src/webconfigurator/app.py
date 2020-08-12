@@ -20,12 +20,9 @@ def images(photos=[]):
 @app.route('/delete_selected_photos',methods=['POST'])
 def delete_selected_photos():
 
-    image = request.form['image']
+    image  = request.form['image']
 
-    if re.search('hidden|on',image, re.M | re.I):
-        return render_template("test.html", images=images())
-
-    img = re.sub('static/', '', image)
+    img    = re.sub('static/', '', image)
 
     p_dir  = '/home/pi/.motiondetection' 
     p_path = os.path.join(p_dir, img)
