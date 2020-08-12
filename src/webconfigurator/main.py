@@ -42,6 +42,23 @@ def delete_selected_photos():
 def photos():
     return render_template("photos.html", images=images())
 
+def get_logs(lines=[]):
+    lines.clear()
+    with open("/var/log/motiondetection.log", "r") as f:
+        for line in f.read().splitlines():
+            lines.append(line)
+    return lines
+
+@main.route('/clear_logs',methods=['POST'])
+def clear_logs():
+    with open("/var/log/motiondetection.log", "w") as f:
+        f.write("")
+    return render_template("logs.html",lines=get_logs())
+
+@main.route('/logs')
+def show_logs():
+    return render_template("logs.html",lines=get_logs())
+
 def write_config_file_into_hash(hash=dict()):
     with open('/etc/motiondetection/motiondetection.cfg','w') as f:
         for key,value in hash.items():
