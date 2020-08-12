@@ -47,6 +47,8 @@ def get_logs(lines=[]):
     with open("/var/log/motiondetection.log", "r") as f:
         for line in f.read().splitlines():
             lines.append(line)
+        if not lines:
+            lines.append('Nothing to show here!')
     return lines
 
 @main.route('/clear_logs',methods=['POST'])

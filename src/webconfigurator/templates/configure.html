@@ -15,6 +15,11 @@
                 });
             });
             $(function() {
+                $('a.nav-link.logs').click(function() {
+                    window.location.replace(url.origin+'/logs');
+                });
+            });
+            $(function() {
                 $('a.nav-link.photos').click(function() {
                     window.location.replace(url.origin+'/photos');
                 });
@@ -32,6 +37,7 @@
         <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
                 <a class="nav-link home" href="#">Home</a>
+                <a class="nav-link logs" href="#">Logs</a>
                 <a class="nav-link photos" href="#">Photos</a>
                 <a class="nav-link configure" href="#">Configure</a>
             </div>
