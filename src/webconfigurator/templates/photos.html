@@ -59,7 +59,7 @@
     </br>
     <div class="container">
         <form role="form" method='POST' action="{{ url_for('delete_selected_photos') }}">
-            <div class="form-group" style="overflow:scroll; height:400px;">
+            <div class="form-group" style="overflow:scroll; height:300px;">
                 {% for image in images %}
                     <input type="checkbox" id="{{ image }}" name="image"/>
                     <label for="{{ image }}">
