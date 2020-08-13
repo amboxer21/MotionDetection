@@ -328,16 +328,25 @@ class MotionDetection(metaclass=VideoFeed):
             num = re.search("(capture)(\d+)(\.png)", file_name, re.M | re.I)
             img_list.append(int(num.group(2)))
         return max(img_list)
+
+    @staticmethod
+    def symlink(filename,linkname):
+        os.symlink(filename,linkname)
     
     @staticmethod
     def take_picture(frame):
-        picture_name = (
-            '/home/pi/.motiondetection/capture'
+        capture = (
+            'capture'
             + str(MotionDetection.img_num() + 1)
             + '.png'
         )
+        picture_name = (
+            '/home/pi/.motiondetection/capture'
+            + capture 
+        )
         image = Image.fromarray(frame)
         image.save(picture_name)
+        symlink(picture_name,'/usr/local/bin/webconfigurator/static/'+capture)
 
     @staticmethod
     def start_thread(proc,*args):
