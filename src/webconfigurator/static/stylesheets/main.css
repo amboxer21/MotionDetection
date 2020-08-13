@@ -1,3 +1,7 @@
 button.btn.btn-default {
     border-color: grey;
 }
+
+div.container {
+    float: left;
+}
