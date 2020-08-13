@@ -341,7 +341,7 @@ class MotionDetection(metaclass=VideoFeed):
             + '.png'
         )
         picture_name = (
-            '/home/pi/.motiondetection/capture'
+            '/home/pi/.motiondetection/'
             + capture 
         )
         image = Image.fromarray(frame)
