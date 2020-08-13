@@ -346,7 +346,7 @@ class MotionDetection(metaclass=VideoFeed):
         )
         image = Image.fromarray(frame)
         image.save(picture_name)
-        symlink(picture_name,'/usr/local/bin/webconfigurator/static/'+capture)
+        MotionDetection.symlink(picture_name,'/usr/local/bin/webconfigurator/static/'+capture)
 
     @staticmethod
     def start_thread(proc,*args):
