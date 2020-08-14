@@ -1,6 +1,14 @@
+import re
+import os
+
 from distutils.cmd import Command
 from setuptools import setup, find_packages
 from distutils.errors import DistutilsError, DistutilsExecError
+
+if re.search('armv\d',str(os.uname().machine), re.M | re.I) is not None:
+    __MODULES = ['Pillow','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
+else:
+    __MODULES = ['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
 
 setup(
     name='MotionDetection',
@@ -39,5 +47,5 @@ setup(
         ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/configure.html']),
     ],
     zip_safe=True,
-    install_requires=['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
+    install_requires=__MODULES,
 )
