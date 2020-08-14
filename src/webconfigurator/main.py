@@ -1,5 +1,8 @@
 import re
 import os
+import fcntl
+import select
+import subprocess
 
 from os import listdir
 from os.path import isfile, join
@@ -43,7 +46,22 @@ def photos():
     return render_template("photos.html", images=images())
 
 def get_logs(lines=[]):
+
     lines.clear()
+
+    s_in  = stdin=subprocess.PIPE
+    s_out = stdout=subprocess.PIPE
+    s_err = stderr=subprocess.PIPE
+
+    command = ['/usr/bin/cat', '/var/log/motiondetection.log']
+    process = subprocess.Popen(command, s_in, s_out, s_err)
+
+    function_control = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
+    fcntl.fcntl(process.stdout, fcntl.F_SETFL, function_control | os.O_NONBLOCK)
+
+    function_control = fcntl.fcntl(process.stderr, fcntl.F_GETFL)
+    fcntl.fcntl(process.stderr, fcntl.F_SETFL, function_control | os.O_NONBLOCK)
+
     with open("/var/log/motiondetection.log", "r") as f:
         for line in f.read().splitlines():
             lines.append(line)
