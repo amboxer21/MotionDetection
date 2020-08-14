@@ -24,7 +24,7 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 ### [Demo]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
-### [Download]:
+### [Download]: (I have an updated tarball based on the lastest stable master that I need to upload)
 Download the Motiondetection framework [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
 
 ### [Rolling your own image]:
