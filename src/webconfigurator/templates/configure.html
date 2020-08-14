@@ -6,42 +6,48 @@
         <script type="text/javascript" src="{{ url_for('static', filename='javascripts/main.js') }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">MotionDetection</a>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-                <a class="nav-link home" href="#">Home</a>
-                <a class="nav-link logs" href="#">Logs</a>
-                <a class="nav-link photos" href="#">Photos</a>
-                <a class="nav-link configure" href="#">Configure</a>
+        <script>
+            $(document).ready(function(){
+                $('a.nav-link').removeClass("active");
+                $('a.nav-link.configure').addClass("active");
+            });
+        </script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">MotionDetection</a>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link home" href="#">Home</a>
+                    <a class="nav-link logs" href="#">Logs</a>
+                    <a class="nav-link photos" href="#">Photos</a>
+                    <a class="nav-link configure" href="#">Configure</a>
+                </div>
             </div>
-        </div>
-    </nav>
-    </br>
-    <div class="container">
-      <form role="form" method='POST' action="{{ url_for('reload_framework') }}">
-        <div class="form-group">
-          <input data-toggle="tooltip" title="IP Address to run Motiondetection on." type="text" name="ip" placeholder="IP Address..." class="form-control" value="{{ value['ip'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Make motiondetection's output verbose." type="text" name="verbose" placeholder="Verbose..." class="form-control" value="{{ value['verbose'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Your mail server's port." type="text" name="email_port" placeholder="E-mail Port..." class="form-control" value="{{ value['email_port'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Path where motiondetection logs it's output." type="text" name="logfile" placeholder="Log File Path..." class="form-control" value="{{ value['logfile'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Prevent motiondetection from sending e-mails." type="text" name="disable_email" placeholder="Disable E-mail..." class="form-control" value="{{ value['disable_email'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Path to motiondetections configuration file." type="text" name="configfile" placeholder="Configuration File Path..." class="form-control" value="{{ value['configfile'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Location of your usb camera." type="text" name="cam_location" placeholder="Camera Location..." class="form-control" value="{{ value['cam_location'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Set the cameras frames per second." type="text" name="fps" placeholder="Camera's Frames Per Second..." class="form-control" value="{{ value['fps'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="E-mail address used to send the outgoing mail." type="text" name="email" placeholder="E-mail Address..." class="form-control" value="{{ value['email'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Password for your e-mail address." type="text" name="password" placeholder="E-mail Password..." class="form-control" value="{{ value['password'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="The port that the android app will use to view the camera's remote feed." type="text" name="camview_port" placeholder="SecureView Port..." class="form-control" value="{{ value['camview_port'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="The framework will ignore movement above this threshold." type="text" name="delta_thresh_min" placeholder="Delta Threshold Minimum..." class="form-control" value="{{ value['delta_thresh_min'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="The framework will ignore movement below this threshold." type="text" name="delta_thresh_max" placeholder="Delta Threshold Maximum..." class="form-control" value="{{ value['delta_thresh_max'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Number of consecutive pictures to take." type="text" name="burst_mode_opts" placeholder="Burst Mode Count..." class="form-control" value="{{ value['burst_mode_opts'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="Can be adjusted to prevent false positives. Default is set to 500." type="text" name="motion_thresh_min" placeholder="Motion Threshold Minimum..." class="form-control" value="{{ value['motion_thresh_min'] }}" style="max-width: 500px;" autofocus required>
-          <input data-toggle="tooltip" title="The port that motiondetection listens on for incoming commands." type="text" name="server_port" placeholder="Server Port..." class="form-control" value="{{ value['server_port'] }}" style="max-width: 500px;" autofocus required>
-        </div>
-        <button type="submit" class="btn btn-default">Update</button>
-      </form>
+        </nav>
+        </br>
+        <div class="container">
+            <form role="form" method='POST' action="{{ url_for('reload_framework') }}">
+                <div class="form-group">
+                <input data-toggle="tooltip" title="IP Address to run Motiondetection on." type="text" name="ip" placeholder="IP Address..." class="form-control" value="{{ value['ip'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Make motiondetection's output verbose." type="text" name="verbose" placeholder="Verbose..." class="form-control" value="{{ value['verbose'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Your mail server's port." type="text" name="email_port" placeholder="E-mail Port..." class="form-control" value="{{ value['email_port'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Path where motiondetection logs it's output." type="text" name="logfile" placeholder="Log File Path..." class="form-control" value="{{ value['logfile'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Prevent motiondetection from sending e-mails." type="text" name="disable_email" placeholder="Disable E-mail..." class="form-control" value="{{ value['disable_email'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Path to motiondetections configuration file." type="text" name="configfile" placeholder="Configuration File Path..." class="form-control" value="{{ value['configfile'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Location of your usb camera." type="text" name="cam_location" placeholder="Camera Location..." class="form-control" value="{{ value['cam_location'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Set the cameras frames per second." type="text" name="fps" placeholder="Camera's Frames Per Second..." class="form-control" value="{{ value['fps'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="E-mail address used to send the outgoing mail." type="text" name="email" placeholder="E-mail Address..." class="form-control" value="{{ value['email'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Password for your e-mail address." type="text" name="password" placeholder="E-mail Password..." class="form-control" value="{{ value['password'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="The port that the android app will use to view the camera's remote feed." type="text" name="camview_port" placeholder="SecureView Port..." class="form-control" value="{{ value['camview_port'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="The framework will ignore movement above this threshold." type="text" name="delta_thresh_min" placeholder="Delta Threshold Minimum..." class="form-control" value="{{ value['delta_thresh_min'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="The framework will ignore movement below this threshold." type="text" name="delta_thresh_max" placeholder="Delta Threshold Maximum..." class="form-control" value="{{ value['delta_thresh_max'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Number of consecutive pictures to take." type="text" name="burst_mode_opts" placeholder="Burst Mode Count..." class="form-control" value="{{ value['burst_mode_opts'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="Can be adjusted to prevent false positives. Default is set to 500." type="text" name="motion_thresh_min" placeholder="Motion Threshold Minimum..." class="form-control" value="{{ value['motion_thresh_min'] }}" style="max-width: 500px;" autofocus required>
+                <input data-toggle="tooltip" title="The port that motiondetection listens on for incoming commands." type="text" name="server_port" placeholder="Server Port..." class="form-control" value="{{ value['server_port'] }}" style="max-width: 500px;" autofocus required>
+            </div>
+            <button type="submit" class="btn btn-default">Update</button>
+        </form>
     </div>
   </body>
 </html>
