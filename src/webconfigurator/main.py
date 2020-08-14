@@ -49,12 +49,8 @@ def get_logs(lines=[]):
 
     lines.clear()
 
-    s_in  = stdin=subprocess.PIPE
-    s_out = stdout=subprocess.PIPE
-    s_err = stderr=subprocess.PIPE
-
     command = ['/usr/bin/cat', '/var/log/motiondetection.log']
-    process = subprocess.Popen(command, s_in, s_out, s_err)
+    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     function_control = fcntl.fcntl(process.stdout, fcntl.F_GETFL)
     fcntl.fcntl(process.stdout, fcntl.F_SETFL, function_control | os.O_NONBLOCK)
@@ -62,12 +58,13 @@ def get_logs(lines=[]):
     function_control = fcntl.fcntl(process.stderr, fcntl.F_GETFL)
     fcntl.fcntl(process.stderr, fcntl.F_SETFL, function_control | os.O_NONBLOCK)
 
-    with open("/var/log/motiondetection.log", "r") as f:
-        for line in f.read().splitlines():
-            lines.append(line)
-        if not lines:
-            lines.append('Nothing to show here!')
-    return lines
+    reads, writes, errors = select.select(
+        [process.stdout, process.stderr], [], [process.stdout, process.stderr], 0.1
+    )
+
+    for line in reads:
+        lines.append(line.read().splitlines())
+    return [a for b in lines for a in b]
 
 @main.route('/clear_logs',methods=['POST'])
 def clear_logs():
