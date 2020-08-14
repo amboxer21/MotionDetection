@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='javascripts/main.js') }}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+        <script>
+            $(document).ready(function(){
+                $('a.nav-link').removeClass("active");
+                $('a.nav-link.logs').addClass("active");
+            });
+        </script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">MotionDetection</a>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link home" href="#">Home</a>
+                    <a class="nav-link logs" href="#">Logs</a>
+                    <a class="nav-link photos" href="#">Photos</a>
+                    <a class="nav-link configure" href="#">Configure</a>
+                </div>
+            </div>
+        </nav>
+        </br>
+        <div class="container">
+            <form role="form" method='POST' action="{{ url_for('clear_logs') }}">
+                <div class="form-group" style="overflow:scroll; height:300px;">
+                    {% for line in lines %}
+                        <p>{{ line }}</p>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-default">Clear</button>
+            </form>
+        </div>
+    </body>
+</html>

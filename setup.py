@@ -1,6 +1,14 @@
+import re
+import os
+
 from distutils.cmd import Command
 from setuptools import setup, find_packages
 from distutils.errors import DistutilsError, DistutilsExecError
+
+if re.search('armv\d',str(os.uname().machine), re.M | re.I) is not None:
+    __MODULES = ['Pillow','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
+else:
+    __MODULES = ['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
 
 setup(
     name='MotionDetection',
@@ -28,11 +36,16 @@ setup(
         ('/usr/local/bin/', ['src/heart.py']),
         ('/usr/local/bin/', ['src/motiondetection.py']),
         ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg']),
-        ('/usr/local/bin/webconfigurator/', ['src/webconfigurator/configure.py']),
         ('/etc/motiondetection/', ['src/etc/motiondetection/motiondetection.cfg.backup']),
-        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/index.html']),
-        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/invalid_credential_format.html'])
+        ('/usr/local/bin/webconfigurator/', ['src/webconfigurator/main.py']),
+        ('/usr/local/bin/webconfigurator/static/', ['src/webconfigurator/static/.hidden']),
+        ('/usr/local/bin/webconfigurator/static/javascripts/', ['src/webconfigurator/static/javascripts/main.js']),
+        ('/usr/local/bin/webconfigurator/static/stylesheets/', ['src/webconfigurator/static/stylesheets/main.css']),
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/main.html']),
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/logs.html']),
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/photos.html']),
+        ('/usr/local/bin/webconfigurator/templates/', ['src/webconfigurator/templates/configure.html']),
     ],
     zip_safe=True,
-    install_requires=['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator'],
+    install_requires=__MODULES,
 )
