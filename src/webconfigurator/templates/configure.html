@@ -1,35 +1,11 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>MotionDetection WebConfigurator</title>
         <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='javascripts/main.js') }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/main.css') }}">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-        <script>
-            var url = new URL(window.document.location);
-            $(function() {
-                $('a.nav-link.home').click(function() {
-                    window.location.replace(url.origin);
-                });
-            });
-            $(function() {
-                $('a.nav-link.logs').click(function() {
-                    window.location.replace(url.origin+'/logs');
-                });
-            });
-            $(function() {
-                $('a.nav-link.photos').click(function() {
-                    window.location.replace(url.origin+'/photos');
-                });
-            });
-            $(function() {
-                $('a.nav-link.configure').click(function() {
-                    window.location.replace(url.origin+'/configure');
-                });
-            });
-        </script>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -67,7 +43,5 @@
         <button type="submit" class="btn btn-default">Update</button>
       </form>
     </div>
-    <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
   </body>
 </html>
