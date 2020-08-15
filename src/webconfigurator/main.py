@@ -240,8 +240,8 @@ class MotionDetection(object):
                     
             return hash
 
-@main.route('/log_loader')
-def log_loader():
+@main.route('/get_logs_wrapper')
+def get_logs_wrapper():
     buffer = []
     for line in MotionDetection.get_logs():
         buffer.append(str(line)+'<br>') 
@@ -279,7 +279,7 @@ def clear_logs():
     return render_template("logs.html",lines=MotionDetection.get_logs())
 
 @main.route('/logs')
-def show_logs():
+def logs():
     return render_template("logs.html",lines=MotionDetection.get_logs())
 
 @main.route('/reload',methods=['POST'])
