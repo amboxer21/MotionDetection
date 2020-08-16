@@ -33,4 +33,17 @@ $(function() {
         });
     });
 
+    $('div.form-group.logs').on('scroll', function() {
+        if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+
+            $.ajax({
+                url: '/get_logs_wrapper',
+                type: "GET",
+                success: function(response) {
+                    document.querySelector('div.scrollbox').innerHTML += response + "<br>";
+                }
+            });
+         }
+     });
+
 });
