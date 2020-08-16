@@ -78,6 +78,53 @@ anthony@anthony ~/rpi4b/firmware/boot $ umount -R /mnt/gentoo
 
 ```
 
+**This is the  same script above but without the command promts so you can just run the commands**
+```
+umount -R /mnt/gentoo
+parted /dev/mmcblk0 mklabel msdos
+
+for n in {1..4}; do echo -e 'y' | parted /dev/mmcblk0 rm $n 2>/dev/null; done
+parted /dev/mmcblk0 mkpart primary fat32 0% 513MB
+parted /dev/mmcblk0 mkpart primary linux-swap 513MB 2561MB
+parted /dev/mmcblk0 mkpart primary ext4 2561MB 100%
+parted /dev/mmcblk0 p
+
+mkfs.vfat -F32 /dev/mmcblk0p1
+mkswap /dev/mmcblk0p2
+echo 'y' | mkfs.ext4 /dev/mmcblk0p3
+
+mount /dev/mmcblk0p3 /mnt/gentoo
+
+tar xzvf rpi4b.tar.gz
+cd rpi4b
+tar xzvf gentoo.tar.gz
+
+time rsync -ra gentoo/* /mnt/gentoo/
+
+time tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
+time tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
+
+mkdir /mnt/gentoo/boot
+mount /dev/mmcblk0p1 /mnt/gentoo/boot
+
+tar xzvf firmware.tar.gz
+cd firmware/boot
+cp -r * /mnt/gentoo/boot/
+cp -r ../modules /mnt/gentoo/lib/
+
+echo -e "/dev/mmcblk0p1 /boot auto noauto,noatime 1 2\n/dev/mmcblk0p3 / ext4 noatime 0 1\n/dev/mmcblk0p2 none swap sw 0 0" >> /mnt/gentoo/etc/fstab
+
+echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p3 rootfstype=ext4 elevator=deadline rootwait" > /mnt/gentoo/boot/cmdline.txt
+
+cp /mnt/gentoo/usr/share/zoneinfo/America/New_York /mnt/gentoo/etc/localtime
+
+echo "America/New_York" > /mnt/gentoo/etc/timezone
+
+sed -i 's/^root:.*/root::::::::/' /mnt/gentoo/etc/shadow
+
+umount -R /mnt/gentoo
+```
+
 ### [Changing Motiondetection options using a GUI]:
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address + port 5000 - i.e., 192.168.1.232:5000. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
