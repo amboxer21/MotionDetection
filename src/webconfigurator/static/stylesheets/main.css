@@ -5,3 +5,12 @@ button.btn.btn-default {
 div.container {
     float: left;
 }
+
+div.photos-actions button.btn.btn-default.delete {
+    float: left;
+}
+
+div.photos-actions input.selectall-input, label.selectall-checkbox{
+    float: right;
+    padding-right: 5px; 
+}

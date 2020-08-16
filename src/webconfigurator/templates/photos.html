@@ -36,7 +36,13 @@
                         </label>
                     {% endfor %}
                 </div>
-                <button type="submit" class="btn btn-default delete">Delete</button>
+                <div>
+                    <div class="photos-actions">
+                        <button type="submit" class="btn btn-default delete">Delete</button>
+                        <input type="checkbox" class="selectall-input" name="select">
+                        <label class="selectall-checkbox" for="select">select all</label><br>
+                    </div>
+                </div>
             </form>
         </div>
     </body>

@@ -33,6 +33,17 @@ $(function() {
         });
     });
 
+    $('.selectall-input').click(function() {
+        let selected = document.getElementsByName('image')[0].checked;
+        document.getElementsByName('image').forEach(function(e) {
+            if(selected) {
+                e.checked = false;
+            } else {
+                e.checked = true;
+            }
+        });
+    });
+
     $('div.form-group.logs').on('scroll', function() {
         if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
 
