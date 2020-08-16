@@ -6,9 +6,9 @@ from setuptools import setup, find_packages
 from distutils.errors import DistutilsError, DistutilsExecError
 
 if re.search('armv\d',str(os.uname().machine), re.M | re.I) is not None:
-    __MODULES = ['Pillow','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
+    __MODULES = ['Pillow','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator'],
 else:
-    __MODULES = ['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator','tensorflow','cvlib'],
+    __MODULES = ['Pillow','opencv-python','flask','click','itsdangerous','Werkzeug','jinja2','wtforms','email-validator'],
 
 setup(
     name='MotionDetection',
