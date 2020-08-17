@@ -24,8 +24,12 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 ### [Demo]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
-### [Download]: (I have an updated tarball based on the lastest stable master that I need to upload)
-Download the Motiondetection framework [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
+### [Download]:
+[ OLD ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
+
+[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/1bJ7WJQeGAhr-r2pe-ITLRjM1wxJExrOK/view?usp=sharing)
+
+[ LATEST ] Download the Motiondetection framework system data for rsyncing **in addition to** the stage3 tarball, init files, and portage [HERE](https://drive.google.com/file/d/1_GH4wuI46ODQ1hCW4jRqEdIKi2kUo_vW/view?usp=sharing).
 
 ### [Rolling your own image]:
 >The following script assumes that you downloaded the rpi4b tarball in your home directory.
