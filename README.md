@@ -34,7 +34,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 ### [Rolling your own image]:
 >The following script assumes that you downloaded the rpi4b tarball in your home directory.
 
-**PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH with the script below!!**
+**PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH(i.e. /dev/mmcblk0) with the script below!!**
 ```
 anthony@anthony ~ $ umount -R /mnt/gentoo
 anthony@anthony ~ $ parted /dev/mmcblk0 mklabel msdos
