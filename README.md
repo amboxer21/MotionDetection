@@ -150,6 +150,25 @@ You can change the options that the Motiondetection framework runs with by openi
 ---
 
 # DEPRECATED SECTION!
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
+
+.
 
 ## [IMPORTANT]:
 >Everything will be moved to Gentoo from Raspbian. I DO NOT have a Raspberry Pi 3 at the moment, so I cannot be 150% sure but I believe that the images for the RPI3 are corrupted. I will make a new image for the Raspberry Pi 3b once I get another 3b. This image will be DD'able unlike the Raspberry Pi 4b system above. 
