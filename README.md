@@ -127,7 +127,7 @@ umount -R /mnt/gentoo
 
 ### [Changing Motiondetection options using a GUI]:
 
-You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address + port 5000 - i.e., 192.168.1.232:5000. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
+You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address - i.e., 192.168.1.232. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
 
 ### [Resources]:
 [ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
