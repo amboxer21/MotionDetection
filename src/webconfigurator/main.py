@@ -61,6 +61,7 @@ class MotionDetection(object):
             for key,value in hash.items():
                 f.write(key+"="+value+"\n")
 
+    # D.R.Y This methods needs tightening
     @classmethod
     def read_config_file_into_hash(cls,hash=dict()):
         with open('/etc/motiondetection/motiondetection.cfg','r') as line:
