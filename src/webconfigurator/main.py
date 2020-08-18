@@ -18,6 +18,7 @@ class MotionDetection(object):
 
     LINES = []
     COUNT = 0
+    LOCK  = threading.Semaphore()
 
     @classmethod
     def images(cls):
@@ -241,6 +242,10 @@ class MotionDetection(object):
                     
             return hash
 
+    @classmethod
+    def remove_photos(cls,paths=[]):
+        [os.remove(path) for path in paths if '/capture' in path]
+
 @main.route('/get_logs_wrapper')
 def get_logs_wrapper():
     buffer = []
@@ -251,19 +256,18 @@ def get_logs_wrapper():
 @main.route('/delete_selected_photos',methods=['POST'])
 def delete_selected_photos():
 
-    image  = request.form['image']
+    img    = request.form['image']
 
-    img    = re.sub('static/', '', image)
+    image  = re.sub('static/', '', img)
 
     p_dir  = '/home/pi/.motiondetection' 
-    p_path = os.path.join(p_dir, img)
+    p_path = os.path.join(p_dir, image)
 
     l_dir  = 'static' 
-    l_path = os.path.join(l_dir, img)
+    l_path = os.path.join(l_dir, image)
 
     try:
-        os.remove(p_path)
-        os.remove(l_path)
+        MotionDetection.threaded(MotionDetection.remove_photos,[p_path, l_path])
     except Exception as exception:
         pass
 
