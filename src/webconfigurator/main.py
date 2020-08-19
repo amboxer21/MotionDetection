@@ -243,7 +243,7 @@ class MotionDetection(object):
             return hash
 
     @classmethod
-    def remove_photos(cls,paths=[]):
+    def remove_photos(cls,paths):
         [os.remove(path) for path in paths if '/capture' in path]
 
 @main.route('/get_logs_wrapper')
@@ -263,12 +263,10 @@ def delete_selected_photos():
     p_dir  = '/home/pi/.motiondetection' 
     p_path = os.path.join(p_dir, image)
 
-    l_dir  = 'static' 
-    l_path = os.path.join(l_dir, image)
-
     try:
-        MotionDetection.threaded(MotionDetection.remove_photos,[p_path, l_path])
+        MotionDetection.threaded(MotionDetection.remove_photos,p_path)
     except Exception as exception:
+        print('Exception exception => '+str(exception))
         pass
 
     return render_template("photos.html", images=MotionDetection.images())
