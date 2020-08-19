@@ -17,7 +17,7 @@ $(function() {
 
     $('button.btn.btn-default.delete').click(function() {
         document.getElementsByName('image').forEach(function(e) {
-            if(e.checked && (e.id !== '.hidden' || e.id !== 'on')) {
+            if(e.checked) {
                 $.ajax({
                     url: '/delete_selected_photos',
                     data: {image : e.id},

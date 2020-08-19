@@ -16,7 +16,9 @@ main = Flask(__name__, template_folder="templates")
 
 class MotionDetection(object):
 
+    __HASH  = {}
     LINES = []
+
     COUNT = 0
 
     @classmethod
@@ -61,13 +63,37 @@ class MotionDetection(object):
             for key,value in hash.items():
                 f.write(key+"="+value+"\n")
 
+    @classmethod
+    def test(cls,hkey,message,line):
+        ip = re.search('^('+hkey+')=(.*)', line, re.M | re.I)
+        if ip is not None:
+            return ip.group(2)
+        else:
+            try:
+                if hkey:
+                    return hkey 
+            except KeyError:
+                return message
+
+    @classmethod
+    def initialize_hash_member(cls,key,hash={}):
+        try:
+            return hash[key]
+        except KeyError as keyError:
+            hash[key] = key
+            pass
+
     # D.R.Y This methods needs tightening
     @classmethod
-    def read_config_file_into_hash(cls,hash=dict()):
+    def read_config_file_into_hash(cls,hash={}):
         with open('/etc/motiondetection/motiondetection.cfg','r') as line:
             for f in line.read().splitlines():
+
+                MotionDetection.initialize_hash_member('ip',hash)
+
+                hash['ip'] = MotionDetection.test(hash['ip'],'IP Address...',f)
     
-                ip = re.search('^ip=(.*)', f, re.M | re.I)
+                '''ip = re.search('^ip=(.*)', f, re.M | re.I)
                 if ip is not None:
                     hash['ip'] = ip.group(1)
                 else:
@@ -76,7 +102,7 @@ class MotionDetection(object):
                             pass 
                     except KeyError:
                         hash['ip'] = 'IP Address...'
-                        pass
+                        pass'''
     
                 verbose = re.search('^verbose=(.*)', f, re.M | re.I)
                 if verbose is not None:
