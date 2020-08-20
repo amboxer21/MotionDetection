@@ -330,8 +330,8 @@ class MotionDetection(metaclass=VideoFeed):
         return max(img_list)
 
     @staticmethod
-    def symlink(filename,linkname):
-        os.symlink(filename,linkname)
+    def symlink(filename,linkname,over_write=True):
+        os.symlink(filename,linkname,overwrite=over_write)
     
     @staticmethod
     def take_picture(frame):
