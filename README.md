@@ -12,7 +12,7 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 >[ OLD ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
 
->[ LATEST ]**As of 2020-08-20**] The system would crash after being triggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) call in the motiondetection.py file in this [commit](5117801ee95b0cc571626b4d704146f06c0ac3d8). New rsync data has been uploaded this morning.
+>[ LATEST ]**As of 2020-08-20**] The system would crash after being triggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) call in the motiondetection.py file in this [commit](5117801ee95b0cc571626b4d704146f06c0ac3d8). New rsync data with the new changes has been uploaded this morning.
 
 # [Todo]
 > Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
