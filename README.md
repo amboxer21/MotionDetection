@@ -29,7 +29,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 [ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/124bZ6SYwKQhMo-OEZ7leah1TNM_boVQu/view?usp=sharing)
 
-[ LATEST ] Download the Motiondetection framework system data for rsyncing **in addition to** the stage3 tarball, init files, and portage [HERE](https://drive.google.com/file/d/1_GH4wuI46ODQ1hCW4jRqEdIKi2kUo_vW/view?usp=sharing).
+[ LATEST ] Download the Motiondetection framework system data for rsyncing **in addition to** the stage3 tarball, init files, and portage [HERE](https://drive.google.com/file/d/17UY0YQOUEzGJpn54gKgSrqkN9bR2SHHj/view?usp=sharing).
 
 ### [Rolling your own image]:
 >The following script assumes that you downloaded the rpi4b tarball in your home directory.
