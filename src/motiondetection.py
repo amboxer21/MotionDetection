@@ -19,6 +19,7 @@ import numpy as np
 
 from PIL import Image
 from io import StringIO
+from shutil import copyfile
 from optparse import OptionParser
 
 from email.mime.image import MIMEImage
@@ -330,8 +331,8 @@ class MotionDetection(metaclass=VideoFeed):
         return max(img_list)
 
     @staticmethod
-    def symlink(filename,linkname,over_write=True):
-        os.symlink(filename,linkname,overwrite=over_write)
+    def copyfiles(filename,linkname):
+        copyfile(filename,linkname)
     
     @staticmethod
     def take_picture(frame):
@@ -346,7 +347,7 @@ class MotionDetection(metaclass=VideoFeed):
         )
         image = Image.fromarray(frame)
         image.save(picture_name)
-        MotionDetection.symlink(picture_name,'/usr/local/bin/webconfigurator/static/'+capture)
+        MotionDetection.copyfiles(picture_name,'/usr/local/bin/webconfigurator/static/'+capture)
 
     @staticmethod
     def start_thread(proc,*args):
