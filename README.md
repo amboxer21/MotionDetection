@@ -10,7 +10,9 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 >[ OLD ][**As of 2020-08-09**] Daemon support was removed from the framework. You will either have to set it up yourself or roll an image. The image is plug-and-play, power up the RPI4b and it just works.
 
->[ LATEST ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
+>[ OLD ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
+
+>[ LATEST ]**As of 2020-08-20**] The system would crash after being traggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) cal in the motiondetection.py file.
 
 # [Todo]
 > Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
