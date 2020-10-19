@@ -130,6 +130,8 @@ echo "America/New_York" > /mnt/gentoo/etc/timezone
 
 sed -i 's/^root:.*/root::::::::/' /mnt/gentoo/etc/shadow
 
+cd
+
 umount -R /mnt/gentoo
 ```
 
