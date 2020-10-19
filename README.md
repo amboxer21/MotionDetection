@@ -140,6 +140,8 @@ You can change the options that the Motiondetection framework runs with by openi
 ### [Resources]:
 [ARMv7 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j_hardfp/)
 
+[ARMv6 stage3 tarball](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv6j)
+
 [Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
 
 [MotionDetection Framework rsync data](https://drive.google.com/file/d/1bJ7WJQeGAhr-r2pe-ITLRjM1wxJExrOK/view?usp=sharing)
