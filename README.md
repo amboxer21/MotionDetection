@@ -17,7 +17,7 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 # [Todo]
 > Fix issue [#47](https://github.com/amboxer21/MotionDetection/issues/47). The system stops working when too many photos have piled up. This tends to be around 600-700 photos.
 
-> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b.
+> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b. **EDIT:** `I am working on this now!`
 
 ---
 
@@ -29,6 +29,7 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 ### [Download]:
+> This download section is for the **Raspberry PI 4 only**!
 [ OLD ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
 
 [ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/124bZ6SYwKQhMo-OEZ7leah1TNM_boVQu/view?usp=sharing)
