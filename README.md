@@ -140,9 +140,7 @@ umount -R /mnt/gentoo
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address - i.e., 192.168.1.232. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
 
 ### [Resources]:
-[stage3-arm64 tarball](https://bouncer.gentoo.org/fetch/root/all/releases/arm64/autobuilds/20201004T190540Z/stage3-arm64-20201004T190540Z.tar.xz)
-
-[stage3-armv6j_hardfp tarball](https://bouncer.gentoo.org/fetch/root/all/releases/arm/autobuilds/20200509T210605Z/stage3-armv6j_hardfp-20200509T210605Z.tar.xz)
+[stage3-armv7a_hardfp-20200509T210605Z.tar.xz](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz)
 
 [Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
 
