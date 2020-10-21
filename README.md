@@ -153,8 +153,8 @@ umount -R /mnt/gentoo
 #### [FFMPEG USE Flags]
 > /etc/portage/package.use/ffmpeg
 ```javascript
-virtual/ffmpeg X encode mp3 threads mp3 threads x264 jack alsa blueray libv4l v4l lzma twolame opengl openssl oss pulseaudio sdl vorbis xvid gsm opus speex vaapi vdpau -theora -truetype -libav
-media-video/ffmpeg X alsa bzip2 encode gmp gpl hardcoded-tables iconv jack libv4l lzma mp3 network opengl openssl oss postproc pulseaudio sdl threads twolame v4l vorbis x264 x265 xvid zlib bluray cdio chromium cpudetection debug doc fontconfig gcrypt gnutls gsm libass libdrm openh264 opus speex svg vaapi wavpack vdpau -theora -truetype -static-libs -amrenc -amr
+virtual/ffmpeg encode mp3 threads mp3 threads x264 jack alsa blueray libv4l v4l lzma twolame opengl openssl oss pulseaudio sdl vorbis xvid gsm opus speex vaapi vdpau -theora -truetype -libav
+media-video/ffmpeg alsa bzip2 encode gmp gpl hardcoded-tables iconv jack libv4l lzma mp3 network opengl openssl oss postproc pulseaudio sdl threads twolame v4l vorbis x264 x265 xvid zlib bluray cdio chromium cpudetection debug doc fontconfig gcrypt gnutls gsm libass libdrm openh264 opus speex svg vaapi wavpack vdpau -theora -truetype -static-libs -amrenc -amr
 ```
 
 > /etc/portage/package.use/libv4l
@@ -176,6 +176,12 @@ media-sound/pulseaudio bluetooth jack dbus sox ofono-headset native-headset libs
 ```javascript
 sys-libs/zlib abi_x86_64 minizip
 ```
+
+> /etc/portage/package.use/alsa-plugins
+```javascript
+media-plugins/alsa-plugins pulseaudio
+```
+
 
 #### [OpenCV USE Flags]
 > /etc/portage/package.use/opencv
