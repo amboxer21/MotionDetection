@@ -148,6 +148,41 @@ cd
 umount -R /mnt/gentoo
 ```
 
+### Compiling OpenCV
+
+#### [FFMPEG USE Flags]
+> /etc/portage/package.use/ffmpeg
+```javascript
+virtual/ffmpeg X encode mp3 threads mp3 threads x264 jack alsa blueray libv4l v4l lzma twolame opengl openssl oss pulseaudio sdl vorbis xvid gsm opus speex vaapi vdpau -theora -truetype -libav
+media-video/ffmpeg X alsa bzip2 encode gmp gpl hardcoded-tables iconv jack libv4l lzma mp3 network opengl openssl oss postproc pulseaudio sdl threads twolame v4l vorbis x264 x265 xvid zlib bluray cdio chromium cpudetection debug doc fontconfig gcrypt gnutls gsm libass libdrm openh264 opus speex svg vaapi wavpack vdpau -theora -truetype -static-libs -amrenc -amr
+```
+
+> /etc/portage/package.use/libv4l
+```javascript
+media-libs/libv4l jpeg
+```
+
+> /etc/portage/package.use/openssl
+```javascript
+dev-libs/openssl sslv3
+```
+
+> /etc/portage/package.use/pulseaudio
+```javascript
+media-sound/pulseaudio bluetooth jack dbus sox ofono-headset native-headset libsamplerate
+```
+
+> /etc/portage/package.use/zlib
+```javascript
+sys-libs/zlib abi_x86_64 minizip
+```
+
+#### [OpenCV USE Flags]
+> /etc/portage/package.use/opencv
+```javascript
+media-libs/opencv v4l png jpeg gstreamer python ffmpeg contrib lapack -opengl
+```
+
 ### [Changing Motiondetection options using a GUI]:
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address - i.e., 192.168.1.232. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
