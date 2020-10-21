@@ -25,26 +25,33 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 **Disclaimer:** The Raspberry Pi 4b doesn't like ghosted(dd) images. You must roll your own in order to get the system to boot. Instructions will be included below along with [THIS](https://youtu.be/DVcC540hxlk) video. You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
 
-### [Demo]:
+### [Demo from Aug 9, 2020]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
-### [Download]:
+### [Downloads]:
 > This download section is for the **Raspberry PI 4 only**!
 
 [ OLD ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
 
-[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/124bZ6SYwKQhMo-OEZ7leah1TNM_boVQu/view?usp=sharing)
+[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/124bZ6SYwKQhMo-OEZ7leah1TNM_boVQu/view?usp=sharing).
 
-[ LATEST ] Download the Motiondetection framework system data for rsyncing **in addition to** the stage3 tarball, init files, and portage [HERE](https://drive.google.com/file/d/17UY0YQOUEzGJpn54gKgSrqkN9bR2SHHj/view?usp=sharing).
+### [Downloads]:
+> This download section is for **BOTH** the **Raspberry PI 4** and **Raspberry PI 3**.
 
-### [Rolling your own image]:
+[ LATEST ] Download the stage3 tarball for the RPI3 and the RPI4 [HERE](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz).
+
+### [Rolling your own Raspberry PI 4 image]:
 >The following script assumes that you downloaded the rpi4b tarball in your home directory.
 
 **PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH(i.e. /dev/mmcblk0) with the script below!!**
+> Run this seperately and follow the prompts before running the rest of the commands. If you run this with the rest of the commands then it won't work properly because of the mandatory prompts. 
 ```
 anthony@anthony ~ $ umount -R /mnt/gentoo
 anthony@anthony ~ $ parted /dev/mmcblk0 mklabel msdos
+```
 
+Continue!
+```
 anthony@anthony ~ $ for n in {1..4}; do echo -e 'y' | parted /dev/mmcblk0 rm $n 2>/dev/null; done
 anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary fat32 0% 513MB
 anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary linux-swap 513MB 2561MB
@@ -53,23 +60,25 @@ anthony@anthony ~ $ parted /dev/mmcblk0 p
 
 anthony@anthony ~ $ mkfs.vfat -F32 /dev/mmcblk0p1
 anthony@anthony ~ $ mkswap /dev/mmcblk0p2
-anthony@anthony ~ $ echo 'y' | mkfs.ext4 /dev/mmcblk0p3
+anthony@anthony ~ $ echo 'y' | mkfs.ext4 /dev/mmcblk0p3 
 
 anthony@anthony ~ $ mount /dev/mmcblk0p3 /mnt/gentoo
+anthony@anthony ~ $ mkdir /mnt/gentoo/boot
+anthony@anthony ~ $ mount /dev/mmcblk0p1 /mnt/gentoo/boot
 
 anthony@anthony ~ $ tar xzvf rpi4b.tar.gz
 anthony@anthony ~ $ cd rpi4b
 anthony@anthony ~/rpi4b $ tar xzvf gentoo.tar.gz
 
-anthony@anthony ~/rpi4b $ time rsync -ra gentoo/* /mnt/gentoo/
+anthony@anthony ~/rpi4b $ rsync -ra gentoo/* /mnt/gentoo/
 
-anthony@anthony ~/rpi4b $ time tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
-anthony@anthony ~/rpi4b $ time tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
+anthony@anthony ~/rpi4b $ wget http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz
+anthony@anthony ~/rpi4b $ tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
 
-anthony@anthony ~/rpi4b $ mkdir /mnt/gentoo/boot
-anthony@anthony ~/rpi4b $ mount /dev/mmcblk0p1 /mnt/gentoo/boot
+anthony@anthony ~/rpi4b $ wget http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+anthony@anthony ~/rpi4b $ tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
 
-anthony@anthony ~/rpi4b $ tar xzvf firmware.tar.gz
+anthony@anthony ~/rpi4b $ git clone --depth 1 git://github.com/raspberrypi/firmware/
 anthony@anthony ~/rpi4b $ cd firmware/boot
 anthony@anthony ~/rpi4b/firmware/boot $ cp -r * /mnt/gentoo/boot/
 anthony@anthony ~/rpi4b/firmware/boot $ cp -r ../modules /mnt/gentoo/lib/
@@ -104,6 +113,8 @@ mkswap /dev/mmcblk0p2
 echo 'y' | mkfs.ext4 /dev/mmcblk0p3
 
 mount /dev/mmcblk0p3 /mnt/gentoo
+mkdir /mnt/gentoo/boot
+mount /dev/mmcblk0p1 /mnt/gentoo/boot
 
 tar xzvf rpi4b.tar.gz
 cd rpi4b
@@ -111,13 +122,13 @@ tar xzvf gentoo.tar.gz
 
 time rsync -ra gentoo/* /mnt/gentoo/
 
-time tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
-time tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
+wget http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz
+tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
 
-mkdir /mnt/gentoo/boot
-mount /dev/mmcblk0p1 /mnt/gentoo/boot
+wget http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
+tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
 
-tar xzvf firmware.tar.gz
+git clone --depth 1 git://github.com/raspberrypi/firmware/
 cd firmware/boot
 cp -r * /mnt/gentoo/boot/
 cp -r ../modules /mnt/gentoo/lib/
