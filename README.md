@@ -200,6 +200,26 @@ media-libs/opencv v4l png jpeg gstreamer python ffmpeg contrib lapack -opengl
 sys-devel/gcc objc objc++ objc-gc
 ```
 
+**NOTE:** For GCC, I ran into issues compiling cmake and the solution was to recompile gcc with these use flags. I had to recompile quite a few times. Compile gcc with thESE USE flags in the beginning could save you the same trouble!
+
+**`Error message:`**
+```
+-- Checking if compiler supports needed C++17 constructs - yes
+-- Checking if compiler supports C++ make_unique
+-- Checking if compiler supports C++ make_unique - no
+-- Checking if compiler supports C++ unique_ptr
+-- Checking if compiler supports C++ unique_ptr - no
+CMake Error at CMakeLists.txt:107 (message):
+  The C++ compiler does not support C++11 (e.g.  std::unique_ptr).
+
+
+-- Configuring incomplete, errors occurred!
+See also "/var/tmp/portage/dev-util/cmake-3.17.4-r1/work/cmake-3.17.4_build/CMakeFiles/CMakeOutput.log".
+See also "/var/tmp/portage/dev-util/cmake-3.17.4-r1/work/cmake-3.17.4_build/CMakeFiles/CMakeError.log".
+ * ERROR: dev-util/cmake-3.17.4-r1::gentoo failed (configure phase):
+ *   cmake failed
+```
+
 ---
 
 ### [Changing Motiondetection options using a GUI]:
