@@ -200,7 +200,7 @@ media-libs/opencv v4l png jpeg gstreamer python ffmpeg contrib lapack -opengl
 sys-devel/gcc objc objc++ objc-gc
 ```
 
-**NOTE:** For GCC, I ran into issues compiling cmake and the solution was to recompile gcc with these use flags. I had to recompile quite a few times. Compile gcc with thESE USE flags in the beginning could save you the same trouble!
+**NOTE:** For GCC, I ran into issues compiling cmake and the solution was to recompile gcc with these use flags. I had to recompile quite a few times. Compiling gcc with these USE flags in the beginning could save you the same trouble!
 
 **`Error message:`**
 ```
