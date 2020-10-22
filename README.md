@@ -28,6 +28,8 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 ### [Demo from Aug 9, 2020]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
+---
+
 ### [Downloads]:
 > This download section is for the **Raspberry PI 4 only**!
 
@@ -39,6 +41,8 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 > This download section is for **BOTH** the **Raspberry PI 4** and **Raspberry PI 3**.
 
 [ LATEST ] Download the stage3 tarball for the RPI3 and the RPI4 [HERE](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz).
+
+---
 
 ### [Rolling your own Raspberry PI 4 image]:
 >The following script assumes that you downloaded the rpi4b tarball in your home directory.
@@ -148,6 +152,8 @@ cd
 umount -R /mnt/gentoo
 ```
 
+---
+
 ### Compiling OpenCV
 
 #### [FFMPEG USE Flags]
@@ -182,16 +188,25 @@ sys-libs/zlib abi_x86_64 minizip
 media-plugins/alsa-plugins pulseaudio
 ```
 
-
 #### [OpenCV USE Flags]
 > /etc/portage/package.use/opencv
 ```javascript
 media-libs/opencv v4l png jpeg gstreamer python ffmpeg contrib lapack -opengl
 ```
 
+#### [GCC USE Flags
+> /etc/portage/package.use/gcc
+```
+sys-devel/gcc objc objc++ objc-gc
+```
+
+---
+
 ### [Changing Motiondetection options using a GUI]:
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address - i.e., 192.168.1.232. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
+
+---
 
 ### [Resources]:
 [stage3-armv7a_hardfp-20200509T210605Z.tar.xz](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz)
@@ -200,12 +215,16 @@ You can change the options that the Motiondetection framework runs with by openi
 
 [MotionDetection Framework rsync data](https://drive.google.com/file/d/1bJ7WJQeGAhr-r2pe-ITLRjM1wxJExrOK/view?usp=sharing)
 
+---
+
 ### [SCREEN SHOTS]
 
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
 ![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
+
+---
 
 ---
 
