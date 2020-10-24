@@ -152,6 +152,8 @@ cd
 umount -R /mnt/gentoo
 ```
 
+---
+
 ### [Rolling your own Raspberry PI 3 image]:
 > A work in progress
 ---
