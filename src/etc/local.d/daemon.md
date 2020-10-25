@@ -2,15 +2,16 @@ Add both .start files to the /etc/local.d directory and it will bring up the web
 
 Make the file executable by everyone!
 ```
-localhost ~ # chmod +x /etc/local.d/{motiondetectiond.start, webconfigurator.start}
+localhost ~ # for n in motiondetectiond.start webconfigurator.start cam-symlink.start; do chmod +x /etc/local.d/$n ; done
 ```
 
 Confirm that the file is executable by everyone.
 ```
-localhost ~ # ls -al /etc/local.d/{motiondetectiond.start, webconfigurator.start}
--rwxr-xr-x 1 root root 2865 Oct 25  2020 /etc/local.d/motiondetectiond.start
--rwxr-xr-x 1 root root 1429 Oct 25  2020 /etc/local.d/webconfigurator.start
-localhost ~ #
+localhost ~/MotionDetection # for n in motiondetectiond.start webconfigurator.start cam-symlink.start; do ls -al /etc/local.d/$n ; done
+-rwxr-xr-x 1 root root 2882 Oct 25 11:16 /etc/local.d/motiondetectiond.start
+-rwxr-xr-x 1 root root 1451 Dec 31  1969 /etc/local.d/webconfigurator.start
+-rwxr-xr-x 1 root root 106 Oct 25 11:14 /etc/local.d/cam-symlink.start
+localhost ~/MotionDetection #
 ```
 
 
