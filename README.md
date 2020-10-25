@@ -324,6 +324,8 @@ You can change the options that the Motiondetection framework runs with by openi
 
 [MotionDetection Framework rsync data](https://drive.google.com/file/d/1bJ7WJQeGAhr-r2pe-ITLRjM1wxJExrOK/view?usp=sharing)
 
+[DD - creating and pushing images](https://gist.github.com/amboxer21/778d1ba7415f314e74ea01f4245deed5)
+
 ---
 
 ### [SCREEN SHOTS]
