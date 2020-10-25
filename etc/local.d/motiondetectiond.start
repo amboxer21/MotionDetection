@@ -1,0 +1,81 @@
+#:set ts=4 sw=4
+
+SLEEPSECS=4
+BINDIR=/usr/local/bin
+LOGFILE=/var/log/motiondetection.log   # Where to place the normal logfile (disabled if blank)
+#SYSLOG=local0              # Which syslog facility to use (disabled if blank)
+PRIORITY=0
+MACHINE=`hostname`
+SUDO='/usr/bin/sudo'
+PYTHON=`/usr/bin/which python`
+
+CFG="/etc/motiondetection/motiondetection.cfg"
+EXECUTABLE="/usr/local/bin/motiondetection.py"
+
+ip=$(awk -F= '/^ip=/{print $2}' ${CFG})
+fps=$(awk -F= '/^fps=/{print $2}' ${CFG})
+email=$(awk -F= '/^email=/{print $2}' ${CFG})
+verbose=$(awk -F= '/^verbose=/{print $2}' ${CFG})
+logfile=$(awk -F= '/^logfile=/{print $2}' ${CFG})
+password=$(awk -F= '/^password=/{print $2}' ${CFG})
+email_port=$(awk -F= '/^email_port=/{print $2}' ${CFG})
+server_port=$(awk -F= '/^server_port=/{print $2}' ${CFG})
+filter_pets=$(awk -F= '/^filter_pets=/{print $2}' ${CFG})
+cam_location=$(awk -F= '/^cam_location=/{print $2}' ${CFG})
+camview_port=$(awk -F= '/^camview_port=/{print $2}' ${CFG})
+disable_email=$(awk -F= '/^disable_email=/{print $2}' ${CFG})
+burst_mode_opts=$(awk -F= '/^burst_mode_opts=/{print $2}' ${CFG})
+delta_thresh_max=$(awk -F= '/^delta_thresh_max=/{print $2}' ${CFG})
+delta_thresh_min=$(awk -F= '/^delta_thresh_min=/{print $2}' ${CFG})
+motion_thresh_min=$(awk -F= '/^motion_thresh_min=/{print $2}' ${CFG})
+
+command=" -e${email} -p${password} -c${cam_location} -b${burst_mode_opts} -f${fps} -l${logfile} -S${server_port}"
+command=" ${command} -E${email_port} -C${camview_port} -i${ip} -T${delta_thresh_max} -t${delta_thresh_min} -m${motion_thresh_min}"
+
+if [[ $verbose == 'Treu' ]] ; then
+    command="$command --verbose";
+fi
+if [[ $disable_email == 'True' ]] ; then
+    command="$command --disable-email";
+fi
+if [[ $filter_pets == 'True' ]] ; then
+    command="$command --filter-pets";
+fi
+
+#`echo "${com}"`
+
+message() {
+    echo "$1" >&2
+    if test "x$SYSLOG" != "x" ; then
+        logger -p "${SYSLOG}.warn" -t motiondetection.py[$$] "$1"
+    fi
+    if test "x$LOGFILE" != "x" ; then
+        echo "motiondetection.py[$$]: $1" >> "$LOGFILE"
+    fi
+}
+
+
+run_motiondetectiond() {
+    while :; do
+
+        cd $BINDIR
+	`echo "$SUDO $PYTHON ${EXECUTABLE} ${command}"` 2> $LOGFILE;
+        EXITSTATUS=$?
+		message "motiondetection.py ended with exit status $EXITSTATUS"
+        if test "x$EXITSTATUS" = "x0" ; then
+            # Properly shutdown....
+            message "motiondetection.py shutdown normally."
+            exit 0
+        else
+            if test "x${email}" != "x" ; then
+                echo "motiondetection.py on $MACHINE died with exit status $EXITSTATUS.  Might want to take a peek." | \
+                mail -s "motiondetection.py Died" $email
+                message "Exited on signal $EXITSTATUS"
+            fi
+        fi
+		message "Automatically restarting motiondetection.py."
+		sleep $SLEEPSECS
+	done
+}
+
+run_motiondetectiond &
