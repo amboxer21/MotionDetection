@@ -14,4 +14,4 @@ localhost ~ #
 ```
 
 
-(Gentoo local.d wiki)[https://wiki.gentoo.org/wiki//etc/local.d]
+[Gentoo local.d wiki](https://wiki.gentoo.org/wiki//etc/local.d)
