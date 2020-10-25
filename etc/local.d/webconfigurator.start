@@ -1,0 +1,49 @@
+#!/bin/bash
+#:set ts=4 sw=4
+
+SLEEPSECS=4
+BINDIR=/usr/local/bin/webconfigurator
+LOGFILE=/var/log/motiondetection.log   # Where to place the normal logfile (disabled if blank)
+#SYSLOG=local0              # Which syslog facility to use (disabled if blank)
+PRIORITY=0
+MACHINE=`hostname`
+SUDO='/usr/bin/sudo'
+PYTHON=`/usr/bin/which python`
+
+EXECUTABLE="/usr/local/bin/webconfigurator/main.py"
+
+message() {
+    echo "$1" >&2
+    if test "x$SYSLOG" != "x" ; then
+        logger -p "${SYSLOG}.warn" -t webconfigurator.py[$$] "$1"
+    fi
+    if test "x$LOGFILE" != "x" ; then
+        echo "webconfigurator.py[$$]: $1" >> "$LOGFILE"
+    fi
+}
+
+
+run_webconfiguratord() {
+    while :; do
+
+        cd $BINDIR
+        $SUDO $PYTHON ${EXECUTABLE} >> $LOGFILE 2>>$LOGFILE
+        EXITSTATUS=$?
+		message "webconfigurator.py ended with exit status $EXITSTATUS"
+        if test "x$EXITSTATUS" = "x0" ; then
+            # Properly shutdown....
+            message "webconfigurator.py shutdown normally."
+            exit 0
+        else
+            if test "x${email}" != "x" ; then
+                echo "webconfigurator.py on $MACHINE died with exit status $EXITSTATUS.  Might want to take a peek." | \
+                mail -s "webconfigurator.py Died" $email
+                message "Exited on signal $EXITSTATUS"
+            fi
+        fi
+		message "Automatically restarting webconfigurator.py."
+		sleep $SLEEPSECS
+	done
+}
+
+run_webconfiguratord &
