@@ -165,6 +165,8 @@ umount -R /mnt/gentoo
 
 * Emerge OpenCV
 
+**NOTE:** It is important to emerge rust-bin because compiling the regular rust package takes up a lot of resources and is prone to breaking on the arm arch! You don't want to spend days hacking this install when you can just install the bin version!
+
 ### Compiling OpenCV
 
 #### [Package USE Flags]
