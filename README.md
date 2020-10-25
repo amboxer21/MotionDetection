@@ -160,51 +160,84 @@ umount -R /mnt/gentoo
 
 ### Compiling OpenCV
 
-#### [FFMPEG USE Flags]
+* Update your system
+
+* Emerge rust-bin
+
+* Emerge ffmpeg
+
+* Emerge OpenCV
+
+#### [Package USE Flags]
 > /etc/portage/package.use/ffmpeg
-```javascript
+```
 virtual/ffmpeg encode mp3 threads mp3 threads x264 jack alsa blueray libv4l v4l lzma twolame opengl openssl oss pulseaudio sdl vorbis xvid gsm opus speex vaapi vdpau -theora -truetype -libav
 media-video/ffmpeg alsa bzip2 encode gmp gpl hardcoded-tables iconv jack libv4l lzma mp3 network opengl openssl oss postproc pulseaudio sdl threads twolame v4l vorbis x264 x265 xvid zlib bluray cdio chromium cpudetection debug doc fontconfig gcrypt gnutls gsm libass libdrm openh264 opus speex svg vaapi wavpack vdpau -theora -truetype -static-libs -amrenc -amr
 ```
 
-> /etc/portage/package.use/libv4l
-```javascript
-media-libs/libv4l jpeg
-```
-
-> /etc/portage/package.use/openssl
-```javascript
-dev-libs/openssl sslv3
-```
-
-> /etc/portage/package.use/pulseaudio
-```javascript
-media-sound/pulseaudio bluetooth jack dbus sox ofono-headset native-headset libsamplerate
-```
-
-> /etc/portage/package.use/zlib
-```javascript
-sys-libs/zlib abi_x86_64 minizip
-```
-
 > /etc/portage/package.use/alsa-plugins
-```javascript
+```
 media-plugins/alsa-plugins pulseaudio
 ```
 
-#### [OpenCV USE Flags]
+> /etc/portage/package.use/gst-plugins-base
+```
+media-libs/gst-plugins-base -opengl
+```
+
+> /etc/portage/package.use/libcrypt
+```
+virtual/libcrypt static-libs
+```
+
+> /etc/portage/package.use/libglvnd
+```
+media-libs/libglvnd X
+```
+
+> /etc/portage/package.use/libv4l
+```
+media-libs/libv4l jpeg
+```
+
+> /etc/portage/package.use/mesa
+```
+media-libs/mesa X
+```
+
+> /etc/portage/package.use/numpy
+```
+dev-python/numpy lapack
+```
+
 > /etc/portage/package.use/opencv
-```javascript
+```
 media-libs/opencv v4l png jpeg gstreamer python ffmpeg contrib lapack -opengl
 ```
 
-#### [GCC USE Flags
+> /etc/portage/package.use/openssl
+```
+dev-libs/openssl sslv3
+```
+
+> /etc/portage/package.use/zlib
+```
+sys-libs/zlib abi_x86_64 minizip
+```
+
+> /etc/portage/package.use/pulseaudio
+```
+media-sound/pulseaudio bluetooth jack dbus sox ofono-headset native-headset libsamplerate CPU_FLAGS_ARM: -neon
+```
+
+**NOTE:** For `pulseaudio`, the neon flags causes the compilation to crash when emerging if this flag is set.
+
 > /etc/portage/package.use/gcc
 ```
 sys-devel/gcc objc objc++ objc-gc
 ```
 
-**NOTE:** For GCC, I ran into issues compiling cmake and the solution was to recompile gcc with these use flags. I had to recompile quite a few times. Compiling gcc with these USE flags in the beginning could save you the same trouble!
+**NOTE:** For `GCC`, I ran into issues compiling cmake and the solution was to recompile gcc with these use flags. I had to recompile quite a few times. Compiling gcc with these USE flags in the beginning could save you the same trouble!
 
 **`Error message:`**
 ```
