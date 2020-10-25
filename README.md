@@ -257,6 +257,54 @@ See also "/var/tmp/portage/dev-util/cmake-3.17.4-r1/work/cmake-3.17.4_build/CMak
  *   cmake failed
 ```
 
+#### [Masked packages]
+
+> /etc/portage/package.mask/cmake
+```
+>=dev-util/cmake-3.17.4-r1
+```
+
+#### [Accept keywords]
+
+> /etc/portage/package.accept_keywords/eigen
+```
+dev-cpp/eigen ~arm
+```
+
+> /etc/portage/package.accept_keywords/opencv
+```
+media-libs/opencv ~arm
+```
+
+#### [make.conf]
+
+```javascript
+# These settings were set by the catalyst build script that automatically
+# built this stage.
+# Please consult /usr/share/portage/config/make.conf.example for a more
+# detailed example.
+COMMON_FLAGS="-O2 -pipe -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=hard"
+CFLAGS="${COMMON_FLAGS}"
+CXXFLAGS="${COMMON_FLAGS}"
+FCFLAGS="${COMMON_FLAGS}"
+FFLAGS="${COMMON_FLAGS}"
+FEATURES="ccache"
+CCACHE_DIR="/var/cache/ccache
+CPU_FLAGS_ARM="edsp neon thumb vfp vfpv3 vfpv4 vfp-d32 crc32 v4 v5 v6 v7 thumb2"
+
+# WARNING: Changing your CHOST is not something that should be done lightly.
+# Please consult https://wiki.gentoo.org/wiki/Changing_the_CHOST_variable before changing.
+CHOST="armv7a-unknown-linux-gnueabihf"
+USE="bluetooth ffmpeg jpeg png gif curl -X -pulseaudio -gtk -qt -qt5 -qt4 -consolekit -static-libs -cups -systemd"
+
+# NOTE: This stage was built with the bindist Use flag enabled
+
+# This sets the language of build output to English.
+# Please keep this setting intact when reporting bugs.
+LC_MESSAGES=C
+
+```
+
 ---
 
 ### [Changing Motiondetection options using a GUI]:
