@@ -157,8 +157,6 @@ umount -R /mnt/gentoo
 ### [Rolling your own Raspberry PI 3 image]:
 > A work in progress
 
-### Compiling OpenCV
-
 * Update your system
 
 * Emerge rust-bin
@@ -166,6 +164,8 @@ umount -R /mnt/gentoo
 * Emerge ffmpeg
 
 * Emerge OpenCV
+
+### Compiling OpenCV
 
 #### [Package USE Flags]
 > /etc/portage/package.use/ffmpeg
