@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ln -s /dev/v4l/by-id/usb-Sony_corporation_EyeToy_USB_camera_Namtai-video-index0 /dev/usbCam0
