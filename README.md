@@ -49,7 +49,7 @@ POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
 
 ### [Installing MotionDetection on your PI]
 > This is an installer script that needs to be run in the same directory as the pi tarball! The script works on both the Raspberry PI 3b and 4b!!
-```
+```javascript
 #!/bin/bash
 
 echo "[ INFO ] Checking for precesne of pi.tar.gz tarball.";
