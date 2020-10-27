@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ ! -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
+    echo "[ ERROR ] The pi.tar.gz tarball needs to be in the same directory as this script.";
+    exit;
+fi
+
 mountpoint=$(mount | awk '/mmcblk0p2/{print $3}');
 
 if [[ $mountpoint ]] ; then
