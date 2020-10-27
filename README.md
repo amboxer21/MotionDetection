@@ -33,9 +33,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 ### [Downloads]:
 > This download section is for the **Raspberry PI 4 only**!
 
-[ OLD ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/1x5P1FGwc4tlk2qW5B8BuJBo79GjJj4A5/view?usp=sharing).
-
-[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/124bZ6SYwKQhMo-OEZ7leah1TNM_boVQu/view?usp=sharing).
+[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](Uploading now).
 
 ### [Downloads]:
 > This download section is for **BOTH** the **Raspberry PI 4** and **Raspberry PI 3**.
@@ -44,64 +42,75 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 ---
 
-### [Rolling your own Raspberry PI 4 image]:
->The following script assumes that you downloaded the rpi4b tarball in your home directory.
-
-**PLEASE MAKE SURE THAT YOU USE THE CORRECT DISK PATH(i.e. /dev/mmcblk0) with the script below!!**
-> Run this seperately and follow the prompts before running the rest of the commands. If you run this with the rest of the commands then it won't work properly because of the mandatory prompts. 
+### [Installing MotionDetection on your PI]
+> The rsync data works on both the Raspberry PI 3b and 4b!!
 ```
-anthony@anthony ~ $ umount -R /mnt/gentoo
-anthony@anthony ~ $ parted /dev/mmcblk0 mklabel msdos
-```
+mountpoint=$(mount | awk '/mmcblk0p2/{print $3}');
 
-Continue!
-```
-anthony@anthony ~ $ for n in {1..4}; do echo -e 'y' | parted /dev/mmcblk0 rm $n 2>/dev/null; done
-anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary fat32 0% 513MB
-anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary linux-swap 513MB 2561MB
-anthony@anthony ~ $ parted /dev/mmcblk0 mkpart primary ext4 2561MB 100%
-anthony@anthony ~ $ parted /dev/mmcblk0 p
+if [[ $mountpoint ]] ; then
+    sudo umount -R $mountpoint;
+fi
 
-anthony@anthony ~ $ mkfs.vfat -F32 /dev/mmcblk0p1
-anthony@anthony ~ $ mkswap /dev/mmcblk0p2
-anthony@anthony ~ $ echo 'y' | mkfs.ext4 /dev/mmcblk0p3 
+echo "=> Partitioning sdcard.";
+for n in {1..4}; do parted -a optimal /dev/mmcblk0 rm $n 2> /dev/null; done
+sudo parted -a optimal /dev/mmcblk0 mkpart primary fat32 0% 513MB
+sudo parted -a optimal /dev/mmcblk0 mkpart primary ext4 513MB 100%
 
-anthony@anthony ~ $ mount /dev/mmcblk0p3 /mnt/gentoo
-anthony@anthony ~ $ mkdir /mnt/gentoo/boot
-anthony@anthony ~ $ mount /dev/mmcblk0p1 /mnt/gentoo/boot
+echo "=> Creating FAT32 filesystem on /dev/mmcblk0p1.";
+echo 'y' | sudo mkfs.vfat -F32 /dev/mmcblk0p1
 
-anthony@anthony ~ $ tar xzvf rpi4b.tar.gz
-anthony@anthony ~ $ cd rpi4b
-anthony@anthony ~/rpi4b $ tar xzvf gentoo.tar.gz
+echo "=> Creating EXT4 filesystem on /dev/mmcblk0p2.";
+echo 'y' | sudo mkfs.ext4 /dev/mmcblk0p2
 
-anthony@anthony ~/rpi4b $ rsync -ra gentoo/* /mnt/gentoo/
+echo "=> Checking if mountpoint /mnt/pi exists.";
+if [[ -e /mnt/pi ]] ; then
+    echo "[ INFO ] Mountpoint /dev/pi exists.";
+else
+    sudo mkdir -p /mnt/pi;
+    echo '[ WARNING ] /mnt/pi doesnt exist - creating it now.';
+fi
 
-anthony@anthony ~/rpi4b $ wget http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz
-anthony@anthony ~/rpi4b $ tar xvf stage3-armv7a_hardfp-20200509T210605Z.tar.xz -C /mnt/gentoo/
+echo "=> Mounting /dev/mmcblk0p2 on /mnt/pi";
+sudo mount /dev/mmcblk0p2 /mnt/pi;
 
-anthony@anthony ~/rpi4b $ wget http://distfiles.gentoo.org/snapshots/portage-latest.tar.bz2
-anthony@anthony ~/rpi4b $ tar xjvf portage-latest.tar.bz2 -C /mnt/gentoo/usr
+echo "=> Checking if mountpoint /mnt/pi/boot exists.";
+if [[ -e /mnt/pi/boot ]] ; then
+    echo "[ INFO ] Mountpoint /dev/pi/boot exists.";
+else
+    sudo mkdir -p /mnt/pi/boot;
+    echo '[ WARNING ] /mnt/pi/boot doesnt exist - creating it now.';
+fi
 
-anthony@anthony ~/rpi4b $ git clone --depth 1 git://github.com/raspberrypi/firmware/
-anthony@anthony ~/rpi4b $ cd firmware/boot
-anthony@anthony ~/rpi4b/firmware/boot $ cp -r * /mnt/gentoo/boot/
-anthony@anthony ~/rpi4b/firmware/boot $ cp -r ../modules /mnt/gentoo/lib/
+echo "=> Mounting /dev/mmcblk0p1 on /mnt/pi/boot";
+sudo mount /dev/mmcblk0p1 /mnt/pi/boot;
 
-anthony@anthony ~/rpi4b/firmware/boot $ echo -e "/dev/mmcblk0p1 /boot auto noauto,noatime 1 2\n/dev/mmcblk0p3 / ext4 noatime 0 1\n/dev/mmcblk0p2 none swap sw 0 0" >> /mnt/gentoo/etc/fstab
+echo "=> Copy data over to your sdcard.";
+sudo rsync -ra pi/* /mnt/pi/ ;
 
-anthony@anthony ~/rpi4b/firmware/boot $ echo "dwc_otg.lpm_enable=0 console=ttyAMA0,115200 kgdboc=ttyAMA0,115200 console=tty1 root=/dev/mmcblk0p3 rootfstype=ext4 elevator=deadline rootwait" > /mnt/gentoo/boot/cmdline.txt
-
-anthony@anthony ~/rpi4b/firmware/boot $ cp /mnt/gentoo/usr/share/zoneinfo/America/New_York /mnt/gentoo/etc/localtime
-
-anthony@anthony ~/rpi4b/firmware/boot $ echo "America/New_York" > /mnt/gentoo/etc/timezone
-
-anthony@anthony ~/rpi4b/firmware/boot $ sed -i 's/^root:.*/root::::::::/' /mnt/gentoo/etc/shadow
-
-anthony@anthony ~/rpi4b/firmware/boot $ umount -R /mnt/gentoo
-
+echo "=> Unmounting your sdcard now.";
+sudo umount -R /mnt/pi ;
 ```
 
-**This is the  same script above but without the command promts so you can just run the commands**
+---
+
+### [Rolling a Raspberry Pi image]:
+
+* Install base system
+
+* Update your system
+
+* Emerge rust-bin
+
+* Emerge ffmpeg
+
+* Emerge OpenCV
+
+* Emerge mail utils
+> emerge -av acct-group/mail acct-user/mail dev-perl/MailTools net-mail/mailbase
+
+**NOTE:** It is important to emerge rust-bin because compiling the regular rust package takes up a lot of resources and is prone to breaking on the arm arch! You don't want to spend days hacking this install when you can just install the bin version!
+
+### Installing base system
 ```
 umount -R /mnt/gentoo
 parted /dev/mmcblk0 mklabel msdos
@@ -152,25 +161,37 @@ cd
 umount -R /mnt/gentoo
 ```
 
----
+### Update your system
+> I would suggest installing rust-bin before updating @world!
+```
+(1) emerge --sync
+(2) emerge -av --deep --newuse --update @world
+```
 
-### [Rolling your own Raspberry PI 3 image]:
-> A work in progress
+**Note:** Before updating your system, crate this file and copy these contents into that file to circumvent the gpg syncing errors
+```
+anthony@anthony ~ $ cat /etc/portage/repos.conf/gentoo.conf 
+[DEFAULT]
+main-repo = gentoo
 
-* Update your system
+[gentoo]
+location = /usr/portage
+sync-type = rsync
+auto-sync = yes
+sync-uri = rsync://rsync.us.gentoo.org/gentoo-portage
+sync-rsync-verify-metamanifest = no
+anthony@anthony ~ $ 
+```
 
-* Emerge rust-bin
-
-* Emerge ffmpeg
-
-* Emerge OpenCV
-
-* Emerge mail utils
-> emerge -av acct-group/mail acct-user/mail dev-perl/MailTools net-mail/mailbase
-
-**NOTE:** It is important to emerge rust-bin because compiling the regular rust package takes up a lot of resources and is prone to breaking on the arm arch! You don't want to spend days hacking this install when you can just install the bin version!
+### Emerge rust-bin
+```
+emerge -av rust-bin
+```
 
 ### Compiling OpenCV
+> Create these file and set the use flags before emerging OpenCV and ffmpeg!
+
+**Note:** Install ffmpeg before installing OpenCV!
 
 #### [Package USE Flags]
 > /etc/portage/package.use/ffmpeg
@@ -323,8 +344,6 @@ You can change the options that the Motiondetection framework runs with by openi
 [Raspberry Pi Gentoo wiki](https://wiki.gentoo.org/wiki/Raspberry_Pi/Quick_Install_Guide)
 
 [MotionDetection Framework rsync data](https://drive.google.com/file/d/1bJ7WJQeGAhr-r2pe-ITLRjM1wxJExrOK/view?usp=sharing)
-
-[DD - creating and pushing images](https://gist.github.com/amboxer21/778d1ba7415f314e74ea01f4245deed5)
 
 ---
 
