@@ -23,8 +23,13 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 **Note:** You can send me an E-mail if you have any trouble and I will be happy to help you - `amboxer21@gmail.com`. 
 
-### [Demo from Aug 9, 2020]:
+### [Videos]
+
+#### [Demo from Aug 9, 2020]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
+
+#### [Booting]
+Booting the system after installation [HERE](https://youtu.be/WJWTAXVIbQg)
 
 ### [Credentials]
 > For use with the installer script.
