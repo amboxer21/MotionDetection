@@ -26,6 +26,11 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 ### [Demo from Aug 9, 2020]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
+### [Credentials]
+`Username`**:** pi
+
+`Password`**:** RASPBERRY pi 3
+
 ---
 
 ### [Downloads]:
