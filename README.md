@@ -25,10 +25,10 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 ### [Videos]
 
-#### [Demo from Aug 9, 2020]:
+> Demo from Aug 9, 2020]:
 Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
-#### [Booting]
+> Booting]
 Booting the system after installation [HERE](https://youtu.be/WJWTAXVIbQg)
 
 ---
