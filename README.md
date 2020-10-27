@@ -115,7 +115,7 @@ sudo umount -R /mnt/pi ;
 ```
 
 Example script output:
-```
+```javascript
 anthony@anthony ~ $ sudo bash make-sdcard.sh 
 Password: 
 [ INFO ] Checking for precesne of pi.tar.gz tarball.
@@ -175,13 +175,13 @@ anthony@anthony ~ $
 
 ### Installing base system
 > Run the command below seperately from the rest of the script and wait for it to finish before continuing!
-```
+```javascript
 umount -R /mnt/gentoo
 parted /dev/mmcblk0 mklabel msdos
 ```
 
 **Continue!**
-```
+```javascript
 for n in {1..4}; do echo -e 'y' | parted /dev/mmcblk0 rm $n 2>/dev/null; done
 parted /dev/mmcblk0 mkpart primary fat32 0% 513MB
 parted /dev/mmcblk0 mkpart primary linux-swap 513MB 2561MB
