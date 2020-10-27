@@ -48,7 +48,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 ---
 
 ### [Installing MotionDetection on your PI]
-> This is an installer script that needs to be run in the same directory as the pi tarball! The rsync data works on both the Raspberry PI 3b and 4b!!
+> This is an installer script that needs to be run in the same directory as the pi tarball! The script works on both the Raspberry PI 3b and 4b!!
 ```
 #!/bin/bash
 
