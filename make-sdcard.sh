@@ -40,7 +40,7 @@ echo "=> Mounting /dev/mmcblk0p1 on /mnt/pi/boot";
 sudo mount /dev/mmcblk0p1 /mnt/pi/boot;
 
 echo "=> Copy data over to your sdcard.";
-sudo rsync -ra Documents/Rsync/pi/* /mnt/pi/ ;
+sudo rsync -ra pi/* /mnt/pi/ ;
 
 echo "=> Unmounting your sdcard now.";
 sudo umount -R /mnt/pi ;
