@@ -36,6 +36,8 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 [ LATEST ] Download the stage3 tarball for the RPI3 and the RPI4 [HERE](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz).
 
+**Notice:** This tarball is necessary if you want to roll your own image instead of use mine.
+
 ---
 
 ### [Installing MotionDetection on your PI]
