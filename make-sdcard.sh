@@ -39,8 +39,8 @@ fi
 echo "=> Mounting /dev/mmcblk0p1 on /mnt/pi/boot";
 sudo mount /dev/mmcblk0p1 /mnt/pi/boot;
 
-echo "=> Copy data over to your sdcard.";
-sudo rsync -ra pi/* /mnt/pi/ ;
+echo "=> Unpacking tarball onto your sdcard.";
+tar -xzvf pi.tar.gz -C /mnt/pi/ ;
 
 echo "=> Unmounting your sdcard now.";
 sudo umount -R /mnt/pi ;
