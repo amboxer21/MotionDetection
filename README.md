@@ -41,24 +41,31 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 ### [Installing MotionDetection on your PI]
 > This is an installer script that needs to be run in the same directory as the decompressed pi tarball! The rsync data works on both the Raspberry PI 3b and 4b!!
 ```
+#!/bin/bash
+
+if [[ ! -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
+    echo "[ ERROR ] The pi.tar.gz tarball needs to be in the same directory as this script.";
+    exit;
+fi
+
 mountpoint=$(mount | awk '/mmcblk0p2/{print $3}');
 
 if [[ $mountpoint ]] ; then
     sudo umount -R $mountpoint;
 fi
 
-echo "=> Partitioning sdcard.";
+echo "[ INFO ] Partitioning sdcard.";
 for n in {1..4}; do parted -a optimal /dev/mmcblk0 rm $n 2> /dev/null; done
 sudo parted -a optimal /dev/mmcblk0 mkpart primary fat32 0% 513MB
 sudo parted -a optimal /dev/mmcblk0 mkpart primary ext4 513MB 100%
 
-echo "=> Creating FAT32 filesystem on /dev/mmcblk0p1.";
+echo "[ INFO ] Creating FAT32 filesystem on /dev/mmcblk0p1.";
 echo 'y' | sudo mkfs.vfat -F32 /dev/mmcblk0p1
 
-echo "=> Creating EXT4 filesystem on /dev/mmcblk0p2.";
+echo "[ INFO ] Creating EXT4 filesystem on /dev/mmcblk0p2.";
 echo 'y' | sudo mkfs.ext4 /dev/mmcblk0p2
 
-echo "=> Checking if mountpoint /mnt/pi exists.";
+echo "[ INFO ] Checking if mountpoint /mnt/pi exists.";
 if [[ -e /mnt/pi ]] ; then
     echo "[ INFO ] Mountpoint /dev/pi exists.";
 else
@@ -66,10 +73,10 @@ else
     echo '[ WARNING ] /mnt/pi doesnt exist - creating it now.';
 fi
 
-echo "=> Mounting /dev/mmcblk0p2 on /mnt/pi";
+echo "[ INFO ] Mounting /dev/mmcblk0p2 on /mnt/pi";
 sudo mount /dev/mmcblk0p2 /mnt/pi;
 
-echo "=> Checking if mountpoint /mnt/pi/boot exists.";
+echo "[ INFO ] Checking if mountpoint /mnt/pi/boot exists.";
 if [[ -e /mnt/pi/boot ]] ; then
     echo "[ INFO ] Mountpoint /dev/pi/boot exists.";
 else
@@ -77,14 +84,54 @@ else
     echo '[ WARNING ] /mnt/pi/boot doesnt exist - creating it now.';
 fi
 
-echo "=> Mounting /dev/mmcblk0p1 on /mnt/pi/boot";
+echo "[ INFO ] Mounting /dev/mmcblk0p1 on /mnt/pi/boot";
 sudo mount /dev/mmcblk0p1 /mnt/pi/boot;
 
-echo "=> Unpacking tarball onto your sdcard.";
-tar -xzvf pi.tar.gz -C /mnt/pi/ ;
+echo "[ INFO ] Unpacking tarball onto your sdcard.";
+tar -xzf pi.tar.gz -C /mnt/pi/ ;
 
-echo "=> Unmounting your sdcard now.";
+echo "[ INFO ] Unmounting your sdcard now.";
 sudo umount -R /mnt/pi ;
+```
+
+Example script output:
+```
+anthony@anthony ~ $ sudo bash make-sdcard.sh 
+Password: 
+[ INFO ] Checking for precesne of pi.tar.gz tarball.
+[INFO] pi.tar.gz found.
+[ INFO ] Checking for presence of sdcard at /dev/mmcblk
+[ INFO ] Found sdcard.
+[ INFO ] Partitioning sdcard.
+Information: You may need to update /etc/fstab.                           
+
+Information: You may need to update /etc/fstab.                           
+
+[ INFO ] Creating FAT32 filesystem on /dev/mmcblk0p1.                     
+mkfs.fat 4.1 (2017-01-24)
+[ INFO ] Creating EXT4 filesystem on /dev/mmcblk0p2.
+mke2fs 1.45.5 (07-Jan-2020)
+Discarding device blocks: done                            
+Creating filesystem with 15511296 4k blocks and 3883008 inodes
+Filesystem UUID: fb8a85ff-1c19-4e64-a0e4-80c1e49167f5
+Superblock backups stored on blocks: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208, 
+	4096000, 7962624, 11239424
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (65536 blocks): done
+Writing superblocks and filesystem accounting information: done   
+
+[ INFO ] Checking if mountpoint /mnt/pi exists.
+[ INFO ] Mountpoint /dev/pi exists.
+[ INFO ] Mounting /dev/mmcblk0p2 on /mnt/pi
+[ INFO ] Checking if mountpoint /mnt/pi/boot exists.
+[ WARNING ] /mnt/pi/boot doesnt exist - creating it now.
+[ INFO ] Mounting /dev/mmcblk0p1 on /mnt/pi/boot
+[ INFO ] Unpacking tarball onto your sdcard.
+[ INFO ] Unmounting your sdcard now.
+anthony@anthony ~ $
 ```
 
 ---
