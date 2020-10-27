@@ -17,8 +17,6 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 # [Todo]
 > Fix issue [#47](https://github.com/amboxer21/MotionDetection/issues/47). The system stops working when too many photos have piled up. This tends to be around 600-700 photos.
 
-> Roll a DD'able **Gentoo** image for the Raspberry Pi 3b. **EDIT:** `I am working on this now!`
-
 ---
 
 # MotionDetection(CCTV) with Python3 on the Raspberry Pi powered by Gentoo Linux
