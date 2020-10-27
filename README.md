@@ -32,7 +32,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 ### [Downloads]:
 
-[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](https://drive.google.com/file/d/1J73kgwk2myqXDBR7UJzuOVIXtDazjmLE/view?usp=sharing).
+[ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE]( UPLOADING NOW ).
 
 [ LATEST ] Download the stage3 tarball for the RPI3 and the RPI4 [HERE](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz).
 
