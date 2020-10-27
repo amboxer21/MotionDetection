@@ -399,15 +399,6 @@ You can change the options that the Motiondetection framework runs with by openi
 
 ---
 
-### [SCREEN SHOTS]
-
-![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
-![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
-![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
-![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
-
----
-
 # [Change Log]
 >[ OLD ][**As of 2020-08-03**] Currently fixing up this repo's code and working on a new Gentoo based ISO image
 
@@ -422,6 +413,15 @@ You can change the options that the Motiondetection framework runs with by openi
 >[ OLD ][**As of 2020-08-20**] The system would crash after being triggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) call in the motiondetection.py file in this [commit](5117801ee95b0cc571626b4d704146f06c0ac3d8). New rsync data with the new changes has been uploaded this morning.
 
 >[ LATEST ][**As of 2020-10-28**] I have written an installer script named **make-sdcard.sh** that installs an image that works on my my Raspberry PI 3 and 4. The size of the card does not matter either. The idea of a DD'able system image has been put on the back burner for now. The installer script is super simple to use anyway!
+
+---
+
+### [SCREEN SHOTS]
+
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171140_scaled-250x500.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
+![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
+![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
 
 ---
 
