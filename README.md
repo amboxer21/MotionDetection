@@ -164,7 +164,7 @@ umount -R /mnt/gentoo
 (2) emerge -av --deep --newuse --update @world
 ```
 
-**Note:** Before updating your system, crate this file and copy these contents into that file to circumvent the gpg syncing errors
+**Note:** Before updating your system, create this file and copy these contents into that file to circumvent the gpg syncing errors
 ```
 anthony@anthony ~ $ cat /etc/portage/repos.conf/gentoo.conf 
 [DEFAULT]
