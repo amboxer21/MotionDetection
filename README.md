@@ -31,6 +31,8 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 #### [Booting]
 Booting the system after installation [HERE](https://youtu.be/WJWTAXVIbQg)
 
+---
+
 ### [Credentials]
 > For use with the installer script.
 
