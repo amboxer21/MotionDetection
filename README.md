@@ -30,7 +30,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 ### [Downloads]:
 
-[ LATEST ] Download the Motiondetection system data tarball [HERE]( UPLOADING NOW ).
+[ LATEST ] Download the Motiondetection system data tarball [HERE](https://drive.google.com/file/d/1w4ONR2b-pfmmrI5HVXqQJ0dEUTHzKViJ/view?usp=sharing).
 
 **Notice:** ^^ This tarball is essential to buillding an sdcard! Without it the system won't work.
 
