@@ -1,21 +1,6 @@
 # [Description]
 This highly configurable framework monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set off the framework then E-mails the picture(s) to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. If you need an image made, I can make an sdcard for you and send it via USPS(mail). If you need an image or have any questions, send an E-mail to amboxer21@gmail.com.
 
-# [Change Log]
->[ OLD ][**As of 2020-08-03**] Currently fixing up this repo's code and working on a new Gentoo based ISO image
-
->[ OLD ][**As of 2020-08-03**] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo of the webconfigurator [HERE](https://youtu.be/YYGSTYESsQk).
-
->[ OLD ][**As of 2020-08-09**] The framework that runs on Raspbian has been deprecated in favor of Gentoo Linux. The Raspbian system will no longer be updated but will be left in tact. 
-
->[ OLD ][**As of 2020-08-09**] Daemon support was removed from the framework. You will either have to set it up yourself or roll an image. The image is plug-and-play, power up the RPI4b and it just works.
-
->[ OLD ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
-
->[ OLD ][**As of 2020-08-20**] The system would crash after being triggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) call in the motiondetection.py file in this [commit](5117801ee95b0cc571626b4d704146f06c0ac3d8). New rsync data with the new changes has been uploaded this morning.
-
->[ LATEST ][**As of 2020-10-28**] I have written an installer script named **make-sdcard.sh** that installs an image that works on my my Raspberry PI 3 and 4. The size of the card does not matter either. The idea of a DD'able system image has been put on the back burner for now. The installer script is super simple to use anyway!
-
 # [Todo]
 > Fix issue [#47](https://github.com/amboxer21/MotionDetection/issues/47). The system stops working when too many photos have piled up. This tends to be around 600-700 photos.
 
@@ -420,6 +405,23 @@ You can change the options that the Motiondetection framework runs with by openi
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171159_scaled-250x500.png)
 ![alt text](https://github.com/amboxer21/MotionDetection/blob/master/src/screenshots/Screenshot_20181119-171209_scaled-250x500.png)
 ![alt_text](https://user-images.githubusercontent.com/2100258/89722342-98db3700-d9b6-11ea-8901-cb8b639b1248.png)
+
+---
+
+# [Change Log]
+>[ OLD ][**As of 2020-08-03**] Currently fixing up this repo's code and working on a new Gentoo based ISO image
+
+>[ OLD ][**As of 2020-08-03**] You can now update the application's configuration options in the GUI using your favorite browser. Now all you have to do is power up the RPI/USB camera, open a browser, navigate to a specified URL, reload, then the program will use your updated options. Watch a short demo of the webconfigurator [HERE](https://youtu.be/YYGSTYESsQk).
+
+>[ OLD ][**As of 2020-08-09**] The framework that runs on Raspbian has been deprecated in favor of Gentoo Linux. The Raspbian system will no longer be updated but will be left in tact. 
+
+>[ OLD ][**As of 2020-08-09**] Daemon support was removed from the framework. You will either have to set it up yourself or roll an image. The image is plug-and-play, power up the RPI4b and it just works.
+
+>[ OLD ][**As of 2020-08-09**] The gentoo install is complete and the system automaticcaly comes up on boot - The system is plug and play. 
+
+>[ OLD ][**As of 2020-08-20**] The system would crash after being triggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) call in the motiondetection.py file in this [commit](5117801ee95b0cc571626b4d704146f06c0ac3d8). New rsync data with the new changes has been uploaded this morning.
+
+>[ LATEST ][**As of 2020-10-28**] I have written an installer script named **make-sdcard.sh** that installs an image that works on my my Raspberry PI 3 and 4. The size of the card does not matter either. The idea of a DD'able system image has been put on the back burner for now. The installer script is super simple to use anyway!
 
 ---
 
