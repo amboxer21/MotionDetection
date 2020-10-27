@@ -39,7 +39,7 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 ---
 
 ### [Installing MotionDetection on your PI]
-> The rsync data works on both the Raspberry PI 3b and 4b!!
+> This is an installer script that needs to be run in the same directory as the decompressed pi tarball! The rsync data works on both the Raspberry PI 3b and 4b!!
 ```
 mountpoint=$(mount | awk '/mmcblk0p2/{print $3}');
 
