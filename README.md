@@ -107,10 +107,14 @@ sudo umount -R /mnt/pi ;
 **NOTE:** It is important to emerge rust-bin because compiling the regular rust package takes up a lot of resources and is prone to breaking on the arm arch! You don't want to spend days hacking this install when you can just install the bin version!
 
 ### Installing base system
+> Run the command below seperately from the rest of the script and wait for it to finish before continuing!
 ```
 umount -R /mnt/gentoo
 parted /dev/mmcblk0 mklabel msdos
+```
 
+**Continue!**
+```
 for n in {1..4}; do echo -e 'y' | parted /dev/mmcblk0 rm $n 2>/dev/null; done
 parted /dev/mmcblk0 mkpart primary fat32 0% 513MB
 parted /dev/mmcblk0 mkpart primary linux-swap 513MB 2561MB
