@@ -1,7 +1,18 @@
 #!/bin/bash
 
-if [[ ! -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
+echo "[ INFO ] Checking for precesne of pi.tar.gz tarball.";
+if [[ -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
+    echo "[INFO] pi.tar.gz found.";
+else
     echo "[ ERROR ] The pi.tar.gz tarball needs to be in the same directory as this script.";
+    exit;
+fi
+
+echo "[ INFO ] Checking for presence of sdcard at /dev/mmcblk";
+if (( var=$(sudo fdisk -l /dev/mmcblk0 1>& /dev/null) $? == 0 )) ; then
+    echo "[ INFO ] Found sdcard.";
+else
+    echo "[ ERROR ] Cannot find sdcard.";
     exit;
 fi
 
