@@ -20,6 +20,10 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
 Booting the system after installation [HERE](https://youtu.be/WJWTAXVIbQg)
 
+> **Installing MotionDetection on an sdcard
+
+POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
+
 ---
 
 ### [Credentials]
