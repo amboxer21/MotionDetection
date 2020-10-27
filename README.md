@@ -31,12 +31,8 @@ Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 ---
 
 ### [Downloads]:
-> This download section is for the **Raspberry PI 4 only**!
 
 [ LATEST ] Download the Motiondetection framework system data for rsyncing [HERE](Uploading now).
-
-### [Downloads]:
-> This download section is for **BOTH** the **Raspberry PI 4** and **Raspberry PI 3**.
 
 [ LATEST ] Download the stage3 tarball for the RPI3 and the RPI4 [HERE](http://gentoo.osuosl.org/releases/arm/autobuilds/current-stage3-armv7a_hardfp/stage3-armv7a_hardfp-20200509T210605Z.tar.xz).
 
