@@ -2,7 +2,7 @@
 This highly configurable framework monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set off the framework then E-mails the picture(s) to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. If you need an image made, I can make an sdcard for you and send it via USPS(mail). If you need an image or have any questions, send an E-mail to amboxer21@gmail.com.
 
 ### [Todo]
-> Fix issue [#47](https://github.com/amboxer21/MotionDetection/issues/47). The system stops working when too many photos have piled up. This tends to be around 600-700 photos.
+> Nothing ATM.
 
 ---
 
