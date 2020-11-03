@@ -319,6 +319,21 @@ class MotionDetection(metaclass=VideoFeed):
             sys.exit(0)
 
     @staticmethod
+    def waitforcamera():
+        pushed = False
+        found  = False
+        while not found:
+            try:
+                open(options.cam_location)
+                found = True
+            except FileNotFoundError:
+                if not pushed:
+                    Logging.log("ERROR", "(PRE-ENTRY) - Camera not found at "+options.cam_location)
+                pushed = True
+                found  = False
+                time.sleep(1)
+
+    @staticmethod
     def img_num():
         img_list = []
         os.chdir("/home/pi/.motiondetection/")
@@ -382,7 +397,7 @@ class MotionDetection(metaclass=VideoFeed):
 
         Logging.log("INFO", "(MotionDetection.capture) - Lock acquired!",self.verbose)
         Logging.log("INFO", "(MotionDetection.capture) - MotionDetection system initialized!", self.verbose)
-    
+
         MotionDetection.camera_object = cv2.VideoCapture(self.cam_location)
         MotionDetection.camera_object.set(cv2.CAP_PROP_FPS, self.fps)
 
@@ -808,4 +823,5 @@ if __name__ == '__main__':
     configFile.populate_empty_options()
 
     motion_detection = MotionDetection(config_dict)
+    motion_detection.waitforcamera()
     Server(multiprocessing.Queue()).server_main()
