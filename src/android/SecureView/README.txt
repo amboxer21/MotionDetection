@@ -83,3 +83,16 @@ git rm --cached -r <file or dir name>
 
 Change java version:
 sudo update-alternatives --config java
+
+
+If you deleted your build.xml file:
+android update project -p /home/anthony/Documents/Python/MotionDetection/src/android/SecureView/
+
+List packages to install:
+/home/anthony/Documents/ZIPs/cmdline-tools/bin/sdkmanager --list --sdk_root="/home/anthony/android-sdk-linux"
+
+Install platform tools:
+/home/anthony/Documents/ZIPs/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-30" --sdk_root="/home/anthony/android-sdk-linux"
+
+Install build tools:
+/home/anthony/Documents/ZIPs/cmdline-tools/bin/sdkmanager "platform-tools" "build-tools;30.0.0" --sdk_root="/home/anthony/android-sdk-linux"
