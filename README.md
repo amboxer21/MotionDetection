@@ -412,6 +412,8 @@ You can change the options that the Motiondetection framework runs with by openi
 
 [MotionDetection Framework rsync data](https://drive.google.com/file/d/1bJ7WJQeGAhr-r2pe-ITLRjM1wxJExrOK/view?usp=sharing)
 
+[Android app to view camera's feed](https://github.com/amboxer21/MotionDetection/blob/master/src/SecureView-debug.apk)
+
 ---
 
 # [Change Log]
