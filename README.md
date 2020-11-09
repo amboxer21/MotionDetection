@@ -52,7 +52,7 @@ POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
 ```javascript
 #!/bin/bash
 
-echo "[ INFO ] Checking for precesne of pi.tar.gz tarball.";
+echo "[ INFO ] Checking for presence of pi.tar.gz tarball.";
 if [[ -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
     echo "[INFO] pi.tar.gz found.";
 else
