@@ -43,40 +43,47 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"/>
 
-      <ToggleButton
-        android:alpha=".7"
-        android:textOn="Stop"
-        android:textOff="Start"
-        android:textSize="10dp"
+      <FrameLayout
         android:elevation="10dp"
-        android:textColor="#009900"
-        android:id="@+id/buttonCam"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:visibility="invisible"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/circle"
-        android:layout_gravity="right|center_vertical"/>
+        android:id="@+id/linearLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="bottom">
 
-      <ToggleButton
-        android:alpha=".7"
-        android:textSize="10dp"
-        android:textOff="Record"
-        android:elevation="10dp"
-        android:textOn="Record"
-        android:textColor="#009900"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:id="@+id/buttonRecord"
-        android:visibility="invisible"
-        android:layout_marginTop="70dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/circle"
-        android:layout_below="@+id/buttonCam"
-        android:layout_gravity="right|center_vertical"/>
+        <ToggleButton
+          android:textOn="Stop"
+          android:textOff="Start"
+          android:textSize="10dp"
+          android:elevation="10dp"
+          android:textColor="#ffffff"
+          android:id="@+id/buttonCam"
+          android:layout_width="50dp"
+          android:layout_height="50dp"
+          android:visibility="invisible"
+          android:layout_marginTop="10dp"
+          android:layout_marginRight="5dp"
+          android:layout_marginBottom="20dp"
+          android:background="@drawable/circle"
+          android:layout_gravity="right|center_vertical"/>
+
+        <ToggleButton
+          android:textSize="10dp"
+          android:textOff="Record"
+          android:elevation="10dp"
+          android:textOn="Record"
+          android:textColor="#ffffff"
+          android:layout_width="50dp"
+          android:layout_height="50dp"
+          android:id="@+id/buttonRecord"
+          android:visibility="invisible"
+          android:layout_marginTop="70dp"
+          android:layout_marginRight="5dp"
+          android:layout_marginBottom="20dp"
+          android:background="@drawable/circle"
+          android:layout_below="@+id/buttonCam"
+          android:layout_gravity="right|center_vertical"/>
+
+      </FrameLayout>
 
       <LinearLayout
         android:elevation="10dp"
