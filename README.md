@@ -2,7 +2,7 @@
 This highly configurable framework monitors motion from a USB webcam on a Raspberry Pi using the OpenCV API. Once motion is detected by the system, it takes a picture of what set off the framework then E-mails the picture(s) to you. It also affords the ability to remotely view that webcam from an android app from anywhere in the world at anytime. So after you’re notified via E-mail, then you have the option of checking the camera’s live feed if you’d like. If you need an image made, I can make an sdcard for you and send it via USPS(mail). If you need an image or have any questions, send an E-mail to amboxer21@gmail.com.
 
 ### [Todo]
-> Nothing ATM.
+> Redisgn the Android app's UI. See GitHub issue [#50](https://github.com/amboxer21/MotionDetection/issues/50).
 
 ---
 
@@ -52,9 +52,9 @@ POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
 ```javascript
 #!/bin/bash
 
-echo "[ INFO ] Checking for precesne of pi.tar.gz tarball.";
+echo "[ INFO ] Checking for presence of pi.tar.gz tarball.";
 if [[ -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
-    echo "[INFO] pi.tar.gz found.";
+    echo "[ INFO ] pi.tar.gz found.";
 else
     echo "[ ERROR ] The pi.tar.gz tarball needs to be in the same directory as this script.";
     exit;
@@ -118,7 +118,7 @@ Example script output:
 ```javascript
 anthony@anthony ~ $ sudo bash make-sdcard.sh 
 Password: 
-[ INFO ] Checking for precesne of pi.tar.gz tarball.
+[ INFO ] Checking for presence of pi.tar.gz tarball.
 [INFO] pi.tar.gz found.
 [ INFO ] Checking for presence of sdcard at /dev/mmcblk
 [ INFO ] Found sdcard.
