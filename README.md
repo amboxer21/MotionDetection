@@ -54,7 +54,7 @@ POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
 
 echo "[ INFO ] Checking for presence of pi.tar.gz tarball.";
 if [[ -e $(ls pi.tar.gz 2> /dev/null) ]] ; then
-    echo "[INFO] pi.tar.gz found.";
+    echo "[ INFO ] pi.tar.gz found.";
 else
     echo "[ ERROR ] The pi.tar.gz tarball needs to be in the same directory as this script.";
     exit;
@@ -118,7 +118,7 @@ Example script output:
 ```javascript
 anthony@anthony ~ $ sudo bash make-sdcard.sh 
 Password: 
-[ INFO ] Checking for precesne of pi.tar.gz tarball.
+[ INFO ] Checking for presence of pi.tar.gz tarball.
 [INFO] pi.tar.gz found.
 [ INFO ] Checking for presence of sdcard at /dev/mmcblk
 [ INFO ] Found sdcard.
