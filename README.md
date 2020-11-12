@@ -3,7 +3,7 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 ### [Todo]
 > Redisgn the Android app's UI. See GitHub issue [#50](https://github.com/amboxer21/MotionDetection/issues/50).
-
+> Android app for remotely viewing the camera's feed is broken. See GitHub issue [#51](https://github.com/amboxer21/MotionDetection/issues/51)
 ---
 
 # MotionDetection(CCTV) with Python3 on the Raspberry Pi powered by Gentoo Linux
