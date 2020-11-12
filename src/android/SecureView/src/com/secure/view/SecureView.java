@@ -155,40 +155,48 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
       @Override
       public void onClick(View v) {
 
-        sanityCheck();
+        buttonCam.setChecked(false);
 
-        if(textView.getText().toString() == "Dead Feed") {
-          String sIPAddress2 = String.valueOf(sIPAddress); 
-          String camPort = String.valueOf(sCamPortNumber);
-          String serverPort = String.valueOf(sServerPortNumber);
-          final String addr = "http://" + sIPAddress2 + ":" + camPort + "/cam.mjpg";
+        if(passedSanityCheck()) {
+        
+          buttonCam.setChecked(true);
 
-          clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_monitor");
+          databaseSetter();
+          databaseGetter();
 
-          webView.setVerticalScrollBarEnabled(false);
-          webView.setHorizontalScrollBarEnabled(false);
-          webView.getSettings().setUseWideViewPort(true);
-          webView.getSettings().setJavaScriptEnabled(true);
-          webView.getSettings().setLoadWithOverviewMode(true);
-          webView.setWebViewClient(new SecureViewBrowser());
-          webView.setBackgroundColor(Color.parseColor("#ffffff"));
-          handler.postDelayed(new Runnable() {
-            public void run() {
-              textView.setText("Live Feed");
-              textView.setTextColor(Color.parseColor("#00ff55"));
-              webView.loadUrl(addr);
-            }
-          }, 3000);
-        }
-        else if(textView.getText().toString() == "Live Feed") {
-          textView.setText("Dead Feed");
-          buttonRecord.setText("Record");
-          textView.setTextColor(Color.parseColor("#ff0000"));
-          /*clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "stop_recording");*/
-          clientAsyncTask = new ClientAsyncTask();
-          clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+          if(textView.getText().toString() == "Dead Feed") {
+            String sIPAddress2 = String.valueOf(sIPAddress); 
+            String camPort = String.valueOf(sCamPortNumber);
+            String serverPort = String.valueOf(sServerPortNumber);
+            final String addr = "http://" + sIPAddress2 + ":" + camPort + "/cam.mjpg";
+  
+            clientAsyncTask = new ClientAsyncTask();
+            clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_monitor");
+  
+            webView.setVerticalScrollBarEnabled(false);
+            webView.setHorizontalScrollBarEnabled(false);
+            webView.getSettings().setUseWideViewPort(true);
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.getSettings().setLoadWithOverviewMode(true);
+            webView.setWebViewClient(new SecureViewBrowser());
+            webView.setBackgroundColor(Color.parseColor("#ffffff"));
+            handler.postDelayed(new Runnable() {
+              public void run() {
+                textView.setText("Live Feed");
+                textView.setTextColor(Color.parseColor("#00ff55"));
+                webView.loadUrl(addr);
+              }
+            }, 3000);
+          }
+          else if(textView.getText().toString() == "Live Feed") {
+            textView.setText("Dead Feed");
+            buttonRecord.setText("Record");
+            textView.setTextColor(Color.parseColor("#ff0000"));
+            /*clientAsyncTask = new ClientAsyncTask();
+            clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "stop_recording");*/
+            clientAsyncTask = new ClientAsyncTask();
+            clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "kill_monitor");
+          }
         }
       }
     });
@@ -236,7 +244,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
 
   }
 
-  public void sanityCheck() {
+  public boolean passedSanityCheck() {
 
     try {
       sIPAddress  = ipAddress.getText().toString();
@@ -245,32 +253,30 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     }
     catch(Exception e) {
       e.printStackTrace();
-      Log.e("SecureView sanityCheck()", "getText() Error => " + e.getMessage(), e);
+      Log.e("SecureView passedSanityCheck()", "getText() Error => " + e.getMessage(), e);
+      return false;
     }
     try {
       if(String.valueOf(sIPAddress).isEmpty()) {
-        buttonCam.setChecked(false);
         Toast.makeText(this,"IP Address cannot be empty.", Toast.LENGTH_SHORT).show();
-        return;
+        return false;
       }
       else if(String.valueOf(sCamPortNumber).isEmpty()) {
-        buttonCam.setChecked(false);
         Toast.makeText(this,"Cam port number cannot be empty.", Toast.LENGTH_SHORT).show();
-        return;
+        return false;
       }
       else if(String.valueOf(sServerPortNumber).isEmpty()) {
-        buttonCam.setChecked(false);
         Toast.makeText(this,"Server port number cannot be empty.", Toast.LENGTH_SHORT).show();
-        return;
+        return false;
       }
       else {
-        databaseSetter();
-        databaseGetter();
+        return true;
       }
     }
     catch(Exception e) {
       e.printStackTrace();
-      Log.e("SecureView sanityCheck()", "isEmpty() Error => " + e.getMessage(), e);
+      Log.e("SecureView passedSanityCheck()", "isEmpty() Error => " + e.getMessage(), e);
+      return false;
     }
   }
 
@@ -321,6 +327,71 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
       view.loadUrl(url);
       return true;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+      handleError(errorCode,view);
+    }
+
+    @Override
+    public void onReceivedError(WebView view, WebResourceRequest req, WebResourceError rerr) {
+      onReceivedError(view, rerr.getErrorCode(),rerr.getDescription().toString(),req.getUrl().toString());
+    }
+
+    public void handleError(int errorCode, WebView view) {
+
+      String message = null;
+
+      if(errorCode == WebViewClient.ERROR_AUTHENTICATION) {
+        message = "User authentication failed on server";
+      }
+      else if (errorCode == WebViewClient.ERROR_TIMEOUT) {
+        message = "The server is taking too much time to communicate. Try again later.";
+      }
+      else if (errorCode == WebViewClient.ERROR_TOO_MANY_REQUESTS) {
+        message = "Too many requests during this load";
+      }
+      else if (errorCode == WebViewClient.ERROR_UNKNOWN) {
+        message = "Generic error";
+      }
+      else if (errorCode == WebViewClient.ERROR_BAD_URL) {
+        message = "Check entered URL..";
+      }
+      else if (errorCode == WebViewClient.ERROR_CONNECT) {
+        message = "Failed to connect to the server";
+      }
+      else if (errorCode == WebViewClient.ERROR_FAILED_SSL_HANDSHAKE) {
+        message = "Failed to perform SSL handshake";
+      }
+      else if (errorCode == WebViewClient.ERROR_HOST_LOOKUP) {
+        message = "Server or proxy hostname lookup failed";
+      }
+      else if (errorCode == WebViewClient.ERROR_PROXY_AUTHENTICATION) {
+        message = "User authentication failed on proxy";
+      }
+      else if (errorCode == WebViewClient.ERROR_REDIRECT_LOOP) {
+        message = "Too many redirects";
+      }
+      else if (errorCode == WebViewClient.ERROR_UNSUPPORTED_AUTH_SCHEME) {
+        message = "Unsupported authentication scheme (not basic or digest)";
+      }
+      else if (errorCode == WebViewClient.ERROR_UNSUPPORTED_SCHEME) {
+        message = "unsupported scheme";
+      }
+      else if (errorCode == WebViewClient.ERROR_FILE) {
+        message = "Generic file error";
+      }
+      else if (errorCode == WebViewClient.ERROR_FILE_NOT_FOUND) {
+        message = "File not found";
+      }
+      else if (errorCode == WebViewClient.ERROR_IO) {
+        message = "The server failed to communicate. Try again later.";
+      }
+      if (message != null) {
+        Toast.makeText(getApplicationContext(), "" + message, Toast.LENGTH_LONG).show();
+      }
     }
   }
 
