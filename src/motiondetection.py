@@ -301,6 +301,7 @@ class MotionDetection(metaclass=VideoFeed):
         self.email_port        = config_dict[0]['email_port'][0]
         self.configfile        = config_dict[0]['configfile'][0]
         self.server_port       = config_dict[0]['server_port'][0]
+        self.camview_port      = config_dict[0]['camview_port'][0]
         self.cam_location      = config_dict[0]['cam_location'][0]
         self.disable_email     = config_dict[0]['disable_email'][0]
         self.burst_mode_opts   = config_dict[0]['burst_mode_opts'][0]
@@ -535,7 +536,7 @@ class Stream(MotionDetection,metaclass=VideoFeed):
             Stream.lock.release()
             Logging.log("INFO", "(Stream.stream_main) - Streaming HTTPServer started")
             server = ThreadedHTTPServer(
-                ('0.0.0.0', self.camview_port), CamHandler, queue, video_capture, video_output
+                ('0.0.0.0', self.camview_port), CamHandler, queue, True, video_capture, video_output,
             )
             server.timeout = 1
             server.queue   = queue
@@ -636,7 +637,7 @@ class Server(MotionDetection,metaclass=VideoFeed):
     def handle_incoming_message(self,*data):
         for(sock,queue) in data:
             message = sock.recv(1024)
-            if(message == 'start_monitor'):
+            if('start_monitor' in str(message)):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Starting camera! -> (start_monitor)")
                 queue.put('start_monitor')
@@ -655,7 +656,7 @@ class Server(MotionDetection,metaclass=VideoFeed):
                 self.proc.start()
                 MotionDetection.pid = self.proc.pid
                 Logging.log("INFO","(Server.handle_incoming_message) - MotionDetection.pid: "+str(Stream.pid))
-            elif(message == 'kill_monitor'):
+            elif('kill_monitor' in str(message)):
                 Logging.log("INFO",
                     "(Server.handle_incoming_message) - Killing camera! -> (kill_monitor)")
                 queue.put('kill_monitor')
@@ -674,11 +675,11 @@ class Server(MotionDetection,metaclass=VideoFeed):
                 self.process.start()
                 MotionDetection.pid = self.process.pid
                 Logging.log("INFO","(Server.handle_incoming_message) - MotionDetection.pid: "+str(MotionDetection.pid))
-            elif(message == 'start_recording'):
+            elif('start_recording' in str(message)):
                 queue.put('start_recording')
-            elif(message == 'stop_recording'):
+            elif('stop_recording' in str(message)):
                 queue.put('stop_recording')
-            elif(message == 'ping'):
+            elif('ping' in str(message)):
                 sock.send(str([Server.main_pid,MotionDetection.pid,Server.parent_pid]))
             else:
                 pass
