@@ -3,8 +3,6 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 ### [Todo]
 > Redisgn the Android app's UI. See GitHub issue [#50](https://github.com/amboxer21/MotionDetection/issues/50).
-
-> Android app for remotely viewing the camera's feed is broken due to the python2 deprecation. Which forced an upgrade to version 3. See GitHub issue [#51](https://github.com/amboxer21/MotionDetection/issues/51).
 ---
 
 # MotionDetection(CCTV) with Python3 on the Raspberry Pi powered by Gentoo Linux
@@ -430,7 +428,9 @@ You can change the options that the Motiondetection framework runs with by openi
 
 >[ OLD ][**As of 2020-08-20**] The system would crash after being triggered. A new symlink feature caused the issue and I have since changed that symlink call to a copy(cp) call in the motiondetection.py file in this [commit](5117801ee95b0cc571626b4d704146f06c0ac3d8). New rsync data with the new changes has been uploaded this morning.
 
->[ LATEST ][**As of 2020-10-28**] I have written an installer script named **make-sdcard.sh** that installs an image that works on my my Raspberry PI 3 and 4. The size of the card does not matter either. The idea of a DD'able system image has been put on the back burner for now. The installer script is super simple to use anyway!
+>[ OLD ][**As of 2020-10-28**] I have written an installer script named **make-sdcard.sh** that installs an image that works on my my Raspberry PI 3 and 4. The size of the card does not matter either. The idea of a DD'able system image has been put on the back burner for now. The installer script is super simple to use anyway!
+
+>[ LATEST ][**As of 2020-11-20**] I have fixed the broken ANdroid app functionality. The remote veiwing of the live camera feed via android app is now working!
 
 ---
 
