@@ -172,7 +172,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
   
             clientAsyncTask = new ClientAsyncTask();
             clientAsyncTask.execute(ipAddressDb, serverPortNumberDb, "start_monitor");
-  
+
             webView.setVerticalScrollBarEnabled(false);
             webView.setHorizontalScrollBarEnabled(false);
             webView.getSettings().setUseWideViewPort(true);
@@ -186,7 +186,7 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
                 textView.setTextColor(Color.parseColor("#00ff55"));
                 webView.loadUrl(addr);
               }
-            }, 3000);
+            }, 6000);
           }
           else if(textView.getText().toString() == "Live Feed") {
             textView.setText("Dead Feed");
@@ -390,6 +390,9 @@ public class SecureView extends Activity implements OnTouchListener, SurfaceHold
         message = "The server failed to communicate. Try again later.";
       }
       if (message != null) {
+        buttonCam.setChecked(false);
+        textView.setText("Dead Feed");
+        textView.setTextColor(Color.parseColor("#ff0000"));
         Toast.makeText(getApplicationContext(), "" + message, Toast.LENGTH_LONG).show();
       }
     }
