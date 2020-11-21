@@ -18,7 +18,7 @@ import logging.handlers
 import numpy as np
 
 from PIL import Image
-from io import StringIO
+from io import BytesIO
 from shutil import copyfile
 from optparse import OptionParser
 
@@ -454,7 +454,6 @@ class CamHandler(BaseHTTPRequestHandler,metaclass=VideoFeed):
             CamHandler.lock.acquire()
             Logging.log("INFO", "(CamHandler.do_GET) - Lock acquired!")
             if self.path.endswith('.mjpg'):
-                self.rfile._sock.settimeout(1)
                 self.send_response(200)
                 self.send_header('Content-type',
                     'multipart/x-mixed-replace; boundary=--jpgboundary')
@@ -466,6 +465,8 @@ class CamHandler(BaseHTTPRequestHandler,metaclass=VideoFeed):
                             '(CamHandler.do_GET) - (Queue message) -> Killing Live Feed!')
                         del(self.server.video_capture)
                         self.server.queue.put('close_camview')
+                        CamHandler.lock.release()
+                        self.server.queue.close()
                         break
                     elif self.server.queue.get() == 'start_recording':
                         CamHandler.__record__ = True
@@ -487,11 +488,10 @@ class CamHandler(BaseHTTPRequestHandler,metaclass=VideoFeed):
                     pass
                 rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
                 jpg = Image.fromarray(rgb)
-                jpg_file = StringIO.StringIO()
+                jpg_file = BytesIO()
                 jpg.save(jpg_file,'JPEG')
-                self.wfile.write("--jpgboundary")
+                self.wfile.write(str.encode("--jpgboundary"))
                 self.send_header('Content-type','image/jpeg')
-                self.send_header('Content-length',str(jpg_file.len))
                 self.end_headers()
                 jpg.save(self.wfile,'JPEG')
                 time.sleep(0.05)
@@ -538,18 +538,20 @@ class Stream(MotionDetection,metaclass=VideoFeed):
             server = ThreadedHTTPServer(
                 ('0.0.0.0', self.camview_port), CamHandler, queue, True, video_capture, video_output,
             )
-            server.timeout = 1
+            server.timeout = 3
             server.queue   = queue
             server.verbose = self.verbose
             server.video_output  = video_output
             server.video_capture = video_capture
             del(video_capture)
-            while(True):
-                if not queue.empty() and queue.get() == 'close_camview':
-                    CamHandler.lock.release()
-                    queue.close()
-                    break
-                server.handle_request()
+
+            server.handle_request()
+
+            if not queue.empty() and queue.get() == 'close_camview':
+                CamHandler.lock.release()
+                queue.close()
+                return
+
         except KeyboardInterrupt:
             CamHandler.lock.release()
             Stream.lock.release()
