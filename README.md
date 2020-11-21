@@ -11,21 +11,13 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 
 ### [Videos]
 
-> **Demo from Aug 9, 2020**
+**`Demo from Aug 9, 2020`** - Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
 
-Find a quick demo [HERE](https://youtu.be/_jswANI5GCg)
+**`Booting`** - Booting the system after installation [HERE](https://youtu.be/WJWTAXVIbQg)
 
-> **Booting**
+**`Installing MotionDetection on an sdcard`** - POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
 
-Booting the system after installation [HERE](https://youtu.be/WJWTAXVIbQg)
-
-> **Installing MotionDetection on an sdcard**
-
-POC of installation [HERE](https://youtu.be/L-uoW5sm6rA)
-
-> **Android App**
-
-POC of Android app [HERE](https://youtu.be/SWIv4_nvkdo)
+**`Android App`** - POC of Android app [HERE](https://youtu.be/SWIv4_nvkdo)
 
 ---
 
