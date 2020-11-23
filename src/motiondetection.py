@@ -205,6 +205,8 @@ class ConfigFile(object):
                         config_dict[0][comm.group(1)][0] = str(comm.group(2))
                     elif re.search('([0-9]{1,6})', comm.group(2)) is not None:
                         config_dict[0][comm.group(1)][0] = int(comm.group(2))
+                    elif re.search('(\[.*\])', comm.group(2)) is not None:
+                        config_dict[0][comm.group(1)][0] = re.sub("[\[\]]","",comm.group(2))
                     else:
                         config_dict[0][comm.group(1)][0] = comm.group(2)
         return config_dict
