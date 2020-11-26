@@ -127,10 +127,10 @@ class NetworkStack(object):
                         + " is no longer connected. Removing it from ip list.")
             if ip_is_in_whitelist:
                 Logging.log("INFO", "Disabling the sending of E-mail notifications.")
-                Mail.__disable__ = True
+                Mail.__disabled__ = True
             else:
                 Logging.log("INFO", "Enabling the sending of E-mail notifications.")
-                Mail.__disable__ = False
+                Mail.__disabled__ = False
 
     @staticmethod
     def start_thread(proc,*args):
