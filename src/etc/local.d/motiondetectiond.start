@@ -1,3 +1,4 @@
+#!/bin/bash
 #:set ts=4 sw=4
 
 SLEEPSECS=4
@@ -7,7 +8,7 @@ LOGFILE=/var/log/motiondetection.log   # Where to place the normal logfile (disa
 PRIORITY=0
 MACHINE=`hostname`
 SUDO='/usr/bin/sudo'
-PYTHON=`/usr/bin/which python`
+PYTHON='/usr/bin/python'
 
 CFG="/etc/motiondetection/motiondetection.cfg"
 EXECUTABLE="/usr/local/bin/motiondetection.py"
@@ -18,6 +19,7 @@ email=$(awk -F= '/^email=/{print $2}' ${CFG})
 verbose=$(awk -F= '/^verbose=/{print $2}' ${CFG})
 logfile=$(awk -F= '/^logfile=/{print $2}' ${CFG})
 password=$(awk -F= '/^password=/{print $2}' ${CFG})
+auto_pause=$(awk -F= '/^auto_pause=/{print $2}' ${CFG})
 email_port=$(awk -F= '/^email_port=/{print $2}' ${CFG})
 server_port=$(awk -F= '/^server_port=/{print $2}' ${CFG})
 filter_pets=$(awk -F= '/^filter_pets=/{print $2}' ${CFG})
@@ -29,8 +31,8 @@ delta_thresh_max=$(awk -F= '/^delta_thresh_max=/{print $2}' ${CFG})
 delta_thresh_min=$(awk -F= '/^delta_thresh_min=/{print $2}' ${CFG})
 motion_thresh_min=$(awk -F= '/^motion_thresh_min=/{print $2}' ${CFG})
 
-command=" -e${email} -p${password} -c${cam_location} -b${burst_mode_opts} -f${fps} -l${logfile} -S${server_port}"
-command=" ${command} -E${email_port} -C${camview_port} -i${ip} -T${delta_thresh_max} -t${delta_thresh_min} -m${motion_thresh_min}"
+command=" -e${email} -p${password} -c${cam_location} -b${burst_mode_opts} -f${fps} -l${logfile} -S${server_port} -E${email_port}"
+command=" ${command} -C${camview_port} -i${ip} -T${delta_thresh_max} -t${delta_thresh_min} -m${motion_thresh_min} -A${auto_pause}"
 
 if [[ $verbose == 'Treu' ]] ; then
     command="$command --verbose";
@@ -69,7 +71,7 @@ run_motiondetectiond() {
         else
             if test "x${email}" != "x" ; then
                 echo "motiondetection.py on $MACHINE died with exit status $EXITSTATUS.  Might want to take a peek." | \
-                mail -s "motiondetection.py Died" $email
+                #mail -s "motiondetection.py Died" $email
                 message "Exited on signal $EXITSTATUS"
             fi
         fi
