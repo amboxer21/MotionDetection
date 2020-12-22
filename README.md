@@ -399,6 +399,27 @@ LC_MESSAGES=C
 
 ---
 
+### [Building OpenCV from source on the PI]
+```javascript
+pi@localhost ~ $ sudo -i
+Password: 
+localhost ~ # cd /usr/src/
+localhost /usr/src # git clone https://github.com/opencv/opencv.git -b 3.4
+localhost /usr/src # git clone https://github.com/opencv/opencv_contrib.git -b 3.4
+localhost /usr/src # cd /usr/src/opencv/opencv
+localhost /usr/src/opencv # mkdir build
+localhost /usr/src/opencv # cd build
+localhost /usr/src/opencv/build # cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 ..
+```
+
+#### CMake command
+```javascript
+cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 ..
+
+```
+
+---
+
 ### [Changing Motiondetection options using a GUI]:
 
 You can change the options that the Motiondetection framework runs with by opening your favorite browser, entering your Rapsberry Pi's IP address - i.e., 192.168.1.232. Here you can change options like the E-mail that the pictures are sent to, burst mode count, etc. A short demonstration can be found [HERE](https://youtu.be/YYGSTYESsQk).
