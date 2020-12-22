@@ -399,7 +399,7 @@ LC_MESSAGES=C
 
 ---
 
-### [Building OpenCV from source on the PI] !!! OPENCV COMPILATION COMMAND IS NOT WORK YET !!!
+### [Building OpenCV from source on x86_64]
 > OpenCV is built from source so that you can use the opencv_createsamples program which was removed in later versions of OpenCV and is not present in Gentoo's upstream version. The opencv_createsamples command is used to help fascilitate in creating your own custom facial recognition models.
 ```javascript
 pi@localhost ~ $ sudo -i
@@ -410,12 +410,12 @@ localhost /usr/src # git clone https://github.com/opencv/opencv_contrib.git -b 3
 localhost /usr/src # cd /usr/src/opencv/opencv
 localhost /usr/src/opencv # mkdir build
 localhost /usr/src/opencv # cd build
-localhost /usr/src/opencv/build # cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 ..
+localhost /usr/src/opencv/build # cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_opencv_apps=ON -DBUILD_EXAMPLES=ON ..
 ```
 
 #### CMake command
 ```javascript
-cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_EXAMPLES=ON -DARCH=ARMV7 ..
+cmake -DCAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr/local/opencv-3.4 -DINSTALL_PYTHON_EXAMPLES=ON -DWITH_V4L=ON -DWITH_OPENGL=ON -DWITH_OPENCL=OFF -DWITH_VTK=OFF -DWITH_QT=OFF -DOPENCV_EXTRA_MODULES_PATH=/usr/src/opencv_contrib/modules -DBUILD_opencv_apps=ON -DBUILD_EXAMPLES=ON ..
 
 ```
 
