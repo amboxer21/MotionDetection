@@ -400,6 +400,7 @@ LC_MESSAGES=C
 ---
 
 ### [Building OpenCV from source on the PI]
+> OpenCV is built from source so that you can use the opencv_createsamples program which was removed in later versions of OpenCV and is not present in Gentoo's upstream version. The opencv_createsamples command is used to help fascilitate in creating your own custom facial recognition models.
 ```javascript
 pi@localhost ~ $ sudo -i
 Password: 
