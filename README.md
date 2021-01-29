@@ -36,11 +36,8 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 ---
 
 ### [Downloads]:
-> Uploading a new image thats properly compressed
 
-[ OLD ][ !! DELETED !! ]] Download the Motiondetection system data tarball [HERE](https://drive.google.com/file/d/1w4ONR2b-pfmmrI5HVXqQJ0dEUTHzKViJ/view?usp=sharing).
-
-[ LATEST ][ !! BROKEN !! ] Download the Motiondetection system data tarball [HERE](https://drive.google.com/file/d/196JJ90PUdf66NS9qVX46j0Q8qf-mgUa5/view?usp=sharing).
+[ LATEST ] Download the Motiondetection system data tarball [HERE](https://drive.google.com/file/d/18IULhCi25xeRIyUjJJg2WMcFOBzX_pJA/view?usp=sharing).
 
 **Notice:** ^^ This tarball is essential to buillding an sdcard! Without it the system won't work.
 
