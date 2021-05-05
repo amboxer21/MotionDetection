@@ -117,7 +117,6 @@ sudo umount -R /mnt/pi ;
 Example script output:
 ```javascript
 root@ghost ~ $ sudo bash make-sdcard.sh 
-Password: 
 [ INFO ] Checking for presence of pi.tar.gz tarball.
 [INFO] pi.tar.gz found.
 [ INFO ] Checking for presence of sdcard at /dev/mmcblk
