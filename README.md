@@ -5,7 +5,7 @@ This highly configurable framework monitors motion from a USB webcam on a Raspbe
 > In order for the app to work remotely, you need to forward ports on your router. The default ports for the Android app are port 5000 and port 50050.
 
 ### [Todo]
-> As of 2021-01-06 I have found out that the latest data image tarball is broken and needs to be fixed. Using the old tarball will work until the latest is fixed.
+> (SHOULD BE RESOLVED) As of 2021-01-06 I have found out that the latest data image tarball is broken and needs to be fixed. Using the old tarball will work until the latest is fixed.
 
 > Redesign the Android app's UI. See GitHub issue [#50](https://github.com/amboxer21/MotionDetection/issues/50).
 ---
