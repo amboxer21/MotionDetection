@@ -21,6 +21,7 @@ from PIL import Image
 from io import BytesIO
 from shutil import copyfile
 from optparse import OptionParser
+from scapy.all import ARP, IP, ICMP, sniff, sr
 
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -85,6 +86,66 @@ class Logging(object):
             pass
         return
 
+class NetworkStack(object):
+
+    ips = []
+
+    def __init__(self,whitelist=[],ignore=[]):
+
+        self.ignore    = ignore
+        self.whitelist = whitelist
+        
+        if not self.ignore:
+            self.ignore = ['0.0.0.0','192.168.1.1','127.0.0.1']
+
+    def _append(self,item):
+        if item not in NetworkStack.ips:
+            NetworkStack.ips.append(item)
+            Logging.log("INFO","Adding "
+                + item
+                + " to NetworkStack.ips.")
+
+    def _sniff(self):
+        sniff(prn=self.arp_monitor_callback, filter="arp", store=0)
+
+    def arp_monitor_callback(self,pkt):
+        if ARP in pkt and pkt[ARP].op in (1,2):
+            self._append(pkt.sprintf("%ARP.psrc%"))
+            return pkt.sprintf("%ARP.psrc%")
+
+    def ip_is_in_whitelist(self):
+        return any([ip in [whitelist for whitelist in self.whitelist] for ip in NetworkStack.ips])
+
+    def monitor_stack(self,_sleep=0.5):
+        while True:
+            time.sleep(_sleep)
+            for ip in NetworkStack.ips: 
+                packet = sr(IP(dst=ip, ttl=1)/ICMP(), timeout=1)
+                if re.search('ICMP:(\d+)',str(packet[1])).group(1) == '1':
+                    NetworkStack.ips.remove(ip) 
+                    Logging.log("INFO", ip
+                        + " is no longer connected. Removing it from ip list.")
+            if ip_is_in_whitelist:
+                Logging.log("INFO", "Disabling the sending of E-mail notifications.")
+                Mail.__disabled__ = True
+            else:
+                Logging.log("INFO", "Enabling the sending of E-mail notifications.")
+                Mail.__disabled__ = False
+
+    @staticmethod
+    def start_thread(proc,*args):
+        thread=None
+        try:
+            if args:
+                thread = threading.Thread(target=proc,args=args)
+            else:
+                thread = threading.Thread(target=proc)
+            thread.daemon = True
+            thread.start()
+        except Exception as eStartThread:
+            Logging.log("ERROR","Threading exception eStartThread => "
+                + str(eStartThread))
+
 # The config filename is passed to this class in the ImageCapture classes __init__ method.
 # The option is the default value set in optparser and is blank by default. See the 
 # optparser declaration at the bottom in the if __name__ == '__main__' check.
@@ -144,6 +205,8 @@ class ConfigFile(object):
                         config_dict[0][comm.group(1)][0] = str(comm.group(2))
                     elif re.search('([0-9]{1,6})', comm.group(2)) is not None:
                         config_dict[0][comm.group(1)][0] = int(comm.group(2))
+                    elif re.search('(\[.*\])', comm.group(2)) is not None:
+                        config_dict[0][comm.group(1)][0] = re.sub("[\[\]]","",comm.group(2))
                     else:
                         config_dict[0][comm.group(1)][0] = comm.group(2)
         return config_dict
@@ -741,6 +804,17 @@ if __name__ == '__main__':
         dest='fps', type='int', default='30',
         help='This sets the frames per second for the motion '
             + 'capture system. It defaults to 30 frames p/s.')
+    parser.add_option('-W', '--whitelist',
+        dest="whitelist", default=[], nargs='+',
+        help="If a device in this whitelist connects to your wifi, "
+            + "the system will not send E-mails. This option depends "
+            + "on the --auto-pause option to be set as well.")
+    parser.add_option('-A', '--auto-pause',
+        dest="auto_pause", action='store_true', default=False,
+        help="The --auto-pause option is passed with the --whitelist "
+            + "option if you want to disable E-mails while you are home. "
+            + "This causes the system to continue to run and log everything "
+            + "like it usually does but it will not send E-mails with pictures.")
     parser.add_option('-e', '--email',
         dest='email',
         help='This argument is required unless you pass the '
@@ -809,7 +883,9 @@ if __name__ == '__main__':
         'verbose': ['', options.verbose],
         'logfile': ['', options.logfile],
         'password': ['', options.password],
+        'whitelist': ['', options.whitelist],
         'email_port': ['', options.email_port],
+        'auto_pause': ['', options.auto_pause],
         'configfile': ['', options.configfile],
         'server_port': ['', options.server_port],
         'cam_location': ['', options.cam_location],
@@ -820,6 +896,16 @@ if __name__ == '__main__':
         'delta_thresh_min': ['', options.delta_thresh_min],
         'motion_thresh_min': ['', options.motion_thresh_min]
     }, []]
+
+    networkstack = NetworkStack()
+
+    if options.auto_pause:
+        if not options.whitelist:
+            Logging.log("WARN", "The whitelist option must be passed if the "
+                + "--auto-pause option is being passed. Disabling the --auto-pause feature.")
+        else:
+            NetworkStack.start_thread(networkstack._sniff)
+            NetworkStack.start_thread(networkstack.monitor_stack)
 
     configFile = ConfigFile(options.configfile)
     configFile.config_options()
